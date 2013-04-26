@@ -1,0 +1,26 @@
+Kernagic 
+--------
+
+Kernagic is libre software for automatically kerning and spacing fonts.
+
+Figuring out and tuning inter-glyph spacing with kerning is one of the final,
+and very time consuming, refinements when mastering a typeface design. This
+process adjusts both the font metrics (the normal spaces to the left and
+right sides of each glyph, known as side-bearings) as well adjustments for
+specific pairs of glyphs (known as kerning pairs.)
+
+Kernagic aims to automate this process. The heuristic currently implemented
+generates a raster-based distance map for measuring distances between the
+facing sides of every possible glyph pair. From each map it finds an optimum
+graylevel for the gap between the letter forms, and outputs a comprehensive
+kerning table. 
+
+In the future the exhaustive “optimal” kerning will be used to generate
+side-bearings and compact, class-based kerning. Kernagic is structured to
+allow experimentation with other heuristics, too.
+
+If the starting point is a ttf file, you must convert quadratic
+curves to cubic curves “normal” beziers before using kernagic, in the future
+kernagic might support working directly with quadratic outlines as well.
+To do this in fontforge invoke the action at the following menu path:
+   element -> font info -> layer -> all layers cubic

@@ -1,0 +1,57 @@
+# PROJECT_NAME = my project
+all:
+
+CFLAGS += -Wall -Wextra
+CFLAGS += -Ofast -g -rdynamic
+#CFLAGS += -g -O2 -rdynamic
+CFLAGS += -fPIC
+#CFLAGS += -fomit-frame-pointer
+CFLAGS += -funroll-loops -fforce-addr -ftracer -fpeel-loops -fmerge-all-constants
+CFLAGS += -Wno-unused-parameter  -Wno-sign-compare
+CFLAGS +=  -I. -D_XOPEN_SOURCE=500
+CFLAGS += -std=c99
+
+# icky, should perhaps be moved to a commen start include
+
+P64 = `export | grep m64 > /dev/null && echo 64`
+
+clean:
+	rm -f $(CLEAN_FILES)
+check: all
+	make -C tests check
+short-check: all
+	make -C tests update
+
+# defaults in case they are not set
+PROJECT_NAME ?= $(shell basename `pwd`)
+PREFIX       ?= /usr/local
+
+all: subdirs
+subdirs:
+	@for a in $(SUBDIRS);do $(MAKE) -C $$a;done
+
+firsthelp:
+	@echo "help:"
+
+help: firsthelp
+	@echo "----"
+
+foo: Makefile
+	cp Makefile tmpmk
+	for a in `cat tmpmk | grep "\.mm/" | sed 's/include//'`;do \
+    csplit tmpmk "/include $$a/"; cat xx00 $$a xx01 > tmpmk2; cp tmpmk2 tmpmk;done
+
+-include config
+
+_name:
+	@echo $(PROJECT_NAME)
+_pkgtest:
+	@echo "pkg-config deps: $(LIB_PKGMODULES)$(BIN_PKGMODULES)"
+	@if (test "$(LIB_PKGMODULES)$(BIN_PKGMODULES)"); then pkg-config $(LIB_PKGMODULES) $(BIN_PKGMODULES) --libs --cflags; fi
+
+
+LIB_MAJOR_VERSION ?= 0
+LIB_MINOR_VERSION ?= 0
+LIB_MICRO_VERSION ?= 0
+
+LIB_VERSION=$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION).$(LIB_MICRO_VERSION)

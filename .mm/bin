@@ -1,0 +1,36 @@
+# bin
+
+BINARY ?= $(PROJECT_NAME)
+BIN_CFILES ?= $(wildcard *.c)
+
+BIN_TARGETS    = $(BINARY)
+
+BIN_CFLAGS += $(CFLAGS) $(LIB_CFLAGS)
+BIN_LD_FLAGS += $(LD_FLAGS) $(LIB_LD_FLAGS)
+
+BIN_CFLAGS += $(shell test "$(BIN_PKGMODULES)" 2>/dev/null && pkg-config $(BIN_PKGMODULES) --cflags)
+BIN_LD_FLAGS += $(shell test "$(BIN_PKGMODULES)" 2>/dev/null && pkg-config $(BIN_PKGMODULES) --libs)
+
+$(BINARY): $(BIN_CFILES) $(LIBNAME_A)
+	@echo "CCLD" $@; $(CC) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS)  \
+		$(BIN_CFILES) $(LIBNAME_A) -o $@
+
+$(BINARY).efence: $(BIN_CFILES) $(LIBNAME_A) 
+	@echo "CCLD" $@; $(CC) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS) \
+		$(BIN_CFILES) $(LIBNAME_A) -lefence -o $@
+
+all: $(BIN_TARGETS)
+CLEAN_FILES += $(BIN_TARGETS) $(BINARY).efence
+buildapi-install-runtime: _install_bin
+install: _install_bin
+uninstall: _uninstall_bin
+_install_bin: $(BIN_TARGETS)
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -t $(DESTDIR)$(PREFIX)/bin $(BIN_TARGETS)
+_uninstall_bin:
+	sudo rm -f $(DESTDIR)$(PREFIX)/bin/$(BINARY)
+
+help: _binhelp
+_binhelp:
+	@echo "$(BINARY)              build binary"
+	@echo "$(BINARY).efence       build binary with efence support"
