@@ -4,6 +4,8 @@
 #include <string.h>
 #include "kernagic.h"
 
+
+
 #define PREVIEW_WIDTH  1024
 #define PREVIEW_HEIGHT 256
 
@@ -14,6 +16,7 @@ static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
 static GtkWidget *progress;
 static GtkWidget *strip_left_bearing_check;
+static GtkWidget *visualize_left_bearing_check;
 static GtkWidget *font_path;
 
 static uint8_t *preview_canvas = NULL;
@@ -25,19 +28,21 @@ extern float kernagic_max_dist;
 extern float kernagic_gray_target;
 static gboolean strip_left_bearing;
 
+gboolean visualize_left_bearing = FALSE;
 
 float place_glyph (Glyph *g, float xo, float opacity)
 {
   int x, y;
 
-#if SHOW_LEFT_BOUNDS
-  for (y = 0; y < g->r_height; y++)
-    for (x = 0; x < 1; x++)
-      if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
-      preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
-          )
-      preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
-#endif
+  if (visualize_left_bearing)
+    {
+      for (y = 0; y < g->r_height; y++)
+        for (x = 0; x < 1; x++)
+          if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
+          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
+              )
+          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
+    }
 
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
@@ -94,6 +99,7 @@ static void configure_kernagic (void)
   kernagic_max_dist    = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
   kernagic_min_dist    = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
   kernagic_gray_target = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
 
 static guint delayed_updater = 0;
@@ -155,6 +161,7 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),    0.1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),    0.3);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_left_bearing_check), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
 
 static void do_save (void)
@@ -293,6 +300,13 @@ int main (int argc, char **argv)
     gtk_size_group_add_widget (sliders, strip_left_bearing_check);
     gtk_box_pack_end (GTK_BOX (hbox), strip_left_bearing_check, FALSE, TRUE, 2);
   }
+  {
+    visualize_left_bearing_check = gtk_check_button_new_with_label ("Show left bearing");
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_size_group_add_widget (sliders, visualize_left_bearing_check);
+    gtk_box_pack_end (GTK_BOX (hbox), visualize_left_bearing_check, FALSE, TRUE, 2);
+  }
 #if 0
   {
     GtkWidget *label = gtk_check_button_new_with_label ("Generate left bearing");
@@ -341,6 +355,7 @@ int main (int argc, char **argv)
   g_signal_connect (strip_left_bearing_check, "toggled",       G_CALLBACK (trigger_reload), NULL);
   g_signal_connect (font_path,                "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
+  g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,            "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,            "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,         "notify::value", G_CALLBACK (trigger), NULL);

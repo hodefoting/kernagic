@@ -1,7 +1,6 @@
 #ifndef KERNAGIC_H
 #define KERNAGIC_H
 
-#define SHOW_LEFT_BOUNDS 1
 
 #include <stdint.h>
 #include <glib.h>
