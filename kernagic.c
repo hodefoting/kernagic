@@ -336,19 +336,6 @@ Glyph *kernagic_find_glyph_unicode (unsigned int unicode)
   return NULL;
 }
 
-Glyph *kernagic_find_glyph (const char *name)
-{
-  GList *l;
-  for (l = glyphs; l; l = l->next)
-    {
-      Glyph *glyph = l->data;
-      if (glyph->name &&
-          !strcmp (glyph->name, name))
-        return glyph;
-    }
-  return NULL;
-}
-
 static Glyph   *ga = NULL;
 static Glyph   *gb = NULL;
 static int      space = 0;
@@ -555,7 +542,6 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
 
   return FALSE;
 }
-
 
 GtkWidget *drawing_area;
 
