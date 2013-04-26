@@ -87,6 +87,19 @@ void save_scratch (void)
 
 void render_ufo_glyph (Glyph *glyph);
 
+void glyph_free (Glyph *glyph)
+{
+  if (glyph->name)
+    free (glyph->name);
+  if (glyph->xml)
+    free (glyph->xml);
+  if (glyph->raster)
+    free (glyph->raster);
+  if (glyph->kerning)
+    g_hash_table_destroy (glyph->kerning);
+  free (glyph);
+}
+
 Glyph *nsd_glyph_new (const char *path)
 {
   Glyph *glyph = calloc (sizeof (Glyph), 1);
@@ -228,12 +241,23 @@ void kernagic_save_kerning_info (void)
   g_string_free (str, TRUE);
 }
 
-void kernagic_load_ufo (const char *fo_path)
+void kernagic_load_ufo (const char *font_path)
 {
   char path[4095];
-  ufo_path = strdup (fo_path);
+  if (ufo_path)
+    free (ufo_path);
+  ufo_path = strdup (font_path);
   if (ufo_path [strlen(ufo_path)] == '/')
     ufo_path [strlen(ufo_path)] = '\0';
+
+  GList *l;
+  for (l = glyphs; l; l = l->next)
+    {
+      Glyph *glyph = l->data;
+      glyph_free (glyph);
+    }
+  g_list_free (glyphs);
+  glyphs = NULL;
 
   sprintf (path, "%s/glyphs", ufo_path);
 
@@ -244,7 +268,6 @@ void kernagic_load_ufo (const char *fo_path)
 
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();
 
-  GList *l;
   for (l = glyphs; l; l = l->next)
     {
       Glyph *glyph = l->data;

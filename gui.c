@@ -13,7 +13,8 @@ static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
 static GtkWidget *progress;
-//static GtkWidget *font_path;
+static GtkWidget *strip_left_bearing_check;
+static GtkWidget *font_path;
 
 static uint8_t *preview_canvas = NULL;
 
@@ -116,12 +117,40 @@ static void trigger (void)
   delayed_updater = g_timeout_add (100, delayed_trigger, NULL);
 }
 
+
+static guint delayed_reload_updater = 0;
+static gboolean delayed_reload_trigger (gpointer foo)
+{
+  char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
+
+  kernagic_load_ufo (ufo_path);
+  free (ufo_path);
+  if (delayed_updater)
+    {
+      g_source_remove (delayed_updater);
+      delayed_updater = 0;
+    }
+  delayed_trigger (foo);
+  delayed_reload_updater = 0;
+  return FALSE;
+}
+static void trigger_reload (void)
+{
+  if (delayed_reload_updater)
+    {
+      g_source_remove (delayed_reload_updater);
+      delayed_reload_updater = 0;
+    }
+  delayed_reload_updater = g_timeout_add (100, delayed_reload_trigger, NULL);
+}
+
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), 40);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),    0.1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),    0.3);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_left_bearing_check), TRUE);
 }
 
 static void do_save (void)
@@ -165,7 +194,6 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 int main (int argc, char **argv)
 {
   const char *ufo_path = argv[1]?argv[1]:"./LucidaSans2.ufo";
-  kernagic_load_ufo (ufo_path);
 
   GtkWidget    *window;
   GtkWidget    *hbox;
@@ -195,16 +223,15 @@ int main (int argc, char **argv)
 
   g_signal_connect (preview, "draw", G_CALLBACK (preview_draw_cb), NULL);
 
-#if 0
+#if 1
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Font");
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (font_path), ".");
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (font_path), ufo_path);
       gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-
 
     gtk_size_group_add_widget (sliders, font_path);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -255,14 +282,14 @@ int main (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
   }
-#if 0
   {
-    GtkWidget *label = gtk_check_button_new_with_label ("Strip left bearing");
+    strip_left_bearing_check = gtk_check_button_new_with_label ("Strip left bearing");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
-    gtk_size_group_add_widget (sliders, label);
-    gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, TRUE, 2);
+    gtk_size_group_add_widget (sliders, strip_left_bearing_check);
+    gtk_box_pack_end (GTK_BOX (hbox), strip_left_bearing_check, FALSE, TRUE, 2);
   }
+#if 0
   {
     GtkWidget *label = gtk_check_button_new_with_label ("Generate left bearing");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -301,21 +328,19 @@ int main (int argc, char **argv)
 
   {
     progress = gtk_progress_bar_new ();
-
-    //gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progress), "");
     gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progress), TRUE);
     gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0.112);
     gtk_container_add (GTK_CONTAINER (vbox1), progress);
   }
 
-  /* These should all be set based on commandline arguments, which should be
-   * similar to how one would use kernagic from the commandline */
-
-  /* all but filename can be treated the same... */
-  g_signal_connect (spin_min_dist,    "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_max_dist,    "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target, "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (test_text,        "notify::text",  G_CALLBACK (trigger), NULL);
+  /* when these change, we need to reinitialize from scratch */
+  g_signal_connect (strip_left_bearing_check, "toggled",       G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (font_path,                "file-set",      G_CALLBACK (trigger_reload), NULL);
+  /* and when these change, we should be able to do an incremental update */
+  g_signal_connect (spin_min_dist,            "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_max_dist,            "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_target,         "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (test_text,                "notify::text",  G_CALLBACK (trigger), NULL);
 
   set_defaults ();
 
