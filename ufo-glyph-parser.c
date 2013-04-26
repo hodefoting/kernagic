@@ -298,3 +298,88 @@ render_ufo_glyph (Glyph *glyph)
   glyph->cr = NULL;
   cairo_surface_destroy (surface);
 }
+
+/**********************************************************************************/
+
+static GString *ts = NULL;
+
+static void
+rewrite_start_element (GMarkupParseContext *context,
+                       const gchar         *element_name,
+                       const gchar        **attribute_names,
+                       const gchar        **attribute_values,
+                       gpointer             user_data,
+                       GError             **error)
+{
+  Glyph *glyph = user_data;
+  g_string_append_printf (ts, "<%s ", element_name);
+  const char **a_n, **a_v;
+  for (a_n = attribute_names,
+       a_v = attribute_values; *a_n; a_n++, a_v++)
+     {
+       if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
+         {
+           char str[512];
+           int value = atoi (*a_v);
+           value = value + glyph->strip_offset;
+           sprintf (str, "%d", value);
+           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
+         }
+       else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
+         {
+           char str[512];
+           sprintf (str, "%d", (int)(glyph->advance));
+           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
+         }
+       else
+         {
+           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, *a_v);
+         }
+     }
+  g_string_append_printf (ts, ">");
+}
+
+static void
+rewrite_end_element (GMarkupParseContext *context,
+                     const gchar         *element_name,
+                     gpointer             user_data,
+                     GError             **error)
+{
+  g_string_append_printf (ts, "</%s>", element_name);
+}
+
+static void
+rewrite_text (GMarkupParseContext *context,
+              const gchar         *text,
+              gsize                text_len,
+              gpointer             user_data,
+              GError             **error)
+{
+  g_string_append_len (ts, text, text_len);
+}
+
+static void
+rewrite_passthrough (GMarkupParseContext *context,
+                     const gchar         *passthrough_text,
+                     gsize                text_len,
+                     gpointer             user_data,
+                     GError             **error)
+{
+  g_string_append_len (ts, passthrough_text, text_len);
+}
+
+static GMarkupParser glif_rewrite =
+{ rewrite_start_element, rewrite_end_element, rewrite_text, rewrite_passthrough, NULL };
+
+void
+rewrite_ufo_glyph (Glyph *glyph)
+{
+  ts = g_string_new ("");
+  GMarkupParseContext *ctx = g_markup_parse_context_new (&glif_rewrite, 0, glyph, NULL);
+
+  g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
+  g_markup_parse_context_free (ctx);
+  g_file_set_contents (glyph->path, ts->str, ts->len, NULL);
+  g_string_free (ts, TRUE);
+  ts = NULL;
+}

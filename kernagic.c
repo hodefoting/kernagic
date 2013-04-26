@@ -91,6 +91,8 @@ void render_ufo_glyph (Glyph *glyph);
 
 void glyph_free (Glyph *glyph)
 {
+  if (glyph->path)
+    free (glyph->path);
   if (glyph->name)
     free (glyph->name);
   if (glyph->xml)
@@ -131,6 +133,7 @@ Glyph *nsd_glyph_new (const char *path)
   if (glyph)
     {
       glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
+      glyph->path = strdup (path);
     }
   return glyph;
 }
@@ -241,13 +244,18 @@ void kernagic_save_kerning_info (void)
   if (error)
     fprintf (stderr, "EEeek %s\n", error->message);
   g_string_free (str, TRUE);
+
+  GList *l;
+  for (l = glyphs; l; l = l->next)
+    {
+      Glyph *glyph = l->data;
+      rewrite_ufo_glyph (glyph);
+    }
 }
 
 void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 {
   char path[4095];
-  if (strip_left_bearing)
-    fprintf (stderr, "strip!\n");
 
   kernagic_strip_bearing = strip_left_bearing;
 
@@ -689,7 +697,6 @@ void process_debug_ui (void)
   gtk_widget_show (drawing_area);
   gtk_widget_show (window);
 }
-
 
 void   kernagic_set_glyph_string (const char *utf8)
 {

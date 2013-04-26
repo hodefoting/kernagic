@@ -326,7 +326,7 @@ int main (int argc, char **argv)
     GtkWidget *hbox;
     GtkWidget *defaults_button = gtk_button_new_with_label ("Reset to defaults");
     GtkWidget *process_button  = gtk_button_new_with_label ("Process");
-    GtkWidget *save_button     = gtk_button_new_with_label ("Save Kerning");
+    GtkWidget *save_button     = gtk_button_new_with_label ("Save (modifies UFO in place)");
 
     hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);

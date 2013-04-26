@@ -10,6 +10,7 @@
 typedef struct _Glyph Glyph;
 
 struct _Glyph {
+  char       *path;
   char       *name;
   char       *xml;
   uint32_t    unicode;
@@ -20,7 +21,7 @@ struct _Glyph {
   int         r_width;
   int         r_height;
  
-  float       strip_offset; /* how many units have been subtracted out of glyphs path
+  int         strip_offset; /* how many units have been subtracted out of glyphs path
                              * coordinates for bearing stripping  */
   float       width;
   float       height;
@@ -56,6 +57,7 @@ void   kernagic_compute_bearings   (void);
  * permitting */
 void   kernagic_set_glyph_string   (const char *utf8);
 
+void   rewrite_ufo_glyph           (Glyph *glyph);
 
 
 #endif
