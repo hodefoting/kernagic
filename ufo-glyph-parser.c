@@ -254,7 +254,8 @@ load_ufo_glyph (Glyph *glyph)
 
       glyph->min_x   += glyph->strip_offset;
       glyph->max_x   += glyph->strip_offset;
-      glyph->advance += glyph->strip_offset;
+      //glyph->advance += glyph->strip_offset;
+      glyph->advance = glyph->width;
     }
 }
 
