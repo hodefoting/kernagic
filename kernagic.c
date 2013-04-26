@@ -222,7 +222,7 @@ recompute_right_bearings ()
         {
           Glyph *rg = r->data;
           float oldkern = kernagic_kern_get (lg, rg);
-          kernagic_kern_set (lg, rg, oldkern + advance_diff);
+          kernagic_kern_set (lg, rg, oldkern - advance_diff);
         }
     }
 }
