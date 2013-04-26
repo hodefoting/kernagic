@@ -15,9 +15,10 @@ facing sides of every possible glyph pair. From each map it finds an optimum
 graylevel for the gap between the letter forms, and outputs a comprehensive
 kerning table. 
 
-In the future the exhaustive “optimal” kerning will be used to generate
-side-bearings and compact, class-based kerning. Kernagic is structured to
-allow experimentation with other heuristics, too.
+The exhaustive kerning table is used as a basis for computing an average
+advance value (or right bearing) for each glyph. This simplistic approach;
+along with 0 left-bearings acts as a starting point for also letting kernagic
+generate reasonable metrics for a font for use when kerning is not available.
 
 If the starting point is a ttf file, you must convert quadratic
 curves to cubic curves “normal” beziers before using kernagic, in the future
