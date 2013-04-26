@@ -238,7 +238,7 @@ int main (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Font");
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (font_path), ufo_path);
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
       gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
