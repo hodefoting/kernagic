@@ -2,7 +2,7 @@
 all:
 
 CFLAGS += -Wall -Wextra
-CFLAGS += -Ofast -g -rdynamic
+#CFLAGS += -Ofast -g -rdynamic
 #CFLAGS += -g -O2 -rdynamic
 CFLAGS += -fPIC
 #CFLAGS += -fomit-frame-pointer
