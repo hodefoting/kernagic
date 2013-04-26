@@ -20,6 +20,12 @@ static uint8_t *preview_canvas = NULL;
 
 extern float  scale_factor;
 
+extern float kernagic_min_dist;
+extern float kernagic_max_dist;
+extern float kernagic_gray_target;
+static gboolean strip_left_bearing;
+
+
 float place_glyph (Glyph *g, float xo, float opacity)
 {
   int x, y;
@@ -81,9 +87,6 @@ static void redraw_test_text (void)
   gtk_widget_queue_draw (preview);
 }
 
-extern float kernagic_min_dist;
-extern float kernagic_max_dist;
-extern float kernagic_gray_target;
 
 
 static void configure_kernagic (void)
@@ -122,8 +125,9 @@ static guint delayed_reload_updater = 0;
 static gboolean delayed_reload_trigger (gpointer foo)
 {
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
+  strip_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_left_bearing_check));
 
-  kernagic_load_ufo (ufo_path);
+  kernagic_load_ufo (ufo_path, strip_left_bearing);
   free (ufo_path);
   if (delayed_updater)
     {

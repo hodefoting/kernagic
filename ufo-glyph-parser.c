@@ -31,6 +31,8 @@ static float scy = 0;
 static int   sc = 0;
 static int   first = 0;
 
+extern gboolean kernagic_strip_bearing; /* XXX: global and passed out of bounds.. */
+
 static void
 parse_start_element (GMarkupParseContext *context,
                      const gchar         *element_name,
@@ -130,7 +132,7 @@ glif_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "x"))
-            x = atof (*a_v);
+            x = atof (*a_v) + glyph->strip_offset;
           else if (!strcmp (*a_n, "y"))
             y = atof (*a_v);
           else if (!strcmp (*a_n, "type"))
@@ -245,6 +247,15 @@ load_ufo_glyph (Glyph *glyph)
 
   glyph->width = glyph->max_x - glyph->min_x;
   glyph->height = glyph->max_y - glyph->min_y;
+
+  if (kernagic_strip_bearing)
+    {
+      glyph->strip_offset = -glyph->min_x;
+
+      glyph->min_x   += glyph->strip_offset;
+      glyph->max_x   += glyph->strip_offset;
+      glyph->advance += glyph->strip_offset;
+    }
 }
 
 void

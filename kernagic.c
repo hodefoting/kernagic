@@ -47,6 +47,8 @@ float    kernagic_max_dist = 0.1;
 float    kernagic_min_dist = 0.1;
 float    kernagic_gray_target = 0.5;
 
+gboolean kernagic_strip_bearing = FALSE;
+
 static pthread_mutex_t kernagic_mutex;
 
 void kernagic_lock (void)
@@ -241,9 +243,14 @@ void kernagic_save_kerning_info (void)
   g_string_free (str, TRUE);
 }
 
-void kernagic_load_ufo (const char *font_path)
+void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 {
   char path[4095];
+  if (strip_left_bearing)
+    fprintf (stderr, "strip!\n");
+
+  kernagic_strip_bearing = strip_left_bearing;
+
   if (ufo_path)
     free (ufo_path);
   ufo_path = strdup (font_path);
