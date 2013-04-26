@@ -193,6 +193,40 @@ int atoi_system (const char *command)
   return ret;
 }
 
+/* simplistic recomputation of right bearings; it uses the average advance
+ * taking all kerning pairs into account, and modifies all the involved
+ * kerning pairs accordingly.
+ */
+void
+recompute_right_bearings ()
+{
+  GList *l;
+  for (l = glyphs; l; l= l->next)
+    {
+      Glyph *lg = l->data;
+      GList *r;
+      float advance_sum = 0;
+      long  glyph_count = 0;
+      int   new_advance;
+      int   advance_diff;
+      for (r = glyphs; r; r= r->next)
+        {
+          Glyph *rg = r->data;
+          advance_sum += kernagic_kern_get (lg, rg) + lg->advance;
+          glyph_count ++;
+        }
+      new_advance = advance_sum / glyph_count;
+      advance_diff = new_advance - lg->advance;
+      lg->advance = new_advance;
+      for (r = glyphs; r; r= r->next)
+        {
+          Glyph *rg = r->data;
+          float oldkern = kernagic_kern_get (lg, rg);
+          kernagic_kern_set (lg, rg, oldkern + advance_diff);
+        }
+    }
+}
+
 void kernagic_save_kerning_info (void)
 {
   GString *str = g_string_new (
@@ -202,10 +236,10 @@ void kernagic_save_kerning_info (void)
 "<plist version=\"1.0\">\n"
 "  <dict>\n");
 
-  fprintf (stderr, "save kerning pairs!\n");
-
   GList *left;
   GList *right;
+
+  recompute_right_bearings ();
 
   for (left = glyphs; left; left = left->next)
   {
@@ -361,7 +395,6 @@ void update_stats (int s)
   x0 = 0;
   x1 = x0 + s + g2_width * scale_factor;
 
-
   overpaint = 0;
   for (y = 0; y < s_height; y++)
     for (x = x0; x < x1; x++)
@@ -380,7 +413,6 @@ void update_stats (int s)
         count ++;
       }
   graylevel = graylevel / count / 127.0;
-
 
   graylevel2 = 0;
   count = 0;
@@ -580,28 +612,6 @@ static gboolean deal_with_glyphs (gunichar unicode, gunichar unicode2)
         glyph_string[i+1] == unicode2)
       return TRUE;
   return FALSE;
-}
-
-void kernagic_compute_bearings (void)
-{
-  /* left bearings - could/should be computed before kerning exhaustive kerning
-   * pairs..
-   */
-
-  /* figure out average inclusive kerning - or median advance inclusive
-   * even better would be the integer value that most use.. or the one that
-   * causes the least overall kerning to be required.. this would likely be
-   * the same as the average?
-   *
-   * kerning. Adjust all kerning pairs and advance values accordingly..
-   */
-
-
-  /* if adjusting the left bearing of a glyph.. all kerning pairs where this
-   * glyph occurs as a right hand glyph need to be adjusted correspondingly..
-   */
-
-  fprintf (stderr, "compute bearings!\n");
 }
 
 void kernagic_compute (GtkProgressBar *progress)
