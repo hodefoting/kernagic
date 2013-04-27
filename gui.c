@@ -181,6 +181,7 @@ static void do_process (void)
 static gboolean
 preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
+  cairo_save (cr);
   cairo_set_source_rgb (cr, 0.93,0.93,0.93);
   cairo_paint (cr);
 
@@ -194,9 +195,9 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
             CAIRO_FORMAT_A8, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_WIDTH);
       cairo_set_source_rgb (cr, 0,0,0);
       cairo_mask_surface (cr, surface, 0, 0);
-      cairo_fill (cr);
       cairo_surface_destroy (surface);
     }
+  cairo_restore (cr);
   return FALSE;
 }
 
