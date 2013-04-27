@@ -114,7 +114,7 @@ static gboolean delayed_trigger (gpointer foo)
 static void trigger (void)
 {
   if (!preview_canvas)
-    preview_canvas = calloc (PREVIEW_WIDTH * PREVIEW_HEIGHT, 1);
+    preview_canvas = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
 
   if (delayed_updater)
     {
@@ -132,7 +132,7 @@ static gboolean delayed_reload_trigger (gpointer foo)
   strip_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
 
   kernagic_load_ufo (ufo_path, strip_bearing);
-  free (ufo_path);
+  g_free (ufo_path);
   if (delayed_updater)
     {
       g_source_remove (delayed_updater);

@@ -72,12 +72,12 @@ void init_kernagic (void)
   s_width /= 8;
   s_width *= 8;
 
-  scratch  = calloc (s_width * s_height, 1);
+  scratch  = g_malloc0 (s_width * s_height);
   pthread_mutex_init (&kernagic_mutex, NULL);
   kernagic_lock ();
 
-  scratch2 = calloc (s_width * s_height, 1);
-  scratch3 = calloc (s_width * s_height, 1);
+  scratch2 = g_malloc0 (s_width * s_height);
+  scratch3 = g_malloc0 (s_width * s_height);
 
   kernagic_unlock ();
 }
@@ -92,21 +92,21 @@ void render_ufo_glyph (Glyph *glyph);
 void glyph_free (Glyph *glyph)
 {
   if (glyph->path)
-    free (glyph->path);
+    g_free (glyph->path);
   if (glyph->name)
-    free (glyph->name);
+    g_free (glyph->name);
   if (glyph->xml)
-    free (glyph->xml);
+    g_free (glyph->xml);
   if (glyph->raster)
-    free (glyph->raster);
+    g_free (glyph->raster);
   if (glyph->kerning)
     g_hash_table_destroy (glyph->kerning);
-  free (glyph);
+  g_free (glyph);
 }
 
 Glyph *nsd_glyph_new (const char *path)
 {
-  Glyph *glyph = calloc (sizeof (Glyph), 1);
+  Glyph *glyph = g_malloc0 (sizeof (Glyph));
   g_file_get_contents (path, &glyph->xml, NULL, NULL);
 
   if (glyph->xml)
@@ -115,7 +115,7 @@ Glyph *nsd_glyph_new (const char *path)
     }
   else
     {
-      free (glyph);
+      g_free (glyph);
       glyph = NULL;
     }
 
@@ -125,7 +125,7 @@ Glyph *nsd_glyph_new (const char *path)
       if (!glyph->name ||
           glyph->unicode == ' ')
         {
-          free (glyph);
+          g_free (glyph);
           glyph = NULL;
         }
     }
@@ -133,28 +133,20 @@ Glyph *nsd_glyph_new (const char *path)
   if (glyph)
     {
       glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
-      glyph->path = strdup (path);
+      glyph->path = g_strdup (path);
     }
   return glyph;
 }
 
-static void free_ptr (void *p)
-{
-  void **ptr = p;
-  if (!ptr)return;
-  if (*ptr)
-    {
-      free (*ptr);
-      *ptr = NULL;
-    }
-}
-
 void nsd_glyph_free (Glyph *glyph)
 {
-  free_ptr (&glyph->xml);
-  free_ptr (&glyph->raster);
-  free_ptr (&glyph->name);
-  free (glyph);
+  if (glyph->xml)
+    g_free (glyph->xml);
+  if (glyph->raster)
+    free (glyph->raster);
+  if (glyph->name)
+    g_free (glyph->name);
+  g_free (glyph);
 }
 
 static int
@@ -168,29 +160,6 @@ add_glyph(const char *fpath, const struct stat *sb,
   if (glyph)
     glyphs = g_list_prepend (glyphs, glyph);
   return 0;
-}
-
-char *psystem (const char *command)
-{
-  FILE *fp;
-  char buf[1024]="";
-  fp = popen(command, "r");
-  if (fp == NULL) {
-    fprintf(stderr, "Failed to run command: %s\n", command);
-    return strdup ("");
-  }
-  fgets(buf, sizeof(buf)-1, fp);
-  pclose(fp);
-  return strdup (buf);
-}
-
-int atoi_system (const char *command)
-{
-  int ret;
-  char *res = psystem (command);
-  ret = atoi (res);
-  free (res);
-  return ret;
 }
 
 /* simplistic recomputation of right bearings; it uses the average advance
@@ -294,8 +263,8 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   kernagic_strip_bearing = strip_left_bearing;
 
   if (ufo_path)
-    free (ufo_path);
-  ufo_path = strdup (font_path);
+    g_free (ufo_path);
+  ufo_path = g_strdup (font_path);
   if (ufo_path [strlen(ufo_path)] == '/')
     ufo_path [strlen(ufo_path)] = '\0';
 
@@ -698,7 +667,7 @@ void   kernagic_set_glyph_string (const char *utf8)
 {
   kernagic_lock ();
   if (glyph_string)
-    free (glyph_string);
+    g_free (glyph_string);
   glyph_string = NULL;
   if (utf8)
     glyph_string = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);

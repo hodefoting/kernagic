@@ -49,7 +49,7 @@ parse_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "name"))
-            glyph->name = strdup (*a_v);
+            glyph->name = g_strdup (*a_v);
         }
       glyph->min_x =  8192;
       glyph->min_y =  8192;
@@ -275,7 +275,7 @@ render_ufo_glyph (Glyph *glyph)
     glyph->r_width /= 16;
     glyph->r_width *= 16;
 
-    glyph->raster = calloc (glyph->r_width * glyph->r_height, 1);
+    glyph->raster = g_malloc0 (glyph->r_width * glyph->r_height);
   }
   int width = glyph->r_width;
   int height = glyph->r_height;
