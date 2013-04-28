@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "kernagic.h"
+#include "kerner.h"
 
 #define PREVIEW_WIDTH  1024
 #define PREVIEW_HEIGHT 256
@@ -21,9 +22,7 @@ static uint8_t *preview_canvas = NULL;
 
 extern float  scale_factor;
 
-extern float kernagic_min_dist;
-extern float kernagic_max_dist;
-extern float kernagic_gray_target;
+
 static gboolean strip_bearing;
 
 gboolean visualize_left_bearing = FALSE;
@@ -90,13 +89,15 @@ static void redraw_test_text (void)
   gtk_widget_queue_draw (preview);
 }
 
-
-
 static void configure_kernagic (void)
 {
-  kernagic_max_dist    = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
-  kernagic_min_dist    = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
-  kernagic_gray_target = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  kerner_settings.maximum_distance =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
+  kerner_settings.minimum_distance =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
+  kerner_settings.gray_target =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+
   visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
 
@@ -169,7 +170,6 @@ static void do_save (void)
 
 static void do_process (void)
 {
-  configure_kernagic ();
   kernagic_set_glyph_string (NULL);
   gtk_widget_show (progress);
   kernagic_compute (GTK_PROGRESS_BAR (progress));
