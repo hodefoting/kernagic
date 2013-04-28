@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <assert.h>
 #include <pthread.h>
 #include <math.h>
-
 #include "kernagic.h"
 #include "kerner.h"
 
@@ -32,33 +31,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 static char *ufo_path = NULL;
 
-GList *glyphs = NULL;
+static GList *glyphs = NULL;
 float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
 
-
-
 gboolean kernagic_strip_bearing = FALSE;
-
-static pthread_mutex_t kernagic_mutex;
-
-void kernagic_lock (void)
-{
-  pthread_mutex_lock (&kernagic_mutex);
-}
-
-void kernagic_unlock (void)
-{
-  pthread_mutex_unlock (&kernagic_mutex);
-}
-
 
 void init_kernagic (void)
 {
   init_kerner ();
-  pthread_mutex_init (&kernagic_mutex, NULL);
 }
-
 
 void render_ufo_glyph (Glyph *glyph);
 
@@ -178,8 +160,7 @@ void kernagic_save_kerning_info (void)
 "<plist version=\"1.0\">\n"
 "  <dict>\n");
 
-  GList *left;
-  GList *right;
+  GList *left, *right;
 
   recompute_right_bearings ();
 
@@ -312,7 +293,6 @@ Glyph *kernagic_find_glyph_unicode (unsigned int unicode)
   return NULL;
 }
 
-
 /* programmatic way of finding x-height, is guaranteed to work better than
  * font metadata...
  */
@@ -323,7 +303,6 @@ float kernagic_x_height (void)
     return 0.0;
   return (g->max_y - g->min_y);
 }
-
 
 static gboolean deal_with_glyph (gunichar unicode)
 {
@@ -349,7 +328,6 @@ static gboolean deal_with_glyphs (gunichar unicode, gunichar unicode2)
       return TRUE;
   return FALSE;
 }
-
 
 void kernagic_compute (GtkProgressBar *progress)
 {
@@ -386,12 +364,9 @@ void kernagic_compute (GtkProgressBar *progress)
 
 void   kernagic_set_glyph_string (const char *utf8)
 {
-  kernagic_lock ();
   if (glyph_string)
     g_free (glyph_string);
   glyph_string = NULL;
   if (utf8)
     glyph_string = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
-
-  kernagic_unlock ();
 }

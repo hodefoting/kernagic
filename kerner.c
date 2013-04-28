@@ -44,7 +44,6 @@ static void save_scratch (void)
   memcpy (scratch2, scratch, s_width * s_height);
 }
 
-
 static int  compute_dist (Glyph *left, Glyph *right, int space)
 {
   int x, y;
@@ -86,7 +85,6 @@ static int  compute_dist (Glyph *left, Glyph *right, int space)
       scratch3_unicode = left->unicode;
       memcpy (scratch3, scratch2, s_width * s_height);
     }
-
 
   for (y = 0; y < right->r_height; y++)
     for (x = 0; x < right->r_width; x++)
@@ -180,6 +178,10 @@ float kerner_kern (KernerSettings *settings,
   if (maxs < kernagic_x_height () * scale_factor)
     maxs = kernagic_x_height () * scale_factor;
 
+  /* XXX: it would be better to go left until going under min_dist, then from
+   * guess mid_point go right until going over max dist,. this would cut out
+   * even distance testing of the extremes that are not neccesary to test on.
+   */
   for (s = left->width * scale_factor * 0.5; s < maxs; s++)
   {
     min_dist = compute_dist (left, right, s);
@@ -247,12 +249,6 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
   sprintf (buf, "graylevel: %2.2f%%", 100 * graylevel);
   cairo_move_to (cr, x, y+=30);
   cairo_show_text (cr, buf);
-
-#if 0
-  sprintf (buf, "min-dist:    %2.2f", min_dist / scale_factor);
-  cairo_move_to (cr, x, y+=30);
-  cairo_show_text (cr, buf);
-#endif
 
   return FALSE;
 }
