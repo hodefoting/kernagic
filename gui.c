@@ -366,7 +366,7 @@ int main (int argc, char **argv)
   gtk_widget_hide (progress);
   gtk_widget_show (window);
 
-  //process_debug_ui ();
+//  kerner_debug_ui ();
 
   gtk_main ();
   return 0;

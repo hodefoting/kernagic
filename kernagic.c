@@ -254,7 +254,7 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 
   if (nftw(path, add_glyph, 20, 0) == -1)
     {
-      fprintf (stderr, "EEEeeek! probably not a ufo dir\n");
+      fprintf (stderr, "EEEeeek! '%s' probably not a ufo dir\n", ufo_path);
     }
 
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();

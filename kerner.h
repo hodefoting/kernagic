@@ -16,5 +16,6 @@ extern KernerSettings kerner_settings;
 
 float kerner_kern (KernerSettings *settings, Glyph *left, Glyph *right);
 void init_kerner (void);
+void kerner_debug_ui (void);
 
 #endif

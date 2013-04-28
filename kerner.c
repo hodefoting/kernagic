@@ -24,17 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 extern float scale_factor;
 
 KernerSettings kerner_settings;
-static int      space = 0;
 
-static Glyph   *ga = NULL;
-static Glyph   *gb = NULL;
-
-static float graylevel  = 0.23;
-static float graylevel2 = 0.23;
-static float overpaint    = 0.0;
-static int   g2_width = 0;
-static int   g1_width = 0;
-static int   min_dist = 0;
+static float graylevel = 0.23;
+static gboolean visual_debug_enabled = FALSE;
 
 #define DIST_MAX  120
 
@@ -45,61 +37,20 @@ static uint8_t *scratch2 = NULL;
 static uint8_t *scratch3 = NULL;
 static long int scratch3_unicode  = -1;
 
-static void place_a (float opacity);
+static void place_a (Glyph *left, Glyph *right, float opacity);
 
 static void save_scratch (void)
 {
   memcpy (scratch2, scratch, s_width * s_height);
 }
 
-static void update_stats (int s)
+
+static int  compute_dist (Glyph *left, Glyph *right, int space)
 {
-  int x0, y0, x1, y1;
   int x, y;
-  int count = 0;
-  graylevel = 0.0;
+  int min_dist = 2000;
 
-  count = 0;
-  y0 = kernagic_x_height () * 1.0 * scale_factor;
-  y1 = kernagic_x_height () * 2.0 * scale_factor;
-  x0 = 0;
-  x1 = x0 + s + g2_width * scale_factor;
-
-  overpaint = 0;
-  for (y = 0; y < s_height; y++)
-    for (x = x0; x < x1; x++)
-      {
-        if (scratch [y * s_width + x] > 127)
-          overpaint++;
-        count ++;
-      }
-  overpaint /= count;
-
-  count = 0;
-  for (y = y0; y < y1; y++)
-    for (x = x0; x < x1; x++)
-      {
-        graylevel += scratch [y * s_width + x];
-        count ++;
-      }
-  graylevel = graylevel / count / 127.0;
-
-  graylevel2 = 0;
-  count = 0;
-  y0 = kernagic_x_height () * 1.0 * scale_factor;
-  y1 = kernagic_x_height () * 2.0 * scale_factor;
-  x0 = g1_width * scale_factor / 2;
-  x1 = s + g2_width * scale_factor / 2;
-  for (y = y0; y < y1; y++)
-    for (x = x0; x < x1; x++)
-      {
-        graylevel2 += scratch [y * s_width + x];
-        count ++;
-        scratch [y * s_width + x] += 120;
-      }
-  graylevel2 = graylevel2 / count / 127.0;
-
-  if (scratch3_unicode == ga->unicode)
+  if (scratch3_unicode == left->unicode)
     {
       memcpy (scratch2, scratch3, s_width * s_height);
       memcpy (scratch, scratch3, s_width * s_height);
@@ -107,14 +58,12 @@ static void update_stats (int s)
   else
     {
       memset (scratch, 0, s_height * s_width);
-      place_a (1.0);
-
+      place_a (left, right, 1.0);
 
       for (y = 1; y < s_height-1; y++)
         for (x = 1; x < s_width-1; x++)
             if (scratch [y * s_width + x] < 254)
               scratch [y * s_width + x] = 0;
-
 
       for (int j = 0; j < DIST_MAX; j++)
         {
@@ -134,20 +83,19 @@ static void update_stats (int s)
         }
       save_scratch ();
 
-      scratch3_unicode = ga->unicode;
+      scratch3_unicode = left->unicode;
       memcpy (scratch3, scratch2, s_width * s_height);
     }
 
-  min_dist = 1000;
 
-  for (y = 0; y < gb->r_height; y++)
-    for (x = 0; x < gb->r_width; x++)
+  for (y = 0; y < right->r_height; y++)
+    for (x = 0; x < right->r_width; x++)
       if (
           x + space < s_width &&
           x + space > 0 &&
           y < s_height &&
           
-          gb->raster[y * gb->r_width + x] > 170)
+          right->raster[y * right->r_width + x] > 170)
         {
           if (scratch2 [y * s_width + x + space] > 0 &&
               DIST_MAX-scratch2 [y * s_width + x + space] < min_dist)
@@ -156,52 +104,73 @@ static void update_stats (int s)
         }
 
   if (min_dist < 0)
-    min_dist = 1000;
-  if (min_dist > 1000)
-    min_dist = 1000;
+    min_dist = -1;
+  if (min_dist >= 1000)
+    min_dist = -1;
+  return min_dist;
 }
 
-static void place_a (float opacity)
+static void update_stats (Glyph *left, Glyph *right, int s)
+{
+  int x0, y0, x1, y1;
+  int x, y;
+  int count = 0;
+
+  graylevel = 0;
+  count = 0;
+  y0 = kernagic_x_height () * 1.0 * scale_factor;
+  y1 = kernagic_x_height () * 2.0 * scale_factor;
+  x0 = left->r_width * scale_factor / 2;
+  x1 = s + right->r_width * scale_factor / 2;
+  for (y = y0; y < y1; y++)
+    for (x = x0; x < x1; x++)
+      {
+        graylevel += scratch [y * s_width + x];
+        count ++;
+  //      scratch [y * s_width + x] += 120;
+      }
+  graylevel = graylevel / count / 127.0;
+
+}
+
+static void place_a (Glyph *left, Glyph *right, float opacity)
 {
   int x, y;
 
-  for (y = 0; y < ga->r_height; y++)
-    for (x = 0; x < ga->r_width; x++)
+  for (y = 0; y < left->r_height; y++)
+    for (x = 0; x < left->r_width; x++)
       if (x < s_width && y < s_height)
-      scratch [y * s_width + x] = ga->raster[y * ga->r_width + x] * opacity;
+      scratch [y * s_width + x] = left->raster[y * left->r_width + x] * opacity;
 }
 
-static void place_glyphs (unsigned int glyph_a_unicode,
-                          unsigned int glyph_b_unicode,
+static void place_glyphs (Glyph *left,
+                          Glyph *right,
                           float        spacing)
 {
   int x, y;
-  space = spacing;
-  ga = kernagic_find_glyph_unicode (glyph_a_unicode);
-  gb = kernagic_find_glyph_unicode (glyph_b_unicode);
-  assert (ga);
-  assert (gb);
+  int space = spacing;
+  assert (left);
+  assert (right);
 
   memset (scratch, 0, s_height * s_width);
-  place_a (0.5);
+  place_a (left, right, 0.5);
 
-  for (y = 0; y < gb->r_height; y++)
-    for (x = 0; x < gb->r_width; x++)
+  for (y = 0; y < right->r_height; y++)
+    for (x = 0; x < right->r_width; x++)
       if (x + space < s_width &&
           x + space >= 0 && 
           y < s_height)
-        scratch [y * s_width + x + space] += gb->raster[y * gb->r_width + x] / 2;
-
-  g1_width = ga->width;
-  g2_width = gb->width;
+        scratch [y * s_width + x + space] += right->raster[y * right->r_width + x] / 2;
 }
 
+static GtkWidget *drawing_area;
 
 float kerner_kern (KernerSettings *settings,
                    Glyph          *left,
                    Glyph          *right)
 {
   int s;
+  int min_dist;
 
   gint    best_advance = 0;
   gfloat  best_gray_diff = 1.0;
@@ -213,25 +182,35 @@ float kerner_kern (KernerSettings *settings,
 
   for (s = left->width * scale_factor * 0.5; s < maxs; s++)
   {
-    place_glyphs (left->unicode, right->unicode, s);
-    update_stats (s);
+    min_dist = compute_dist (left, right, s);
 
     if (min_dist < settings->maximum_distance * kernagic_x_height () * scale_factor &&
         
-        min_dist > settings->minimum_distance * kernagic_x_height () * scale_factor
-        
-        &&
-        overpaint <= 0.0 &&
-        graylevel2 >= 0.01 && graylevel2 <= 0.98)
+        min_dist > settings->minimum_distance * kernagic_x_height () * scale_factor)
       {
-        float graydiff = fabs (graylevel2 - settings->gray_target / 100.0);
+        place_glyphs (left, right, s);
+        update_stats (left, right, s);
+
+        float graydiff = fabs (graylevel - settings->gray_target / 100.0);
         if (graydiff < best_gray_diff)
           {
             best_gray_diff = graydiff;
             best_advance = s;
-
           }
+
+        if (visual_debug_enabled)
+          {
+            gtk_widget_queue_draw (drawing_area);
+            int i;
+            for (i = 0; i < 1500; i++)
+              {
+                gtk_main_iteration_do (FALSE);
+              }
+          }
+
       }
+
+
   }
   return best_advance / scale_factor;
 }
@@ -265,26 +244,20 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
   float y = 0.0;
   float x = 300;
 
-  sprintf (buf, "graylevel:   %2.2f%%", 100 * graylevel);
+  sprintf (buf, "graylevel: %2.2f%%", 100 * graylevel);
   cairo_move_to (cr, x, y+=30);
   cairo_show_text (cr, buf);
 
-  sprintf (buf, "graylevel2: %2.2f%%", 100 * graylevel2);
-  cairo_move_to (cr, x, y+=30);
-  cairo_show_text (cr, buf);
-
-  sprintf (buf, "overpaint:      %2.2f%%", 100 * overpaint);
-  cairo_move_to (cr, x, y+=30);
-  cairo_show_text (cr, buf);
-
+#if 0
   sprintf (buf, "min-dist:    %2.2f", min_dist / scale_factor);
   cairo_move_to (cr, x, y+=30);
   cairo_show_text (cr, buf);
+#endif
 
   return FALSE;
 }
 
-static GtkWidget *drawing_area;
+
 
 void kerner_debug_ui (void)
 {
@@ -296,6 +269,7 @@ void kerner_debug_ui (void)
   gtk_container_add (GTK_CONTAINER (window), drawing_area);
   gtk_widget_show (drawing_area);
   gtk_widget_show (window);
+  visual_debug_enabled = TRUE;
 }
 
 void init_kerner (void)
