@@ -9,7 +9,10 @@ struct _KernerSettings
 {
   float minimum_distance;
   float maximum_distance;
-  float gray_target;
+  float alpha_target;
+  float alpha_strength;
+  float beta_target;
+  float beta_strength;
 };
 extern KernerSettings kerner_settings;
 

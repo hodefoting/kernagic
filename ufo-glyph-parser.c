@@ -234,8 +234,21 @@ void render_glyph (Glyph *glyph)
   ctx = g_markup_parse_context_new (&glif_render, 0, glyph, NULL);
   g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
   g_markup_parse_context_free (ctx);
-
   cairo_restore (cr);
+
+  {
+    int y;
+    for (y = 0; y < glyph->r_height; y ++)
+      {
+        int x;
+        for (x = glyph->r_width -1; x>=0; x--)
+          {
+            if (glyph->raster[y * glyph->r_width + x] != 0)
+              break;
+          }
+        glyph->scan_width[y] = x + 1;
+      }
+  }
 }
 
 void

@@ -13,6 +13,11 @@ static GtkWidget *test_text;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
+static GtkWidget *spin_area_target;
+
+static GtkWidget *spin_gray_strength;
+static GtkWidget *spin_area_strength;
+
 static GtkWidget *progress;
 static GtkWidget *strip_bearing_check;
 static GtkWidget *visualize_left_bearing_check;
@@ -95,8 +100,14 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
   kerner_settings.minimum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
-  kerner_settings.gray_target =
+  kerner_settings.alpha_target =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  kerner_settings.beta_target =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_area_target));
+  kerner_settings.alpha_strength =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_strength));
+  kerner_settings.beta_strength =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_area_strength));
 
   visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
@@ -156,9 +167,14 @@ static void trigger_reload (void)
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), 40);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),    0.1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),    0.3);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      15);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      50);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   50);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), 70);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target),   30);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), 20);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), TRUE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
@@ -264,7 +280,7 @@ int main (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Min distance");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_min_dist = gtk_spin_button_new_with_range (0.00, 1.0, 0.01);
+    spin_min_dist = gtk_spin_button_new_with_range (0.00, 100.0, 1);
     gtk_size_group_add_widget (sliders, spin_min_dist);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -275,7 +291,7 @@ int main (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Max distance");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_max_dist = gtk_spin_button_new_with_range (0.00, 1.0, 0.01);
+    spin_max_dist = gtk_spin_button_new_with_range (0.00, 100.0, 1);
     gtk_size_group_add_widget (sliders, spin_max_dist);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -292,6 +308,45 @@ int main (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
   }
+
+
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Gray strength");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_gray_strength = gtk_spin_button_new_with_range (0.0, 100.0, 1);
+    gtk_size_group_add_widget (sliders, spin_gray_strength);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_gray_strength);
+  }
+
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Area target");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_area_target = gtk_spin_button_new_with_range (0.0, 100, 1);
+    gtk_size_group_add_widget (sliders, spin_area_target);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_area_target);
+  }
+
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Area strength");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_area_strength = gtk_spin_button_new_with_range (0.0, 100.0, 1);
+    gtk_size_group_add_widget (sliders, spin_area_strength);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_area_strength);
+  }
+
+
   {
     strip_bearing_check = gtk_check_button_new_with_label ("Strip bearings");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -358,6 +413,9 @@ int main (int argc, char **argv)
   g_signal_connect (spin_min_dist,            "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,            "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,         "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_area_target,         "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_strength,       "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_area_strength,       "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,                "notify::text",  G_CALLBACK (trigger), NULL);
 
   set_defaults ();

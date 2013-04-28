@@ -25,7 +25,8 @@ extern float scale_factor;
 
 KernerSettings kerner_settings;
 
-static float graylevel = 0.23;
+static float alpha = 0.23;
+static float beta  = 0.23;
 static gboolean visual_debug_enabled = FALSE;
 
 #define DIST_MAX  120
@@ -108,29 +109,70 @@ static int  compute_dist (Glyph *left, Glyph *right, int space)
   return min_dist;
 }
 
-static void update_stats (Glyph *left, Glyph *right, int s)
+
+static float compute_xheight_graylevel (Glyph *left, Glyph *right, int s)
 {
   int x0, y0, x1, y1;
   int x, y;
   int count = 0;
 
-  graylevel = 0;
+  float graylevel = 0;
   count = 0;
   y0 = kernagic_x_height () * 1.0 * scale_factor;
   y1 = kernagic_x_height () * 2.0 * scale_factor;
-  x0 = left->width * scale_factor / 2;
-  x1 = s + right->width * scale_factor / 2;
+  x0 = left->width * scale_factor * 0.4;
+  x1 = s + right->width * scale_factor * 0.6;
   for (y = y0; y < y1; y++)
     for (x = x0; x < x1; x++)
       {
         graylevel += scratch [y * s_width + x];
         count ++;
-        if (visual_debug_enabled)
-          {
-            scratch [y * s_width + x] = 255 -scratch [y * s_width + x] ;
-          }
       }
   graylevel = graylevel / count / 255.0;
+  return graylevel;
+}
+
+/* build an array of valid starting points per scanline.. being the left most
+ * non-filled pixels of the glyph..
+ *
+ */
+
+static void floodfill (int x, int y, int x0, int y0, int x1, int y1, int *count)
+{
+  if (x < x0 || x > x1 || y < y0 || y > y1 ||
+      scratch [y * s_width + x] != 0)
+    return;
+  scratch [y * s_width + x] = 127;
+  (*count) ++;
+  floodfill (x + 1, y, x0, y0, x1, y1, count);
+  floodfill (x - 1, y, x0, y0, x1, y1, count);
+  floodfill (x, y + 1, x0, y0, x1, y1, count);
+  floodfill (x, y - 1, x0, y0, x1, y1, count);
+}
+
+static float compute_negative_area_ratio (Glyph *left, Glyph *right, int s)
+{
+  int x0, y0, x1, y1;
+  int x = 0, y;
+  int count = 0;
+
+  count = 0;
+  y0 = kernagic_x_height () * 1.04 * scale_factor;
+  y1 = kernagic_x_height () * 1.96 * scale_factor;
+  x0 = left->width * scale_factor * 0.2;
+  x1 = s + right->width * scale_factor *0.8;
+
+  for (y = y0 + 1; y < y1; y++)
+    {
+      x = left->scan_width[y];
+      if (scratch [y * s_width + x] == 0)
+        break;
+    }
+  if (x < x0)
+    x = x0;
+
+  floodfill (x + 1, y, x0, y0, x1, y1, &count);
+  return count / (kernagic_x_height () * scale_factor * kernagic_x_height() * scale_factor * 1.0);
 }
 
 static void place_a (Glyph *left, Glyph *right, float opacity)
@@ -165,6 +207,7 @@ static void place_glyphs (Glyph *left,
 
 static GtkWidget *drawing_area;
 
+
 float kerner_kern (KernerSettings *settings,
                    Glyph          *left,
                    Glyph          *right)
@@ -173,7 +216,7 @@ float kerner_kern (KernerSettings *settings,
   int min_dist;
 
   gint    best_advance = 0;
-  gfloat  best_gray_diff = 1.0;
+  gfloat  best_diff = 10000.0;
 
   int maxs = left->width * scale_factor * 1.5;
 
@@ -188,33 +231,41 @@ float kerner_kern (KernerSettings *settings,
   {
     min_dist = compute_dist (left, right, s);
 
-    if (min_dist < settings->maximum_distance * kernagic_x_height () * scale_factor &&
+    if (min_dist < settings->maximum_distance * kernagic_x_height () * scale_factor / 100.0 &&
         
-        min_dist > settings->minimum_distance * kernagic_x_height () * scale_factor)
+        min_dist > settings->minimum_distance * kernagic_x_height () * scale_factor / 100.0)
       {
         place_glyphs (left, right, s);
-        update_stats (left, right, s);
+        alpha = compute_xheight_graylevel (left, right, s);
+        //place_glyphs (left, right, s);
+        beta = compute_negative_area_ratio (left, right, s);
 
-        float graydiff = fabs (graylevel - settings->gray_target / 100.0);
-        if (graydiff < best_gray_diff)
+        float alphadiff = fabs (alpha - settings->alpha_target / 100.0);
+        float betadiff  = fabs (beta  - settings->beta_target / 100.0);
+        float sumdiff;
+
+        alphadiff *= alphadiff;
+        betadiff *= betadiff;
+        alphadiff *= settings->alpha_strength / 100.0;
+        betadiff  *= settings->beta_strength / 100.0;
+
+        sumdiff = alphadiff + betadiff;
+
+        if (sumdiff < best_diff)
           {
-            best_gray_diff = graydiff;
+            best_diff = sumdiff;
             best_advance = s;
           }
 
         if (visual_debug_enabled)
           {
             gtk_widget_queue_draw (drawing_area);
-            int i;
-            for (i = 0; i < 1500; i++)
+            //for (int i = 0; i < 5500; i++)
               {
                 gtk_main_iteration_do (FALSE);
               }
           }
-
       }
-
-
   }
   return best_advance / scale_factor;
 }
@@ -247,14 +298,17 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
   float y = 0.0;
   float x = 300;
 
-  sprintf (buf, "graylevel: %2.2f%%", 100 * graylevel);
+  sprintf (buf, "alpha: %2.2f%%", 100 * alpha);
+  cairo_move_to (cr, x, y+=30);
+  cairo_show_text (cr, buf);
+
+
+  sprintf (buf, "beta: %2.2f%%", 100 * beta);
   cairo_move_to (cr, x, y+=30);
   cairo_show_text (cr, buf);
 
   return FALSE;
 }
-
-
 
 void kerner_debug_ui (void)
 {

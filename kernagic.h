@@ -20,6 +20,8 @@ struct _Glyph {
   uint8_t    *raster;
   int         r_width;
   int         r_height;
+
+  int         scan_width[1024]; /* 1024 is a really arbitrary number.. */
  
   int         strip_offset; /* how many units have been subtracted out of glyphs path
                              * coordinates for bearing stripping  */
