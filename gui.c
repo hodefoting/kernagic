@@ -366,7 +366,8 @@ int main (int argc, char **argv)
   gtk_widget_hide (progress);
   gtk_widget_show (window);
 
-//  kerner_debug_ui ();
+  if (getenv ("KERNAGIC_DEBUG"))
+    kerner_debug_ui ();
 
   gtk_main ();
   return 0;

@@ -118,17 +118,19 @@ static void update_stats (Glyph *left, Glyph *right, int s)
   count = 0;
   y0 = kernagic_x_height () * 1.0 * scale_factor;
   y1 = kernagic_x_height () * 2.0 * scale_factor;
-  x0 = left->r_width * scale_factor / 2;
-  x1 = s + right->r_width * scale_factor / 2;
+  x0 = left->width * scale_factor / 2;
+  x1 = s + right->width * scale_factor / 2;
   for (y = y0; y < y1; y++)
     for (x = x0; x < x1; x++)
       {
         graylevel += scratch [y * s_width + x];
         count ++;
-  //      scratch [y * s_width + x] += 120;
+        if (visual_debug_enabled)
+          {
+            scratch [y * s_width + x] = 255 -scratch [y * s_width + x] ;
+          }
       }
-  graylevel = graylevel / count / 127.0;
-
+  graylevel = graylevel / count / 255.0;
 }
 
 static void place_a (Glyph *left, Glyph *right, float opacity)
@@ -151,14 +153,14 @@ static void place_glyphs (Glyph *left,
   assert (right);
 
   memset (scratch, 0, s_height * s_width);
-  place_a (left, right, 0.5);
+  place_a (left, right, 1.0);
 
   for (y = 0; y < right->r_height; y++)
     for (x = 0; x < right->r_width; x++)
       if (x + space < s_width &&
           x + space >= 0 && 
           y < s_height)
-        scratch [y * s_width + x + space] += right->raster[y * right->r_width + x] / 2;
+        scratch [y * s_width + x + space] += right->raster[y * right->r_width + x];
 }
 
 static GtkWidget *drawing_area;
@@ -216,7 +218,6 @@ float kerner_kern (KernerSettings *settings,
   }
   return best_advance / scale_factor;
 }
-
 
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
