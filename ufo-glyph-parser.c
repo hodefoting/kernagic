@@ -283,7 +283,7 @@ render_ufo_glyph (Glyph *glyph)
   
 
   {
-    glyph->r_width = kernagic_x_height () * scale_factor * 2.0;
+    glyph->r_width = kernagic_x_height () * scale_factor * 2.5;
     glyph->r_height = kernagic_x_height () * scale_factor * 2.8;
     glyph->r_width /= 16;
     glyph->r_width *= 16;
