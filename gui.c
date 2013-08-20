@@ -10,6 +10,7 @@
 
 static GtkWidget *preview;
 static GtkWidget *test_text;
+static GtkWidget *spin_mode;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
@@ -96,6 +97,8 @@ static void redraw_test_text (void)
 
 static void configure_kernagic (void)
 {
+  kerner_settings.mode =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_mode));
   kerner_settings.maximum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
   kerner_settings.minimum_distance =
@@ -167,6 +170,7 @@ static void trigger_reload (void)
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_mode),          0);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      15);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      50);
 
@@ -217,7 +221,7 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   return FALSE;
 }
 
-int main (int argc, char **argv)
+int gui_main (int argc, char **argv)
 {
   const char *ufo_path = argv[1]?argv[1]:"./LucidaSans2.ufo";
 
@@ -274,6 +278,18 @@ int main (int argc, char **argv)
     gtk_size_group_add_widget (sliders, test_text);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
+  }
+
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Fitting mode");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_mode = gtk_spin_button_new_with_range (0.00, 4.0, 1);
+    gtk_size_group_add_widget (sliders, spin_mode);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_mode);
   }
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -407,16 +423,16 @@ int main (int argc, char **argv)
 
   /* when these change, we need to reinitialize from scratch */
   g_signal_connect (strip_bearing_check, "toggled",       G_CALLBACK (trigger_reload), NULL);
-  g_signal_connect (font_path,                "file-set",      G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_min_dist,            "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_max_dist,            "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target,         "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_area_target,         "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_strength,       "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_area_strength,       "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (test_text,                "notify::text",  G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_area_target,   "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_strength, "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_area_strength, "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
   set_defaults ();
 

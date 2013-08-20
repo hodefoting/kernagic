@@ -5,8 +5,15 @@
 
 typedef struct _KernerSettings KernerSettings;
 
+enum {
+  KERNAGIC_GRAY,
+  KERNAGIC_CADENCE,
+  KERNAGIC_RYTHM
+};
+
 struct _KernerSettings
 {
+  int   mode;
   float minimum_distance;
   float maximum_distance;
   float alpha_target;
