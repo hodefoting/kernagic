@@ -49,9 +49,6 @@ void   kernagic_kern_clear_all     (void);
 
 void   kernagic_save_kerning_info  (void);
 
-void   kernagic_lock               (void);
-void   kernagic_unlock             (void);
-
 void   kernagic_compute            (GtkProgressBar *progress);
 void   kernagic_compute_bearings   (void);
 
