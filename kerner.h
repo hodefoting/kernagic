@@ -11,6 +11,14 @@ enum {
   KERNAGIC_RYTHM
 };
 
+#define KERNER_DEFAULT_MODE          0 /* only two at first, gray and cadence */
+#define KERNER_DEFAULT_MIN          15
+#define KERNER_DEFAULT_MAX          50
+#define KERNER_DEFAULT_TARGET_GRAY  50
+#define KERNER_DEFAULT_WEIGHT_GRAY 100
+#define KERNER_DEFAULT_TARGET_FOO   50
+#define KERNER_DEFAULT_WEIGHT_FOO    0
+
 struct _KernerSettings
 {
   int   mode;

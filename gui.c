@@ -28,8 +28,7 @@ static uint8_t *preview_canvas = NULL;
 
 extern float  scale_factor;
 
-
-static gboolean strip_bearing;
+gboolean kernagic_strip_left_bearing = KERNAGIC_DEFAULT_STRIP_LEFT_BEARING;
 
 gboolean visualize_left_bearing = FALSE;
 
@@ -144,9 +143,9 @@ static guint delayed_reload_updater = 0;
 static gboolean delayed_reload_trigger (gpointer foo)
 {
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
-  strip_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
+  kernagic_strip_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
 
-  kernagic_load_ufo (ufo_path, strip_bearing);
+  kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
   g_free (ufo_path);
   if (delayed_updater)
     {
@@ -164,22 +163,38 @@ static void trigger_reload (void)
       g_source_remove (delayed_reload_updater);
       delayed_reload_updater = 0;
     }
-  delayed_reload_updater = g_timeout_add (100, delayed_reload_trigger, NULL);
+  delayed_reload_updater = g_timeout_add (1000, delayed_reload_trigger, NULL);
 }
 
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_mode),          0);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      15);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      50);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_mode),          KERNER_DEFAULT_MODE);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   50);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), 70);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), KERNER_DEFAULT_WEIGHT_GRAY);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target),   30);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), 20);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), TRUE);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target),   KERNER_DEFAULT_TARGET_FOO);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), KERNER_DEFAULT_WEIGHT_FOO);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
+}
+
+static void set_defaults_from_args (void)
+{
+  gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_mode), kerner_settings.mode);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), kerner_settings.alpha_strength);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target), kerner_settings.beta_target);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), kerner_settings.beta_strength);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), kernagic_strip_left_bearing);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
 
@@ -221,10 +236,13 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   return FALSE;
 }
 
-int gui_main (int argc, char **argv)
-{
-  const char *ufo_path = argv[1]?argv[1]:"./LucidaSans2.ufo";
+int cli_main (int argc, char **argv);
+extern const char *ufo_path;
 
+void parse_args (int argc, char **argv);
+
+int main (int argc, char **argv)
+{
   GtkWidget    *window;
   GtkWidget    *hbox;
   GtkWidget    *vbox1;
@@ -232,6 +250,7 @@ int gui_main (int argc, char **argv)
   GtkSizeGroup *labels;
   GtkSizeGroup *sliders;
 
+  parse_args (argc, argv);
   gtk_init (&argc, &argv);
 
   labels  = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
@@ -434,7 +453,7 @@ int gui_main (int argc, char **argv)
   g_signal_connect (spin_area_strength, "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
-  set_defaults ();
+  set_defaults_from_args ();
 
   gtk_widget_show_all (hbox);
   gtk_widget_hide (progress);

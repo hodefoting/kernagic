@@ -58,5 +58,7 @@ void   kernagic_set_glyph_string   (const char *utf8);
 
 void   rewrite_ufo_glyph           (Glyph *glyph);
 
+#define KERNAGIC_DEFAULT_STRIP_LEFT_BEARING  1
+extern gboolean kernagic_strip_left_bearing;
 
 #endif

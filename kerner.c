@@ -23,7 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 extern float scale_factor;
 
-KernerSettings kerner_settings;
+KernerSettings kerner_settings = {
+  KERNER_DEFAULT_MODE,
+  KERNER_DEFAULT_MIN,
+  KERNER_DEFAULT_MAX,
+  KERNER_DEFAULT_TARGET_GRAY,
+  KERNER_DEFAULT_WEIGHT_GRAY,
+  KERNER_DEFAULT_TARGET_FOO,
+  KERNER_DEFAULT_WEIGHT_FOO
+};
 
 static float alpha = 0.23;
 static float beta  = 0.23;
