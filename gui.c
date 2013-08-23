@@ -28,7 +28,6 @@ static uint8_t *preview_canvas = NULL;
 
 extern float  scale_factor;
 
-gboolean kernagic_strip_left_bearing = KERNAGIC_DEFAULT_STRIP_LEFT_BEARING;
 
 gboolean visualize_left_bearing = FALSE;
 
@@ -236,12 +235,9 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   return FALSE;
 }
 
-int cli_main (int argc, char **argv);
 extern const char *ufo_path;
 
-void parse_args (int argc, char **argv);
-
-int main (int argc, char **argv)
+int kernagic_gtk (int argc, char **argv)
 {
   GtkWidget    *window;
   GtkWidget    *hbox;
@@ -250,7 +246,6 @@ int main (int argc, char **argv)
   GtkSizeGroup *labels;
   GtkSizeGroup *sliders;
 
-  parse_args (argc, argv);
   gtk_init (&argc, &argv);
 
   labels  = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
