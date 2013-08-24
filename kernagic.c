@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 #define SPECIMEN_SIZE 60
 
-static char *ufo_path = NULL;
+static char *loaded_ufo_path = NULL;
 
 static GList *glyphs = NULL;
 float  scale_factor = 0.18;
@@ -195,7 +195,7 @@ void kernagic_save_kerning_info (void)
   char path[4095];
   GError *error = NULL;
 
-  sprintf (path, "%s/kerning.plist", ufo_path);
+  sprintf (path, "%s/kerning.plist", loaded_ufo_path);
 
   g_file_set_contents (path, str->str, -1, &error);
   if (error)
@@ -216,11 +216,11 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 
   kernagic_strip_bearing = strip_left_bearing;
 
-  if (ufo_path)
-    g_free (ufo_path);
-  ufo_path = g_strdup (font_path);
-  if (ufo_path [strlen(ufo_path)] == '/')
-    ufo_path [strlen(ufo_path)] = '\0';
+  if (loaded_ufo_path)
+    g_free (loaded_ufo_path);
+  loaded_ufo_path = g_strdup (font_path);
+  if (loaded_ufo_path [strlen(loaded_ufo_path)] == '/')
+    loaded_ufo_path [strlen(loaded_ufo_path)] = '\0';
 
   GList *l;
   for (l = glyphs; l; l = l->next)
@@ -231,11 +231,11 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   g_list_free (glyphs);
   glyphs = NULL;
 
-  sprintf (path, "%s/glyphs", ufo_path);
+  sprintf (path, "%s/glyphs", loaded_ufo_path);
 
   if (nftw(path, add_glyph, 20, 0) == -1)
     {
-      fprintf (stderr, "EEEeeek! '%s' probably not a ufo dir\n", ufo_path);
+      fprintf (stderr, "EEEeeek! '%s' probably not a ufo dir\n", loaded_ufo_path);
     }
 
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();
