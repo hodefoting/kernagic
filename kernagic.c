@@ -329,81 +329,52 @@ static gboolean deal_with_glyphs (gunichar unicode, gunichar unicode2)
   return FALSE;
 }
 
-void kernagic_compute_linear (GtkProgressBar *progress)
+void kernagic_combinatoric_each_left (Glyph *lg, GtkProgressBar *progress)
 {
-  long int total = g_list_length (glyphs);
-  long int count = 0;
-  GList *left;
-
-  for (left = glyphs; left; left = left->next)
-  {
-    Glyph *lg = left->data;
-  
-    if (progress || deal_with_glyph (lg->unicode))
-      {
-        count ++;
-        {
-          /* XXX: a linear kerner ignores the right glyph */
-          float kerned_advance = kerner_kern (&kerner_settings, lg, NULL);
-          /* XXX: kern set with rg = NULL sets the global advance? */
-          kernagic_kern_set (lg, NULL, kerned_advance - lg->advance);
-        }
-        if (progress)
-          {
-            float fraction = count / (float)total;
-            gtk_progress_bar_set_fraction (progress, fraction);
-            gtk_main_iteration_do (FALSE);
-          }
-      }
-  }
-}
-
-void kernagic_compute_combinatoric (GtkProgressBar *progress)
-{
-  long int total = g_list_length (glyphs);
-  long int count = 0;
-  GList *left;
   GList *right;
-
-  total *= total;
-
-  for (left = glyphs; left; left = left->next)
-  {
-    Glyph *lg = left->data;
-  
-    if (progress || deal_with_glyph (lg->unicode))
-    for (right = glyphs; right; right = right->next)
-      {
-        Glyph *rg = right->data;
-        count ++;
-        if (progress || deal_with_glyphs (lg->unicode, rg->unicode))
-          {
-            float kerned_advance = kerner_kern (&kerner_settings, lg, rg);
-            kernagic_kern_set (lg, rg, kerned_advance - lg->advance);
-          }
-        if (progress)
-          {
-            float fraction = count / (float)total;
-            gtk_progress_bar_set_fraction (progress, fraction);
-            gtk_main_iteration_do (FALSE);
-          }
-      }
-  }
+  for (right = glyphs; right; right = right->next)
+    {
+      Glyph *rg = right->data;
+      if (progress || deal_with_glyphs (lg->unicode, rg->unicode))
+        {
+          float kerned_advance = kerner_kern (&kerner_settings, lg, rg);
+          kernagic_kern_set (lg, rg, kerned_advance - lg->advance);
+        }
+    }
 }
 
 
 void kernagic_compute (GtkProgressBar *progress)
 {
-  switch (kerner_settings.mode)
+  long int total = g_list_length (glyphs);
+  long int count = 0;
+  GList *left;
+
+  for (left = glyphs; left; left = left->next)
   {
-    case KERNAGIC_CADENCE:
-    case KERNAGIC_RYTHM:
-      kernagic_compute_linear (progress);
-      break;
-    case KERNAGIC_GRAY:
-    default:
-      kernagic_compute_combinatoric (progress);
-      break;
+    Glyph *lg = left->data;
+    if (progress)
+    {
+      float fraction = count / (float)total;
+      gtk_progress_bar_set_fraction (progress, fraction);
+      gtk_main_iteration_do (FALSE);
+    }
+  
+    if (progress || deal_with_glyph (lg->unicode))
+    {
+      switch (kerner_settings.mode)
+      {
+        case KERNAGIC_CADENCE:
+        case KERNAGIC_RYTHM:
+          fprintf (stderr, "missing linear iterator\n");
+          break;
+        case KERNAGIC_GRAY:
+        default:
+          kernagic_combinatoric_each_left (lg, progress);
+          break;
+      }
+    }
+    count ++;
   }
 }
 
