@@ -343,6 +343,11 @@ void kernagic_combinatoric_each_left (Glyph *lg, GtkProgressBar *progress)
     }
 }
 
+void kernagic_cadence_each_left (Glyph *lg, GtkProgressBar *progress)
+{
+  printf ("%s\n", lg->name);
+}
+
 
 void kernagic_compute (GtkProgressBar *progress)
 {
@@ -365,6 +370,8 @@ void kernagic_compute (GtkProgressBar *progress)
       switch (kerner_settings.mode)
       {
         case KERNAGIC_CADENCE:
+          kernagic_cadence_each_left (lg, progress);
+          break;
         case KERNAGIC_RYTHM:
           fprintf (stderr, "missing linear iterator\n");
           break;
