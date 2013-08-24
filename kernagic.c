@@ -393,3 +393,6 @@ void   kernagic_set_glyph_string (const char *utf8)
   if (utf8)
     glyph_string = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
 }
+
+
+
