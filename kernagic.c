@@ -37,6 +37,11 @@ static gunichar *glyph_string = NULL;
 
 gboolean kernagic_strip_bearing = FALSE;
 
+GList *kernagic_glyphs (void)
+{
+  return glyphs;
+}
+
 void init_kernagic (void)
 {
   init_kerner ();
@@ -304,7 +309,7 @@ float kernagic_x_height (void)
   return (g->max_y - g->min_y);
 }
 
-static gboolean deal_with_glyph (gunichar unicode)
+gboolean kernagic_deal_with_glyph (gunichar unicode)
 {
   int i;
   if (!glyph_string)
@@ -315,7 +320,7 @@ static gboolean deal_with_glyph (gunichar unicode)
   return FALSE;
 }
 
-static gboolean deal_with_glyphs (gunichar unicode, gunichar unicode2)
+gboolean kernagic_deal_with_glyphs (gunichar unicode, gunichar unicode2)
 {
   int i;
   if (!glyph_string)
@@ -327,62 +332,6 @@ static gboolean deal_with_glyphs (gunichar unicode, gunichar unicode2)
         glyph_string[i+1] == unicode2)
       return TRUE;
   return FALSE;
-}
-
-void kernagic_combinatoric_each_left (Glyph *lg, GtkProgressBar *progress)
-{
-  GList *right;
-  for (right = glyphs; right; right = right->next)
-    {
-      Glyph *rg = right->data;
-      if (progress || deal_with_glyphs (lg->unicode, rg->unicode))
-        {
-          float kerned_advance = kerner_kern (&kerner_settings, lg, rg);
-          kernagic_kern_set (lg, rg, kerned_advance - lg->advance);
-        }
-    }
-}
-
-void kernagic_cadence_each_left (Glyph *lg, GtkProgressBar *progress)
-{
-  printf ("%s\n", lg->name);
-}
-
-
-void kernagic_compute (GtkProgressBar *progress)
-{
-  long int total = g_list_length (glyphs);
-  long int count = 0;
-  GList *left;
-
-  for (left = glyphs; left; left = left->next)
-  {
-    Glyph *lg = left->data;
-    if (progress)
-    {
-      float fraction = count / (float)total;
-      gtk_progress_bar_set_fraction (progress, fraction);
-      gtk_main_iteration_do (FALSE);
-    }
-  
-    if (progress || deal_with_glyph (lg->unicode))
-    {
-      switch (kerner_settings.mode)
-      {
-        case KERNAGIC_CADENCE:
-          kernagic_cadence_each_left (lg, progress);
-          break;
-        case KERNAGIC_RYTHM:
-          fprintf (stderr, "missing linear iterator\n");
-          break;
-        case KERNAGIC_GRAY:
-        default:
-          kernagic_combinatoric_each_left (lg, progress);
-          break;
-      }
-    }
-    count ++;
-  }
 }
 
 void   kernagic_set_glyph_string (const char *utf8)
