@@ -28,9 +28,11 @@ KernerSettings kerner_settings = {
   KERNER_DEFAULT_MIN,
   KERNER_DEFAULT_MAX,
   KERNER_DEFAULT_TARGET_GRAY,
+#if 0
   KERNER_DEFAULT_WEIGHT_GRAY,
   KERNER_DEFAULT_TARGET_FOO,
   KERNER_DEFAULT_WEIGHT_FOO
+#endif
 };
 
 static float alpha = 0.23;
@@ -249,15 +251,15 @@ float kerner_kern (KernerSettings *settings,
         beta = compute_negative_area_ratio (left, right, s);
 
         float alphadiff = fabs (alpha - settings->alpha_target / 100.0);
-        float betadiff  = fabs (beta  - settings->beta_target / 100.0);
+        //float betadiff  = fabs (beta  - settings->beta_target / 100.0);
         float sumdiff;
 
-        alphadiff *= alphadiff;
-        betadiff *= betadiff;
-        alphadiff *= settings->alpha_strength / 100.0;
-        betadiff  *= settings->beta_strength / 100.0;
+        //alphadiff *= alphadiff;
+        //betadiff *= betadiff;
+        //alphadiff *= settings->alpha_strength / 100.0;
+        //betadiff  *= settings->beta_strength / 100.0;
 
-        sumdiff = alphadiff + betadiff;
+        sumdiff = alphadiff /* + betadiff */;
 
         if (sumdiff < best_diff)
           {

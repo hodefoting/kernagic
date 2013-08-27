@@ -20,7 +20,7 @@ static GtkWidget *spin_gray_strength;
 static GtkWidget *spin_area_strength;
 
 static GtkWidget *progress;
-static GtkWidget *strip_bearing_check;
+//static GtkWidget *strip_bearing_check;
 static GtkWidget *visualize_left_bearing_check;
 static GtkWidget *font_path;
 
@@ -103,12 +103,6 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
   kerner_settings.alpha_target =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
-  kerner_settings.beta_target =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_area_target));
-  kerner_settings.alpha_strength =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_strength));
-  kerner_settings.beta_strength =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_area_strength));
 
   visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
@@ -142,7 +136,8 @@ static guint delayed_reload_updater = 0;
 static gboolean delayed_reload_trigger (gpointer foo)
 {
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
-  kernagic_strip_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
+  //kernagic_strip_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
+  kernagic_strip_left_bearing = TRUE;
 
 
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
@@ -178,7 +173,7 @@ static void set_defaults (void)
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target),   KERNER_DEFAULT_TARGET_FOO);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), KERNER_DEFAULT_WEIGHT_FOO);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
+  //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
 
@@ -190,11 +185,10 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), kerner_settings.alpha_strength);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target), kerner_settings.beta_target);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), kerner_settings.beta_strength);
+  /*
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), kernagic_strip_left_bearing);
+  */
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
 
@@ -340,7 +334,7 @@ int kernagic_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
   }
 
-
+#if 0
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Gray strength");
@@ -376,8 +370,9 @@ int kernagic_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_area_strength);
   }
+#endif
 
-
+#if 0
   {
     strip_bearing_check = gtk_check_button_new_with_label ("Strip bearings");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -385,6 +380,7 @@ int kernagic_gtk (int argc, char **argv)
     gtk_size_group_add_widget (sliders, strip_bearing_check);
     gtk_box_pack_end (GTK_BOX (hbox), strip_bearing_check, FALSE, TRUE, 2);
   }
+#endif
   {
     visualize_left_bearing_check = gtk_check_button_new_with_label ("Show left bearing");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -437,16 +433,20 @@ int kernagic_gtk (int argc, char **argv)
   }
 
   /* when these change, we need to reinitialize from scratch */
+#if 0
   g_signal_connect (strip_bearing_check, "toggled",       G_CALLBACK (trigger_reload), NULL);
+#endif
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
+#if 0
   g_signal_connect (spin_area_target,   "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_strength, "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_area_strength, "notify::value", G_CALLBACK (trigger), NULL);
+#endif
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
   set_defaults_from_args ();
