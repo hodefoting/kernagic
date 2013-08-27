@@ -144,6 +144,7 @@ static gboolean delayed_reload_trigger (gpointer foo)
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
   kernagic_strip_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (strip_bearing_check));
 
+
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
   g_free (ufo_path);
   if (delayed_updater)
@@ -457,7 +458,7 @@ int kernagic_gtk (int argc, char **argv)
   if (getenv ("KERNAGIC_DEBUG"))
     kerner_debug_ui ();
 
-  trigger ();
+  trigger_reload ();
   gtk_main ();
   return 0;
 }

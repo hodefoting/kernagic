@@ -544,6 +544,5 @@ void kernagic_compute (GtkProgressBar *progress)
       }
     }
     count ++;
-    fprintf (stderr, "bummer %i\n", count);
   }
 }
