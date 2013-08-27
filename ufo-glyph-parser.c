@@ -51,10 +51,10 @@ parse_start_element (GMarkupParseContext *context,
           if (!strcmp (*a_n, "name"))
             glyph->name = g_strdup (*a_v);
         }
-      glyph->min_x =  8192;
-      glyph->min_y =  8192;
-      glyph->max_x = -8192;
-      glyph->max_y = -8192;
+      glyph->ink_min_x =  8192;
+      glyph->ink_min_y =  8192;
+      glyph->ink_max_x = -8192;
+      glyph->ink_max_y = -8192;
     }
   else if (!strcmp (element_name, "advance"))
     {
@@ -94,10 +94,10 @@ parse_start_element (GMarkupParseContext *context,
           if (!strcmp (*a_n, "y"))
             y = atof (*a_v);
         }
-      if (x < glyph->min_x) glyph->min_x = x;
-      if (y < glyph->min_y) glyph->min_y = y;
-      if (x > glyph->max_x) glyph->max_x = x;
-      if (y > glyph->max_y) glyph->max_y = y;
+      if (x < glyph->ink_min_x) glyph->ink_min_x = x;
+      if (y < glyph->ink_min_y) glyph->ink_min_y = y;
+      if (x > glyph->ink_max_x) glyph->ink_max_x = x;
+      if (y > glyph->ink_max_y) glyph->ink_max_y = y;
     }
 }
 
@@ -258,15 +258,15 @@ load_ufo_glyph (Glyph *glyph)
   g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
   g_markup_parse_context_free (ctx);
 
-  glyph->width = glyph->max_x - glyph->min_x;
-  glyph->height = glyph->max_y - glyph->min_y;
+  glyph->width = glyph->ink_max_x - glyph->ink_min_x;
+  glyph->height = glyph->ink_max_y - glyph->ink_min_y;
 
   if (kernagic_strip_bearing)
     {
-      glyph->strip_offset = -glyph->min_x;
+      glyph->strip_offset = -glyph->ink_min_x;
 
-      glyph->min_x   += glyph->strip_offset;
-      glyph->max_x   += glyph->strip_offset;
+      glyph->ink_min_x   += glyph->strip_offset;
+      glyph->ink_max_x   += glyph->strip_offset;
       //glyph->advance += glyph->strip_offset;
       glyph->advance = glyph->width;
     }

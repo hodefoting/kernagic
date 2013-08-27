@@ -10,30 +10,30 @@
 typedef struct _Glyph Glyph;
 
 struct _Glyph {
-  char       *path;
-  char       *name;
-  char       *xml;
-  uint32_t    unicode;
-  int         advance;
-  GHashTable *kerning;
+  char        *path;
+  char        *name;
+  char        *xml;
+  uint32_t     unicode;
+  int          advance;
+  GHashTable  *kerning;
 
-  uint8_t    *raster;
-  int         r_width;
-  int         r_height;
+  uint8_t     *raster;
+  int          r_width;
+  int          r_height;
 
-  int         scan_width[1024]; /* 1024 is a really arbitrary number.. */
+  int          scan_width[1024]; /* 1024 is a really arbitrary number.. */
  
-  int         strip_offset; /* how many units have been subtracted out of glyphs outline 
+  int          strip_offset; /* how many units have been subtracted out of glyphs outline 
                              * coordinates by the bearing stripping */
-  float       width;
-  float       height;
+  float        width;
+  float        height;
 
-  float       min_x; /* always 0 when stripping bearings */
-  float       max_x;
-  float       min_y;
-  float       max_y;
+  float        ink_min_x; /* always 0 due to stripped bearings */
+  float        ink_max_x;
+  float        ink_min_y;
+  float        ink_max_y;
 
-  cairo_t    *cr; /* used transiently during glyph rendering */
+  cairo_t     *cr; /* used transiently during glyph rendering */
 };
 
 void   kernagic_load_ufo           (const char *ufo_path, gboolean strip_left_bearing);

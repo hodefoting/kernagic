@@ -439,6 +439,7 @@ int kernagic_gtk (int argc, char **argv)
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_mode,          "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
