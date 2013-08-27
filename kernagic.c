@@ -501,3 +501,49 @@ int main (int argc, char **argv)
 
   return 0;
 }
+
+/* XXX: move these into a plug-in struct */
+void kernagic_cadence_init (void);
+void kernagic_cadence_each (Glyph *lg, GtkProgressBar *progress);
+void kernagic_gray_init (void);
+void kernagic_gray_each (Glyph *lg, GtkProgressBar *progress);
+
+void kernagic_compute (GtkProgressBar *progress)
+{
+  GList *glyphs = kernagic_glyphs ();
+  long int total = g_list_length (glyphs);
+  long int count = 0;
+  GList *left;
+
+  /* initialization */
+  switch (kerner_settings.mode)
+  {
+    case KERNAGIC_CADENCE: kernagic_cadence_init (); break;
+    case KERNAGIC_RYTHM: break;
+    case KERNAGIC_GRAY: kernagic_gray_init (); break;
+    default: break;
+  }
+
+  for (left = glyphs; left; left = left->next)
+  {
+    Glyph *lg = left->data;
+    if (progress)
+    {
+      float fraction = count / (float)total;
+      gtk_progress_bar_set_fraction (progress, fraction);
+      gtk_main_iteration_do (FALSE);
+    }
+  
+    if (progress || kernagic_deal_with_glyph (lg->unicode))
+    {
+      switch (kerner_settings.mode)
+      {
+        case KERNAGIC_CADENCE: kernagic_cadence_each (lg, progress); break;
+        case KERNAGIC_RYTHM: fprintf (stderr, "missing linear iterator\n"); break;
+        case KERNAGIC_GRAY: default: kernagic_gray_each (lg, progress); break;
+      }
+    }
+    count ++;
+    fprintf (stderr, "bummer %i\n", count);
+  }
+}

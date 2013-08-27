@@ -457,6 +457,7 @@ int kernagic_gtk (int argc, char **argv)
   if (getenv ("KERNAGIC_DEBUG"))
     kerner_debug_ui ();
 
+  trigger ();
   gtk_main ();
   return 0;
 }

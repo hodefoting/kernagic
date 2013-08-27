@@ -23,12 +23,12 @@ struct _Glyph {
 
   int         scan_width[1024]; /* 1024 is a really arbitrary number.. */
  
-  int         strip_offset; /* how many units have been subtracted out of glyphs path
-                             * coordinates for bearing stripping  */
+  int         strip_offset; /* how many units have been subtracted out of glyphs outline 
+                             * coordinates by the bearing stripping */
   float       width;
   float       height;
 
-  float       min_x; /* bounds detected, and subtracted during parse/render */
+  float       min_x; /* always 0 when stripping bearings */
   float       max_x;
   float       min_y;
   float       max_y;

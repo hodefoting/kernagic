@@ -270,6 +270,10 @@ load_ufo_glyph (Glyph *glyph)
       //glyph->advance += glyph->strip_offset;
       glyph->advance = glyph->width;
     }
+  else
+    {
+      fprintf (stderr, "ow\n");
+    }
 }
 
 void
