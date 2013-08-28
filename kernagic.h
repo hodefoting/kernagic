@@ -35,7 +35,8 @@ struct _Glyph {
   float         ink_width;   /* computed from ink_max_x - ink_min_x */
   float         ink_height;  /* computed from ink_max_y - ink_min_y */
 
-  int           advance; /* XXX: advance should be rewritten in-place when re-saving  */
+  float         advance;
+
 
   GHashTable   *kerning;
 
