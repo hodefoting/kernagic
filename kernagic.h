@@ -10,28 +10,35 @@
 typedef struct _Glyph Glyph;
 
 struct _Glyph {
-  char        *path;
-  char        *name;
-  char        *xml;
-  uint32_t     unicode;
-  int          advance;
-  GHashTable  *kerning;
+  char         *path;
+  char         *name;
+  char         *xml;
+  uint32_t      unicode;
 
-  uint8_t     *raster;
-  int          r_width;
-  int          r_height;
+  /* each glyph loaded into kernagic can have an associated raster image
+   */
+  uint8_t      *raster;
+  int           r_width;   /* raster width */
+  int           r_height;
 
-  int          scan_width[1024]; /* 1024 is a really arbitrary number.. */
+  int           scan_width[1024]; /* 1024 is a really arbitrary number.. */
  
-  int          strip_offset; /* how many units have been subtracted out of glyphs outline 
-                             * coordinates by the bearing stripping */
-  float        width;
-  float        height;
 
-  float        ink_min_x; /* always 0 due to stripped bearings */
-  float        ink_max_x;
-  float        ink_min_y;
-  float        ink_max_y;
+  int           offset_x; /* how many units have been subtracted out of glyphs outline 
+                              * coordinates by the bearing stripping */
+
+  float         ink_min_x; /* always 0 due to stripped bearings */
+  float         ink_max_x; /* the ink extents is bounding box of the glyph */
+  float         ink_min_y; /* outline. */
+  float         ink_max_y;
+
+  float         ink_width;   /* computed from ink_max_x - ink_min_x */
+  float         ink_height;  /* computed from ink_max_y - ink_min_y */
+
+  int           advance; /* XXX: advance should be rewritten in-place when re-saving  */
+
+  GHashTable   *kerning;
+
 
   cairo_t     *cr; /* used transiently during glyph rendering */
 };

@@ -14,10 +14,6 @@ static GtkWidget *spin_mode;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
-static GtkWidget *spin_area_target;
-
-static GtkWidget *spin_gray_strength;
-static GtkWidget *spin_area_strength;
 
 static GtkWidget *progress;
 //static GtkWidget *strip_bearing_check;
@@ -169,10 +165,6 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_strength), KERNER_DEFAULT_WEIGHT_GRAY);
-
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_target),   KERNER_DEFAULT_TARGET_FOO);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_area_strength), KERNER_DEFAULT_WEIGHT_FOO);
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
 }
@@ -439,7 +431,7 @@ int kernagic_gtk (int argc, char **argv)
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_mode,          "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_mode,          "notify::value", G_CALLBACK (trigger_reload), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);

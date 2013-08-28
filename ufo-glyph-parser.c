@@ -132,7 +132,7 @@ glif_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "x"))
-            x = atof (*a_v) + glyph->strip_offset;
+            x = atof (*a_v) + glyph->offset_x;
           else if (!strcmp (*a_n, "y"))
             y = atof (*a_v);
           else if (!strcmp (*a_n, "type"))
@@ -258,17 +258,17 @@ load_ufo_glyph (Glyph *glyph)
   g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
   g_markup_parse_context_free (ctx);
 
-  glyph->width = glyph->ink_max_x - glyph->ink_min_x;
-  glyph->height = glyph->ink_max_y - glyph->ink_min_y;
+  glyph->ink_width = glyph->ink_max_x - glyph->ink_min_x;
+  glyph->ink_height = glyph->ink_max_y - glyph->ink_min_y;
 
   if (kernagic_strip_bearing)
     {
-      glyph->strip_offset = -glyph->ink_min_x;
+      glyph->offset_x = -glyph->ink_min_x;
 
-      glyph->ink_min_x   += glyph->strip_offset;
-      glyph->ink_max_x   += glyph->strip_offset;
-      //glyph->advance += glyph->strip_offset;
-      glyph->advance = glyph->width;
+      glyph->ink_min_x   += glyph->offset_x;
+      glyph->ink_max_x   += glyph->offset_x;
+      //glyph->advance += glyph->offset_x;
+      glyph->advance = glyph->ink_width;
     }
   else
     {
@@ -314,6 +314,29 @@ render_ufo_glyph (Glyph *glyph)
   cairo_destroy (cr);
   glyph->cr = NULL;
   cairo_surface_destroy (surface);
+
+  {
+    int x;
+    for (x = 0; x < glyph->r_width; x++)
+    {
+      long sum = 0;
+      int y;
+      for (y = 0; y < glyph->r_height - 2; y++)
+        sum += raster[glyph->r_width * y + x];
+      raster [glyph->r_width * (glyph->r_height-1) + x] = sum / glyph->r_height;
+    }
+  }
+  {
+    int x;
+    for (x = 0; x < glyph->r_width; x++)
+    {
+      long sum = 0;
+      int y;
+      for (y = 0; y < glyph->r_height - 3; y++)
+        sum += raster[glyph->r_width * y + x];
+      raster [glyph->r_width * (glyph->r_height-2) + x] = sum / glyph->r_height;
+    }
+  }
 }
 
 /**********************************************************************************/
@@ -338,7 +361,7 @@ rewrite_start_element (GMarkupParseContext *context,
          {
            char str[512];
            int value = atoi (*a_v);
-           value = value + glyph->strip_offset;
+           value = value + glyph->offset_x;
            sprintf (str, "%d", value);
            g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
          }

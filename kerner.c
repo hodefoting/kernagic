@@ -130,8 +130,8 @@ static float compute_xheight_graylevel (Glyph *left, Glyph *right, int s)
   count = 0;
   y0 = kernagic_x_height () * 1.0 * scale_factor;
   y1 = kernagic_x_height () * 2.0 * scale_factor;
-  x0 = left->width * scale_factor * 0.4;
-  x1 = s + right->width * scale_factor * 0.6;
+  x0 = left->ink_width * scale_factor * 0.4;
+  x1 = s + right->ink_width * scale_factor * 0.6;
   for (y = y0; y < y1; y++)
     for (x = x0; x < x1; x++)
       {
@@ -169,8 +169,8 @@ static float compute_negative_area_ratio (Glyph *left, Glyph *right, int s)
   count = 0;
   y0 = kernagic_x_height () * 1.04 * scale_factor;
   y1 = kernagic_x_height () * 1.96 * scale_factor;
-  x0 = left->width * scale_factor * 0.2;
-  x1 = s + right->width * scale_factor *0.8;
+  x0 = left->ink_width * scale_factor * 0.2;
+  x1 = s + right->ink_width * scale_factor *0.8;
 
   for (y = y0 + 1; y < y1; y++)
     {
@@ -228,7 +228,7 @@ float kerner_kern (KernerSettings *settings,
   gint    best_advance = 0;
   gfloat  best_diff = 10000.0;
 
-  int maxs = left->width * scale_factor * 1.5;
+  int maxs = left->ink_width * scale_factor * 1.5;
 
   if (maxs < kernagic_x_height () * scale_factor)
     maxs = kernagic_x_height () * scale_factor;
@@ -237,7 +237,7 @@ float kerner_kern (KernerSettings *settings,
    * guess mid_point go right until going over max dist,. this would cut out
    * even distance testing of the extremes that are not neccesary to test on.
    */
-  for (s = left->width * scale_factor * 0.5; s < maxs; s++)
+  for (s = left->ink_width * scale_factor * 0.5; s < maxs; s++)
   {
     min_dist = compute_dist (left, right, s);
 
