@@ -317,24 +317,22 @@ render_ufo_glyph (Glyph *glyph)
 
   {
     int x;
+    int t;
+    for (t = 1; t < 8; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
       int y;
-      for (y = 0; y < glyph->r_height - 2; y++)
-        sum += raster[glyph->r_width * y + x];
-      raster [glyph->r_width * (glyph->r_height-1) + x] = sum / glyph->r_height;
-    }
-  }
-  {
-    int x;
-    for (x = 0; x < glyph->r_width; x++)
-    {
-      long sum = 0;
-      int y;
-      for (y = 0; y < glyph->r_height - 3; y++)
-        sum += raster[glyph->r_width * y + x];
-      raster [glyph->r_width * (glyph->r_height-2) + x] = sum / glyph->r_height;
+      int c = 0;
+      int y0 = kernagic_x_height () * 1.0 * scale_factor;
+      int y1 = kernagic_x_height () * 2.0 * scale_factor;
+
+      for (y = y0; y < y1; y++)
+        {
+          sum += raster[glyph->r_width * y + x];
+          c++;
+        }
+      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
     }
   }
 }

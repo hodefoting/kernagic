@@ -47,67 +47,6 @@ void init_kernagic (void)
   init_kerner ();
 }
 
-void render_ufo_glyph (Glyph *glyph);
-
-void glyph_free (Glyph *glyph)
-{
-  if (glyph->path)
-    g_free (glyph->path);
-  if (glyph->name)
-    g_free (glyph->name);
-  if (glyph->xml)
-    g_free (glyph->xml);
-  if (glyph->raster)
-    g_free (glyph->raster);
-  if (glyph->kerning)
-    g_hash_table_destroy (glyph->kerning);
-  g_free (glyph);
-}
-
-Glyph *nsd_glyph_new (const char *path)
-{
-  Glyph *glyph = g_malloc0 (sizeof (Glyph));
-  g_file_get_contents (path, &glyph->xml, NULL, NULL);
-
-  if (glyph->xml)
-    {
-      load_ufo_glyph (glyph);
-    }
-  else
-    {
-      g_free (glyph);
-      glyph = NULL;
-    }
-
-  if (glyph)
-    {
-      /* skipping some glyphs */
-      if (!glyph->name ||
-          glyph->unicode == ' ')
-        {
-          g_free (glyph);
-          glyph = NULL;
-        }
-    }
-
-  if (glyph)
-    {
-      glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
-      glyph->path = g_strdup (path);
-    }
-  return glyph;
-}
-
-void nsd_glyph_free (Glyph *glyph)
-{
-  if (glyph->xml)
-    g_free (glyph->xml);
-  if (glyph->raster)
-    free (glyph->raster);
-  if (glyph->name)
-    g_free (glyph->name);
-  g_free (glyph);
-}
 
 static int
 add_glyph(const char *fpath, const struct stat *sb,
@@ -115,7 +54,7 @@ add_glyph(const char *fpath, const struct stat *sb,
 {
   if (strstr (fpath, "contents.plist"))
     return 0;
-  Glyph *glyph = nsd_glyph_new (fpath);
+  Glyph *glyph = kernagic_glyph_new (fpath);
 
   if (glyph)
     glyphs = g_list_prepend (glyphs, glyph);
@@ -151,7 +90,7 @@ recompute_right_bearings ()
         {
           Glyph *rg = r->data;
           float oldkern = kernagic_kern_get (lg, rg);
-          kernagic_kern_set (lg, rg, oldkern - advance_diff);
+          kernagic_set_kerning (lg, rg, oldkern - advance_diff);
         }
     }
 }
@@ -215,6 +154,8 @@ void kernagic_save_kerning_info (void)
     }
 }
 
+void render_ufo_glyph (Glyph *glyph);
+
 void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 {
   char path[4095];
@@ -231,7 +172,7 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   for (l = glyphs; l; l = l->next)
     {
       Glyph *glyph = l->data;
-      glyph_free (glyph);
+      kernagic_glyph_free (glyph);
     }
   g_list_free (glyphs);
   glyphs = NULL;
@@ -263,28 +204,7 @@ void kernagic_kern_clear_all (void)
     }
 }
 
-void kernagic_kern_set (Glyph *a, Glyph *b, float kerning)
-{
-  int intkern = kerning * 10;
-  if (!a || !b)
-    return;
 
-  g_hash_table_insert (a->kerning, b, GINT_TO_POINTER (intkern));
-}
-
-float kernagic_kern_get (Glyph *a, Glyph *b)
-{
-  int intkern;
-  float kern;
-  if (!a || !b)
-    return 0;
-
-  gpointer pvalue = g_hash_table_lookup (a->kerning, b);
-
-  intkern = GPOINTER_TO_INT (pvalue);
-  kern = intkern / 10.0;
-  return kern;
-}
 
 Glyph *kernagic_find_glyph_unicode (unsigned int unicode)
 {
