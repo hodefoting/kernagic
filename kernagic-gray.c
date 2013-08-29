@@ -13,8 +13,9 @@ void kernagic_gray_each (Glyph *lg, GtkProgressBar *progress)
           /*XXX: kerner kern is wrong, this is method specific */
           float kerned_advance = kerner_kern (&kerner_settings, lg, rg);
 
-          kernagic_set_advance (lg, lg->ink_width);
-          kernagic_set_kerning (lg, rg, kerned_advance - lg->advance);
+          lg->right_bearing = 0;
+          lg->left_bearing = 0;
+          kernagic_set_kerning (lg, rg, kerned_advance - kernagic_get_advance (lg));
         }
     }
 }

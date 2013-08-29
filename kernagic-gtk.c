@@ -48,7 +48,7 @@ float place_glyph (Glyph *g, float xo, float opacity)
           )
       preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = g->raster[y * g->r_width + x] * opacity;
 
-  return xo + g->advance * scale_factor;
+  return xo + kernagic_get_advance (g) * scale_factor;
 }
 
 static void redraw_test_text (void)
@@ -155,7 +155,7 @@ static void trigger_reload (void)
       g_source_remove (delayed_reload_updater);
       delayed_reload_updater = 0;
     }
-  delayed_reload_updater = g_timeout_add (1000, delayed_reload_trigger, NULL);
+  delayed_reload_updater = g_timeout_add (500, delayed_reload_trigger, NULL);
 }
 
 static void set_defaults (void)
@@ -386,11 +386,11 @@ int kernagic_gtk (int argc, char **argv)
   }
 #endif
   {
-    visualize_left_bearing_check = gtk_check_button_new_with_label ("Show left bearing");
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
-    gtk_size_group_add_widget (sliders, visualize_left_bearing_check);
-    gtk_box_pack_end (GTK_BOX (hbox), visualize_left_bearing_check, FALSE, TRUE, 2);
+    visualize_left_bearing_check = gtk_check_button_new_with_label ("Draw seperators");
+    //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_container_add (GTK_CONTAINER (vbox1), visualize_left_bearing_check);
+    //gtk_size_group_add_widget (sliders, visualize_left_bearing_check);
+    //gtk_box_pack_end (GTK_BOX (hbox), visualize_left_bearing_check, FALSE, TRUE, 2);
   }
 #if 0
   {

@@ -29,12 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 void   kernagic_set_advance        (Glyph *a, float advance)
 {
-  a->advance = advance;
+  //a->advance = advance;
+  fprintf (stderr, "ooops\n");
 }
 
 float  kernagic_get_advance        (Glyph *a)
 {
-  return a->advance;
+  return a->ink_width + a->left_bearing + a->right_bearing;
 }
 
 void kernagic_set_kerning (Glyph *a, Glyph *b, float kerning)

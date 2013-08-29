@@ -63,7 +63,7 @@ parse_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "width"))
-            glyph->advance = atoi (*a_v);
+            {};//glyph->advance = atoi (*a_v);
         }
     }
   else if (!strcmp (element_name, "unicode"))
@@ -268,7 +268,8 @@ load_ufo_glyph (Glyph *glyph)
       glyph->ink_min_x   += glyph->offset_x;
       glyph->ink_max_x   += glyph->offset_x;
       //glyph->advance += glyph->offset_x;
-      glyph->advance = glyph->ink_width;
+      glyph->left_bearing = 0;
+      glyph->right_bearing = 0;
     }
   else
     {
@@ -366,7 +367,7 @@ rewrite_start_element (GMarkupParseContext *context,
        else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
          {
            char str[512];
-           sprintf (str, "%d", (int)(glyph->advance));
+           sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
            g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
          }
        else

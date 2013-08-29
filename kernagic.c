@@ -80,12 +80,15 @@ recompute_right_bearings ()
       for (r = glyphs; r; r= r->next)
         {
           Glyph *rg = r->data;
-          advance_sum += kernagic_kern_get (lg, rg) + lg->advance;
+          advance_sum += kernagic_kern_get (lg, rg) + kernagic_get_advance (lg);
           glyph_count ++;
         }
       new_advance = advance_sum / glyph_count;
-      advance_diff = new_advance - lg->advance;
-      lg->advance = new_advance;
+      advance_diff = new_advance - kernagic_get_advance (lg);
+
+      lg->left_bearing  = 0;
+      lg->right_bearing = new_advance;
+
       for (r = glyphs; r; r= r->next)
         {
           Glyph *rg = r->data;
@@ -189,7 +192,27 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   for (l = glyphs; l; l = l->next)
     {
       Glyph *glyph = l->data;
+      int y;
       render_ufo_glyph (glyph);
+
+      for (y = 0; y < glyph->r_height; y ++)
+      {
+        int x;
+        int min = 8192;
+        int max = -1;
+        for (x = 0; x < glyph->r_width; x ++)
+          {
+            if (glyph->raster[y * glyph->r_width + x] > 0)
+              {
+                if (x < min)
+                  min = x;
+                if (x > max)
+                  max = x;
+              }
+          }
+        glyph->leftmost[y] = min;
+        glyph->rightmost[y] = max;
+      }
     }
   init_kernagic ();
 }

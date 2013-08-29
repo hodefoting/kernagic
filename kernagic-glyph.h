@@ -35,21 +35,25 @@ struct _Glyph {
   float         ink_width;   /* computed from ink_max_x - ink_min_x */
   float         ink_height;  /* computed from ink_max_y - ink_min_y */
 
-  float         advance;
-
+  float         left_bearing;
+  float         right_bearing; /* this should deprecate advance.. */
 
   GHashTable   *kerning;
 
-  cairo_t     *cr; /* used transiently during glyph rendering */
+  /* leftmost and rightmost pixel per row -1 for no pixel */
+  int           leftmost[2048];
+  int           rightmost[2048];
+
+  cairo_t      *cr; /* used transiently during glyph rendering */
 };
 
-float  kernagic_kern_get           (Glyph *a, Glyph *b);
-void   kernagic_set_kerning        (Glyph *a, Glyph *b, float kerning);
-void   kernagic_set_advance        (Glyph *unicode, float advance);
-float  kernagic_get_advance        (Glyph *unicode);
-
-Glyph *kernagic_glyph_new (const char *path);
-void kernagic_glyph_free (Glyph *glyph);
+float  kernagic_kern_get          (Glyph *a, Glyph *b);
+void   kernagic_set_kerning       (Glyph *a, Glyph *b, float kerning);
+void   kernagic_set_left_bearing  (Glyph *g, float left_bearing);
+void   kernagic_set_right_bearing (Glyph *g, float right_bearing);
+float  kernagic_get_advance       (Glyph *unicode);
+Glyph *kernagic_glyph_new         (const char *path);
+void   kernagic_glyph_free        (Glyph *glyph);
 
 #endif
 
