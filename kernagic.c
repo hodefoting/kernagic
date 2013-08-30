@@ -227,8 +227,6 @@ void kernagic_kern_clear_all (void)
     }
 }
 
-
-
 Glyph *kernagic_find_glyph_unicode (unsigned int unicode)
 {
   GList *l;
