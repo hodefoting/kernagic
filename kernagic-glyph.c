@@ -124,3 +124,12 @@ void kernagic_glyph_free (Glyph *glyph)
     g_free (glyph->name);
   g_free (glyph);
 }
+
+void   kernagic_set_left_bearing  (Glyph *g, float left_bearing)
+{
+  g->left_bearing = left_bearing;
+}
+void   kernagic_set_right_bearing (Glyph *g, float right_bearing)
+{
+  g->right_bearing = right_bearing;
+}

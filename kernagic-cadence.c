@@ -99,4 +99,9 @@ void kernagic_cadence_init (void)
 void kernagic_cadence_each (Glyph *lg, GtkProgressBar *progress)
 {
   printf ("%s\n", lg->name);
+  kernagic_set_left_bearing (lg, 100);
+  kernagic_set_right_bearing (lg, 100);
 }
+
+
+

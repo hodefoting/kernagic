@@ -109,6 +109,7 @@ void kernagic_save_kerning_info (void)
 
   GList *left, *right;
 
+  /* XXX: this likely is not desired for all methods!! */
   recompute_right_bearings ();
 
   for (left = glyphs; left; left = left->next)
