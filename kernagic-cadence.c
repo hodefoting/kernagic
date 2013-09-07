@@ -45,17 +45,17 @@ Cadence cadence[]={
 {1,"X",1,BOTH_EXTREME},
 {1,"Y",1,BOTH_EXTREME},
 {2,"Z",2,BOTH_EXTREME},
-{2,"a",6,BOTH_EXTREME| RIGHT_STEM},
+{2,"a",6,LEFT_EXTREME| RIGHT_STEM},
 {5,"b",2,LEFT_STEM | RIGHT_EXTREME},
 {2,"c",1,BOTH_EXTREME},
-{2,"d",6,BOTH_EXTREME | RIGHT_STEM},
+{2,"d",6,LEFT_EXTREME | RIGHT_STEM}, /* XXX!!! */
 {2,"e",1,BOTH_EXTREME},
 {6,"f",1,LEFT_STEM | RIGHT_EXTREME},
 {2,"g",1,BOTH_EXTREME},
 {6,"h",6,BOTH_STEM},
 {6,"i",6,BOTH_STEM},
 {6,"j",5,BOTH_STEM},
-{6,"k",1,BOTH_STEM}, /* stem tricky ? */
+{6,"k",1,LEFT_STEM | RIGHT_EXTREME}, /* stem tricky ? */
 {6,"l",6,BOTH_STEM},
 {6,"m",6,BOTH_STEM},
 {6,"n",6,BOTH_STEM},
@@ -125,11 +125,20 @@ void kernagic_cadence_each (Glyph *g, GtkProgressBar *progress)
 
   /* XXX: incorporate measurements from edge.. : possibly yielding negative
    * bearings */
+
+
   left = n_width * c->left;
   right = n_width * c->right;
 
-  left -= left_most_center(g);
-  right -= (g->ink_max_x - right_most_center(g));
+  if (c->flags & LEFT_EXTREME)
+    left -= g->ink_min_x;
+  else
+    left -= left_most_center(g);
+
+  if (c->flags & RIGHT_EXTREME)
+    right -= 0;
+  else
+    right -= (g->ink_max_x - right_most_center(g));
 
   kernagic_set_left_bearing (g,  left);
   kernagic_set_right_bearing (g, right);
