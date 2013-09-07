@@ -168,7 +168,7 @@ static void set_defaults (void)
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
 }
 
 static void set_defaults_from_args (void)
@@ -184,7 +184,7 @@ static void set_defaults_from_args (void)
   /*
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), kernagic_strip_left_bearing);
   */
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), FALSE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
 }
 
 static void do_save (void)
@@ -292,9 +292,9 @@ int kernagic_gtk (int argc, char **argv)
     //spin_mode = gtk_spin_button_new_with_range (0.00, 4.0, 1);
     spin_mode = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    0, "average x-gray");
+                                    0, "x-height gray");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    1,  "cadence units");
+                                    1,  "cadence");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
                                     2, "ink bounds");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),

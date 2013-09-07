@@ -301,9 +301,9 @@ void help (void)
   printf ("kernagic [options] <font.ufo>\n"
           "\n"
           "Options:\n"
-//          "   -c use cadence units, try this for fonts with traditional proportions\n"
-//          "   -g use gray level     (default)\n"
-//          "      suboptions influencing gray:\n"
+          "   -c use cadence method \n"
+          "   -g use x-height gray method  (default)\n"
+          "      suboptions influencing x-height gray:\n"
           "       -m <0..100>   minimum distance default = %i\n"
           "       -M <0..100>   maximum distance default = %i\n"
           "       -t <0..100>   target gray value default = %i\n"
@@ -315,7 +315,7 @@ void help (void)
           "   -p <output.png>   render sample string with settings (do not change font)\n" */
           "\n"
 
-          "Examples:\n"
+ //         "Examples:\n"
     //      "    Use the cadence unit method on Test.ufo, overwriting file\n"
     //      "      kernagic -c Test.ufo\n"
    /*     "    Preview default settings on string shoplift to test.png\n"
@@ -323,7 +323,8 @@ void help (void)
           "    Run gray with a different gray target, still previewing to test.png\n"
           "      kernagic Original.ufo -s 'shoplift' -p test.png -t 0.4\n"
           "    Write a final adjusted font to Output.ufo\n" */
-          "      kernagic Original.ufo -s 'shoplift' -o Output.ufo -t 0.32 -m 10 -M 30\n",
+//          "      kernagic Original.ufo -s 'shoplift' -o Output.ufo -t 0.32 -m 10 -M 30\n"
+          ,
     KERNER_DEFAULT_MIN,
     KERNER_DEFAULT_MAX,
     KERNER_DEFAULT_TARGET_GRAY
