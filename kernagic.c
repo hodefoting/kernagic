@@ -310,7 +310,7 @@ void help (void)
      //     "       -l            don't strip left bearing\n"
      //     "       -L            strip left bearing (default)\n"
           "\n"
-          "   -o <output.ufo>  create a copy of the input font, withoutit kernagic overwrites the input ufo\n"
+          "   -o <output.ufo>  create a copy of the input font, without it kernagic overwrites the input ufo\n"
    /*     "   -s <string>      sample string (for use with -p)\n"
           "   -p <output.png>   render sample string with settings (do not change font)\n" */
           "\n"
