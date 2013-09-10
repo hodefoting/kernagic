@@ -1,6 +1,59 @@
 #include "kernagic.h"
 #include "kerner.h"
 
+#if 0
+
+dXXvXXX
+X  X  X
+X  X  X
+X  X  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  X  X
+X     X
+X  X  X
+X  X  X
+X  XX X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  X  X
+X     X
+X XX  X
+X  X  X
+X  X  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  X  X
+X  X  X
+X  X  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  dXXb  X
+X  X  X  X
+X  X  X  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  dXXb  X
+X  X  X  X
+X  YXXP  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+X  dXXvXXX  X
+X  X  X  X  X
+X  X  X  X  X
+
+X  X  X  X  X  X  X  X  X  X  X  X
+
+
+#endif
+
+
 static void kernagic_rythm_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');

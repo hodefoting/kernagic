@@ -114,6 +114,15 @@ Glyph *kernagic_glyph_new (const char *path)
   return glyph;
 }
 
+void kernagic_glyph_reset (Glyph *glyph)
+{
+  if (glyph->kerning)
+    g_hash_table_destroy (glyph->kerning);
+  glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
+  glyph->left_bearing = 0;
+  glyph->right_bearing = 0;
+}
+
 void kernagic_glyph_free (Glyph *glyph)
 {
   if (glyph->xml)

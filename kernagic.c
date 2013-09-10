@@ -379,17 +379,22 @@ void parse_args (int argc, char **argv)
         {
           int i;
           char *method;
+          int found = 0;
           EXPECT_ARG;
           method = argv[++no];
           for (i = 0; methods[i]; i++)
             {
               if (!strcmp (method, methods[i]->name))
-                kerner_settings.method = methods[i];
-              else
                 {
-                  fprintf (stderr, "unknown method %s\n", method);
-                  exit (-1);
+                  kerner_settings.method = methods[i];
+                  found = 1;
+                  break;
                 }
+            }
+          if (!found)
+            {
+              fprintf (stderr, "unknown method %s\n", method);
+              exit (-1);
             }
         }
       else if (!strcmp (argv[no], "-l"))
@@ -509,6 +514,8 @@ void kernagic_compute (GtkProgressBar *progress)
       gtk_progress_bar_set_fraction (progress, fraction);
       gtk_main_iteration_do (FALSE);
     }
+
+    kernagic_glyph_reset (lg);
   
     if (progress || kernagic_deal_with_glyph (lg->unicode))
     {

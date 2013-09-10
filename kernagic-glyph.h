@@ -61,5 +61,9 @@ float  kernagic_get_advance       (Glyph *unicode);
 Glyph *kernagic_glyph_new         (const char *path);
 void   kernagic_glyph_free        (Glyph *glyph);
 
+/* resets the bearing information of the glyph
+ */
+void   kernagic_glyph_reset       (Glyph *glyph);
+
 #endif
 
