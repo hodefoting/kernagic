@@ -300,8 +300,8 @@ void gen_debug (Glyph *glyph)
         }
       {
         int foo = sum / c;
-        foo /= 64;
-        foo *= 8;
+        foo /= 16;
+        foo *= 16;
         raster [glyph->r_width * (glyph->r_height-t) + x] = foo;
       }
     }
@@ -329,7 +329,7 @@ void gen_debug (Glyph *glyph)
              while (u > 0 && raster[glyph->r_width * (glyph->r_height-t)+u]==
                  prevval) u--;
              u = (u + x) /2;
-             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
+             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 0;
 
              glyph->stems[glyph->stem_count] = u / scale_factor;
              glyph->stem_weight[glyph->stem_count++] = prevval;

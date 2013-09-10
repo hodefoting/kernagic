@@ -161,7 +161,8 @@ static void trigger_reload (void)
 
 static void set_defaults (void)
 {
-  gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  //gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  gtk_entry_set_text (GTK_ENTRY (test_text), "binlunapmno");
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), KERNER_DEFAULT_MODE);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
@@ -173,7 +174,8 @@ static void set_defaults (void)
 
 static void set_defaults_from_args (void)
 {
-  gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  //gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  gtk_entry_set_text (GTK_ENTRY (test_text), "binlunapmno");
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), kernagic_active_method_no());
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
@@ -332,7 +334,7 @@ int kernagic_gtk (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Gray target");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_gray_target = gtk_spin_button_new_with_range (0.0, 100.0, 0.2);
+    spin_gray_target = gtk_spin_button_new_with_range (0.0, 2000.0, 0.5);
     gtk_size_group_add_widget (sliders, spin_gray_target);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
