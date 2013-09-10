@@ -26,9 +26,9 @@ Cadence cadence[]={
 {8,"E",2,LEFT_STEM | RIGHT_EXTREME},
 {8,"F",2,LEFT_STEM | RIGHT_EXTREME},
 {3,"G",6,LEFT_EXTREME | RIGHT_STEM},
-{8,"I",8,BOTH_STEM},
 {8,"H",8,BOTH_STEM},
-{6,"J",6,BOTH_STEM}, /* MIGHT BE TOO LOW FOR LEFT STEM */
+{8,"I",8,BOTH_STEM},
+{6,"J",6,BOTH_STEM}, /* XXX: left side stem likely too lowe for ismple hit */
 {8,"K",1,LEFT_STEM | RIGHT_EXTREME},
 {8,"L",2,LEFT_STEM | RIGHT_EXTREME},
 {8,"M",8,BOTH_STEM},
@@ -48,14 +48,14 @@ Cadence cadence[]={
 {2,"a",6,LEFT_EXTREME| RIGHT_STEM},
 {5,"b",2,LEFT_STEM | RIGHT_EXTREME},
 {2,"c",1,BOTH_EXTREME},
-{2,"d",6,LEFT_EXTREME | RIGHT_STEM}, /* XXX!!! */
-{2,"e",1,BOTH_EXTREME},
+{2,"d",6,LEFT_EXTREME | RIGHT_STEM},
+{2,"e",2,BOTH_EXTREME},
 {6,"f",1,LEFT_STEM | RIGHT_EXTREME},
 {2,"g",1,BOTH_EXTREME},
 {6,"h",6,BOTH_STEM},
 {6,"i",6,BOTH_STEM},
 {6,"j",5,BOTH_STEM},
-{6,"k",1,LEFT_STEM | RIGHT_EXTREME}, /* stem tricky ? */
+{6,"k",1,LEFT_STEM | RIGHT_EXTREME},
 {6,"l",6,BOTH_STEM},
 {6,"m",6,BOTH_STEM},
 {6,"n",6,BOTH_STEM},
@@ -72,6 +72,8 @@ Cadence cadence[]={
 {1,"y",1,BOTH_EXTREME},
 {2,"z",2,BOTH_EXTREME},
 {3,".",3,BOTH_EXTREME},
+{3,":",3,BOTH_EXTREME},
+{3,";",3,BOTH_EXTREME},
 {3,",",3,BOTH_EXTREME}};
 
 extern float scale_factor;
@@ -99,33 +101,21 @@ Cadence *glyph_get_cadence (Glyph *g)
 
 float n_width = 0;
 
-void kernagic_cadence_init (void)
+static void cadence_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
     return;
-  if (kerner_settings.maximum_distance < 1)
-   kerner_settings.maximum_distance = 1;
-  //n_width = (right_most_center (g) - left_most_center(g)) / (kerner_settings.maximum_distance);
+
   n_width = (right_most_center (g) - left_most_center(g)) / 24.0;
-  printf ("n-width: %f\n", g->ink_max_x - g->ink_min_x);
-  printf ("n-width: %f %f\n", g->ink_max_x, g->ink_min_x);
-  printf ("       : %f %f\n", left_most_center(g), right_most_center(g));
-  printf ("       : %f\n", n_width);
-  //return (g->max_y - g->min_y);
 }
 
-void kernagic_cadence_each (Glyph *g, GtkProgressBar *progress)
+static void cadence_each (Glyph *g, GtkProgressBar *progress)
 {
   float left;
   float right;
   Cadence *c;
-  printf ("%s\n", g->name);
   c = glyph_get_cadence (g);
-
-  /* XXX: incorporate measurements from edge.. : possibly yielding negative
-   * bearings */
-
 
   left = n_width * c->left;
   right = n_width * c->right;
@@ -143,3 +133,13 @@ void kernagic_cadence_each (Glyph *g, GtkProgressBar *progress)
   kernagic_set_left_bearing (g,  left);
   kernagic_set_right_bearing (g, right);
 }
+
+static KernagicMethod method = {
+  "cadence", 
+  cadence_init,
+  cadence_each,
+  NULL
+};
+
+KernagicMethod *kernagic_cadence = &method;
+

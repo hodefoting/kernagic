@@ -277,6 +277,111 @@ load_ufo_glyph (Glyph *glyph)
     }
 }
 
+void gen_debug (Glyph *glyph)
+{
+  uint8_t *raster = glyph->raster;
+    int x;
+    int t;
+    float x_height = kernagic_x_height ();
+
+    for (t = 1; t < 8; t ++)
+    for (x = 0; x < glyph->r_width; x++)
+    {
+      long sum = 0;
+      int y;
+      long c = 0;
+      int y0 = x_height  * 1.0 * scale_factor;
+      int y1 = x_height  * 2.0 * scale_factor;
+
+      for (y = y0; y < y1; y++)
+        {
+          sum += raster[glyph->r_width * y + x];
+          c++;
+        }
+      {
+        int foo = sum / c;
+        foo /= 64;
+        foo *= 8;
+        raster [glyph->r_width * (glyph->r_height-t) + x] = foo;
+      }
+    }
+
+    /* detect candidates; with confidence */
+    int prevval = 255;
+    int goingup = 0;
+    int beenbelow = 1;
+
+    for (x = 0; x < glyph->r_width; x++)
+      {
+        int val;
+        int delta;
+        t = 1;
+        val = raster [glyph->r_width * (glyph->r_height-t) + x];
+
+        if (val < 64)
+          beenbelow = 1;
+        delta = val - prevval;
+
+        if (delta < 0 && goingup)
+          {
+             int u = x - 1; 
+             /* backtrack half the distance back that is of the same level */
+             while (u > 0 && raster[glyph->r_width * (glyph->r_height-t)+u]==
+                 prevval) u--;
+             u = (u + x) /2;
+             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
+
+             glyph->stems[glyph->stem_count] = u / scale_factor;
+             glyph->stem_weight[glyph->stem_count++] = prevval;
+
+             beenbelow = 0;
+             goingup = 0;
+          }
+
+        if (delta > 0 && beenbelow)
+          goingup = 1;
+
+        if (delta < 0)
+          goingup = 0;
+
+        prevval = val;
+      }
+
+    for (t = 8; t < 16; t ++)
+    for (x = 0; x < glyph->r_width; x++)
+    {
+      long sum = 0;
+      int y;
+      long c = 0;
+
+      for (y = x_height * 1.45 * scale_factor ;
+          y <  x_height * 1.55 * scale_factor;
+          y++)
+        {
+          sum += raster[glyph->r_width * y + x] * 16;
+          c+= 16;
+        }
+      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
+    }
+
+    for (t = 16; t < 32; t ++)
+    for (x = 0; x < glyph->r_width; x++)
+    {
+      long sum = 0;
+      int y;
+      long c = 0;
+
+      for (y = x_height * 1.8 * scale_factor ;
+          y <  x_height * 2.0 * scale_factor;
+          y++)
+        {
+          sum += raster[glyph->r_width * y + x] * 16;
+          c+= 16;
+        }
+      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
+    }
+}
+
 void
 render_ufo_glyph (Glyph *glyph)
 {
@@ -285,8 +390,6 @@ render_ufo_glyph (Glyph *glyph)
   assert (glyph->xml);
 
   load_ufo_glyph (glyph);
-  
-
   {
     glyph->r_width = kernagic_x_height () * scale_factor * 2.5;
     glyph->r_height = kernagic_x_height () * scale_factor * 2.8;
@@ -316,26 +419,7 @@ render_ufo_glyph (Glyph *glyph)
   glyph->cr = NULL;
   cairo_surface_destroy (surface);
 
-  {
-    int x;
-    int t;
-    for (t = 1; t < 8; t ++)
-    for (x = 0; x < glyph->r_width; x++)
-    {
-      long sum = 0;
-      int y;
-      int c = 0;
-      int y0 = kernagic_x_height () * 1.0 * scale_factor;
-      int y1 = kernagic_x_height () * 2.0 * scale_factor;
-
-      for (y = y0; y < y1; y++)
-        {
-          sum += raster[glyph->r_width * y + x];
-          c++;
-        }
-      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
-    }
-  }
+  gen_debug (glyph);
 }
 
 /**********************************************************************************/

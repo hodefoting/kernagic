@@ -1,8 +1,7 @@
 #include "kernagic.h"
 #include "kerner.h"
 
-
-void kernagic_gray_each (Glyph *lg, GtkProgressBar *progress)
+void gray_each (Glyph *lg, GtkProgressBar *progress)
 {
   GList *right;
   for (right = kernagic_glyphs (); right; right = right->next)
@@ -20,7 +19,9 @@ void kernagic_gray_each (Glyph *lg, GtkProgressBar *progress)
     }
 }
 
-void kernagic_gray_init (void)
-{
-}
+
+static KernagicMethod method = {"gray", 
+  NULL,  gray_each, NULL};
+
+KernagicMethod *kernagic_gray = &method;
 

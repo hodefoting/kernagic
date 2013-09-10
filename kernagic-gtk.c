@@ -92,8 +92,8 @@ static void redraw_test_text (void)
 
 static void configure_kernagic (void)
 {
-  kerner_settings.mode =
-      gtk_combo_box_get_active (GTK_COMBO_BOX (spin_mode));
+  kerner_settings.method =
+      kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_mode)));
 
   kerner_settings.maximum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
@@ -174,7 +174,7 @@ static void set_defaults (void)
 static void set_defaults_from_args (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), kerner_settings.mode);
+  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), kernagic_active_method_no());
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
@@ -292,11 +292,11 @@ int kernagic_gtk (int argc, char **argv)
     //spin_mode = gtk_spin_button_new_with_range (0.00, 4.0, 1);
     spin_mode = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    0, "x-height gray");
+                                    0, "ink bounds");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    1,  "cadence");
+                                    1, "x-height gray");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    2, "ink bounds");
+                                    2,  "cadence");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
                                     3, "rythmic");
     gtk_size_group_add_widget (sliders, spin_mode);

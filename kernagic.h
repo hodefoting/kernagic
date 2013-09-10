@@ -1,7 +1,6 @@
 #ifndef KERNAGIC_H
 #define KERNAGIC_H
 
-
 #include <stdint.h>
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -37,5 +36,16 @@ gboolean kernagic_deal_with_glyphs (gunichar left, gunichar right);
 gboolean kernagic_deal_with_glyph (gunichar unicode);
 
 GList *kernagic_glyphs (void);
+
+typedef struct _KernagicMethod KernagicMethod;
+KernagicMethod *kernagic_method_no (int no);
+int             kernagic_active_method_no (void);
+
+struct _KernagicMethod {
+  char *name;
+  void (*init) (void);
+  void (*each) (Glyph *glyph, GtkProgressBar *progress);
+  void (*done) (void);
+};
 
 #endif

@@ -5,12 +5,6 @@
 
 typedef struct _KernerSettings KernerSettings;
 
-enum {
-  KERNAGIC_GRAY,
-  KERNAGIC_CADENCE,
-  KERNAGIC_RYTHM
-};
-
 #define KERNER_DEFAULT_MODE          0 /* only two at first, gray and cadence */
 #define KERNER_DEFAULT_MIN          15
 #define KERNER_DEFAULT_MAX          50
@@ -21,7 +15,7 @@ enum {
 
 struct _KernerSettings
 {
-  int   mode;
+  KernagicMethod *method;
   float minimum_distance;
   float maximum_distance;
   float alpha_target;

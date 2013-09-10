@@ -28,11 +28,6 @@ KernerSettings kerner_settings = {
   KERNER_DEFAULT_MIN,
   KERNER_DEFAULT_MAX,
   KERNER_DEFAULT_TARGET_GRAY,
-#if 0
-  KERNER_DEFAULT_WEIGHT_GRAY,
-  KERNER_DEFAULT_TARGET_FOO,
-  KERNER_DEFAULT_WEIGHT_FOO
-#endif
 };
 
 static float alpha = 0.23;
@@ -296,7 +291,6 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data)
   cairo_fill (cr);
 
   cairo_surface_destroy (g_surface);
-
   cairo_set_source_rgb (cr, 0,0,0);
   
   cairo_select_font_face(cr, "Sans",

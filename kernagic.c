@@ -30,10 +30,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #define SPECIMEN_SIZE 60
 
 static char *loaded_ufo_path = NULL;
-
 static GList *glyphs = NULL;
 float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
+
+extern KernagicMethod *kernagic_cadence,
+                      *kernagic_rythm,
+                      *kernagic_gray,
+                      *kernagic_bounds;
+
+KernagicMethod *methods[32] = {NULL};
+
+static void init_methods (void)
+{
+  int i = 0;
+  methods[i++] = kernagic_bounds;
+  methods[i++] = kernagic_gray;
+  methods[i++] = kernagic_cadence;
+  methods[i++] = kernagic_rythm;
+  methods[i] = NULL;
+};
+
 
 gboolean kernagic_strip_bearing = FALSE;
 
@@ -301,11 +318,10 @@ void help (void)
   printf ("kernagic [options] <font.ufo>\n"
           "\n"
           "Options:\n"
-          "   -c use cadence method \n"
-          "   -g use x-height gray method  (default)\n"
-          "      suboptions influencing x-height gray:\n"
-          "       -m <0..100>   minimum distance default = %i\n"
-          "       -M <0..100>   maximum distance default = %i\n"
+          "   -m <method>   specify method, one of gray, cadence and rythmic "
+          "   suboptions influencing x-height gray:\n"
+          "       -d <0..100>   minimum distance default = %i\n"
+          "       -D <0..100>   maximum distance default = %i\n"
           "       -t <0..100>   target gray value default = %i\n"
      //     "       -l            don't strip left bearing\n"
      //     "       -L            strip left bearing (default)\n"
@@ -342,14 +358,14 @@ void parse_args (int argc, char **argv)
       if (!strcmp (argv[no], "--help") ||
           !strcmp (argv[no], "-h"))
         help ();
-      else if (!strcmp (argv[no], "-m"))
+      else if (!strcmp (argv[no], "-d"))
         {
 #define EXPECT_ARG if (!argv[no+1]) {fprintf (stderr, "expected argument after %s\n", argv[no]);exit(-1);}
 
           EXPECT_ARG;
           kerner_settings.minimum_distance = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-M"))
+      else if (!strcmp (argv[no], "-D"))
         {
           EXPECT_ARG;
           kerner_settings.maximum_distance = atof (argv[++no]);
@@ -359,13 +375,22 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.alpha_target = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-g"))
+      else if (!strcmp (argv[no], "-m"))
         {
-          kerner_settings.mode = 0;
-        }
-      else if (!strcmp (argv[no], "-c"))
-        {
-          kerner_settings.mode = 1;
+          int i;
+          char *method;
+          EXPECT_ARG;
+          method = argv[++no];
+          for (i = 0; methods[i]; i++)
+            {
+              if (!strcmp (method, methods[i]->name))
+                kerner_settings.method = methods[i];
+              else
+                {
+                  fprintf (stderr, "unknown method %s\n", method);
+                  exit (-1);
+                }
+            }
         }
       else if (!strcmp (argv[no], "-l"))
         {
@@ -418,9 +443,29 @@ void parse_args (int argc, char **argv)
 }
 
 int kernagic_gtk (int argc, char **argv);
+KernagicMethod *kernagic_method_no (int no)
+{
+  if (no < 0) no = 0;
+  return methods[no];
+}
+
+int             kernagic_find_method_no (KernagicMethod *method)
+{
+  int i;
+  for (i = 0; methods[i]; i++)
+    if (methods[i] == method)
+      return i;
+  return 0;
+}
+
+int kernagic_active_method_no (void)
+{
+  return kernagic_find_method_no (kerner_settings.method);
+}
 
 int main (int argc, char **argv)
 {
+  init_methods ();
   parse_args (argc, argv);
 
   if (interactive)
@@ -445,12 +490,6 @@ int main (int argc, char **argv)
   return 0;
 }
 
-/* XXX: move these into a plug-in struct */
-void kernagic_cadence_init (void);
-void kernagic_cadence_each (Glyph *lg, GtkProgressBar *progress);
-void kernagic_gray_init (void);
-void kernagic_gray_each (Glyph *lg, GtkProgressBar *progress);
-
 void kernagic_compute (GtkProgressBar *progress)
 {
   GList *glyphs = kernagic_glyphs ();
@@ -458,14 +497,8 @@ void kernagic_compute (GtkProgressBar *progress)
   long int count = 0;
   GList *left;
 
-  /* initialization */
-  switch (kerner_settings.mode)
-  {
-    case KERNAGIC_CADENCE: kernagic_cadence_init (); break;
-    case KERNAGIC_RYTHM: break;
-    case KERNAGIC_GRAY: kernagic_gray_init (); break;
-    default: break;
-  }
+  if (kerner_settings.method->init)
+    kerner_settings.method->init ();
 
   for (left = glyphs; left; left = left->next)
   {
@@ -479,13 +512,12 @@ void kernagic_compute (GtkProgressBar *progress)
   
     if (progress || kernagic_deal_with_glyph (lg->unicode))
     {
-      switch (kerner_settings.mode)
-      {
-        case KERNAGIC_CADENCE: kernagic_cadence_each (lg, progress); break;
-        case KERNAGIC_RYTHM: fprintf (stderr, "missing linear iterator\n"); break;
-        case KERNAGIC_GRAY: default: kernagic_gray_each (lg, progress); break;
-      }
+      if (kerner_settings.method->each)
+        kerner_settings.method->each (lg, progress);
     }
     count ++;
   }
+
+  if (kerner_settings.method->done)
+    kerner_settings.method->done ();
 }
