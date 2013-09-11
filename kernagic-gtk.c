@@ -54,6 +54,7 @@ float place_glyph (Glyph *g, float xo, float opacity)
 
 static void redraw_test_text (void)
 {
+  float cadence = kerner_settings.alpha_target;
   memset (preview_canvas, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
   {
     const char *utf8;
@@ -77,7 +78,7 @@ static void redraw_test_text (void)
             x = place_glyph (g, x, 1.0);
             prev_g = g;
           }
-        else if (str2[i] == ' ')
+        else if (str2[i] == ' ') /* XXX: use spacing from the space glyph in the font */
           {
             x += kernagic_x_height () * 0.4 * scale_factor;
             prev_g = NULL;
@@ -85,6 +86,20 @@ static void redraw_test_text (void)
       }
     g_free (str2);
     }
+  }
+
+  if (visualize_left_bearing) /* XXX rename veriable */
+  {
+    int i;
+    for (i = 0; i * cadence * scale_factor < PREVIEW_WIDTH - cadence * scale_factor; i++)
+      {
+        int y;
+        int x = (i + 0.5) * cadence * scale_factor;
+        for (y= 0; y < PREVIEW_HEIGHT; y++)
+          {
+            preview_canvas[y* PREVIEW_WIDTH + x] = 96;
+          }
+      }
   }
  
   gtk_widget_queue_draw (preview);

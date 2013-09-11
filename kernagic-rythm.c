@@ -76,8 +76,10 @@ static void kernagic_rythm_init (void)
 static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
   float cadence = kerner_settings.alpha_target;
+
   float left = cadence * 0.5 - g->stems[0];
-  float right = fmod (left + g->stems[g->stem_count] + 0.5, cadence);
+
+  float right = cadence - fmod (left + g->ink_width, cadence);
 
   kernagic_set_left_bearing (g, left);
   kernagic_set_right_bearing (g, right);
