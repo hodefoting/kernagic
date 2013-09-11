@@ -2,63 +2,6 @@
 #include "kernagic.h"
 #include "kerner.h"
 
-#if 0
-
-dXXvXXX
-X  X  X
-X  X  X
-X  X  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  X  X
-X     X
-X  X  X
-X  X  X
-X  XX X
-
-.  .
-
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  X  X
-X     X
-X XX  X
-X  X  X
-X  X  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  X  X
-X  X  X
-X  X  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  dXXb  X
-X  X  X  X
-X  X  X  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  dXXb  X
-X  X  X  X
-X  YXXP  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-X  dXXvXXX  X
-X  X  X  X  X
-X  X  X  X  X
-
-X  X  X  X  X  X  X  X  X  X  X  X
-
-
-#endif
-
-
-
 extern float scale_factor;
 
 float left_most_center (Glyph *g);
@@ -80,6 +23,8 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   float width;
 
   left = cadence * 0.5 - g->stems[0];
+  while (left < 0)
+    left += cadence * 1.0;
 
   /* can we come up with something better than ink_width here?.. */
   width = g->ink_width;

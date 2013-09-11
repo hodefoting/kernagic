@@ -97,7 +97,7 @@ static void redraw_test_text (void)
       {
         int y;
         int x = (i + 0.5) * cadence * scale_factor;
-        for (y= 0; y < PREVIEW_HEIGHT; y++)
+        for (y= PREVIEW_HEIGHT/2; y < PREVIEW_HEIGHT; y++)
           {
             preview_canvas[y* PREVIEW_WIDTH + x] = 96;
           }
