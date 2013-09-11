@@ -307,7 +307,7 @@ void gen_debug (Glyph *glyph)
     }
 
     /* detect candidates; with confidence */
-    int prevval = 255;
+    int prevval = 0;
     int goingup = 0;
     int beenbelow = 1;
 
@@ -318,7 +318,7 @@ void gen_debug (Glyph *glyph)
         t = 1;
         val = raster [glyph->r_width * (glyph->r_height-t) + x];
 
-        if (val < 64)
+        if (val < 128)
           beenbelow = 1;
         delta = val - prevval;
 
