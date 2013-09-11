@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 #define SPECIMEN_SIZE 60
 
+char *kernagic_sample_text = NULL;
+
 static char *loaded_ufo_path = NULL;
 static GList *glyphs = NULL;
 float  scale_factor = 0.18;
@@ -405,6 +407,11 @@ void parse_args (int argc, char **argv)
         {
           kernagic_strip_left_bearing = 1;
         }
+      else if (!strcmp (argv[no], "-T"))
+      {
+        EXPECT_ARG;
+        kernagic_sample_text = argv[++no];
+      }
       else if (!strcmp (argv[no], "-o"))
       {
         EXPECT_ARG;

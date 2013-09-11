@@ -346,7 +346,7 @@ void gen_debug (Glyph *glyph)
 
         prevval = val;
       }
-
+#if 0
     for (t = 8; t < 16; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
@@ -380,6 +380,7 @@ void gen_debug (Glyph *glyph)
         }
       raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
     }
+#endif
 }
 
 void
