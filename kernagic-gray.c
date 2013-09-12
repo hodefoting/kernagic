@@ -19,9 +19,15 @@ void gray_each (Glyph *lg, GtkProgressBar *progress)
     }
 }
 
+void recompute_right_bearings (void);
+
+static void done (void)
+{
+  recompute_right_bearings ();
+}
 
 static KernagicMethod method = {"gray", 
-  NULL,  gray_each, NULL};
+  NULL,  gray_each, (void*)done};
 
 KernagicMethod *kernagic_gray = &method;
 

@@ -10,6 +10,7 @@ typedef struct _KernerSettings KernerSettings;
 #define KERNER_DEFAULT_MAX          50
 #define KERNER_DEFAULT_TARGET_GRAY  50
 #define KERNER_DEFAULT_MULTIPLIER    1
+#define KERNER_DEFAULT_FNORD         1
 #define KERNER_DEFAULT_TRACKING    100
 
 
@@ -25,6 +26,7 @@ struct _KernerSettings
   float maximum_distance;
   float alpha_target;
   float multiplier;
+  float fnord;
   float tracking;
 };
 extern KernerSettings kerner_settings;

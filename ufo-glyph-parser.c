@@ -441,6 +441,8 @@ rewrite_start_element (GMarkupParseContext *context,
   for (a_n = attribute_names,
        a_v = attribute_values; *a_n; a_n++, a_v++)
      {
+       /* XXX: we've altered offset-x with the new desired left bearing.. 
+        * this is currently invalid */
        if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
          {
            char str[512];

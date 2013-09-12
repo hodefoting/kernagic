@@ -20,17 +20,21 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
   float cadence = kerner_settings.alpha_target;
   float multiplier = kerner_settings.multiplier;
+  float rythm = kerner_settings.fnord;
   float left, right;
-  float width;
 
   left = cadence * (multiplier+0.5) - g->stems[0];
 
   /* can we come up with something better than ink_width here?.. */
-  width = g->stems[g->stem_count-1];//g->ink_width;
-  //width = g->stems[g->stem_count-1];
-  fprintf (stderr, "%i %f\n", (int)g->stem_count, g->stems[g->stem_count-1]);
+  right = cadence - fmod (left + g->ink_width , cadence);
 
-  right = cadence - fmod (left + g->ink_width + right, cadence);
+  { /* sync in on rythm */
+    float tw = left + g->ink_width + right;
+    if (rythm != 0)
+    while ( ((int)(tw/cadence) %( (int)rythm)) != 0)
+        tw += cadence;
+    right = tw - left - g->ink_width;
+  }
 
   fprintf (stderr, "%f  %f  .... \n", 
       left + g->ink_width + right,

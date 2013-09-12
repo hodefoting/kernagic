@@ -128,9 +128,6 @@ void kernagic_save_kerning_info (void)
 
   GList *left, *right;
 
-  /* XXX: this likely is not desired for all methods!! */
-  recompute_right_bearings ();
-
   for (left = glyphs; left; left = left->next)
   {
     Glyph *lg = left->data;
@@ -303,10 +300,6 @@ void   kernagic_set_glyph_string (const char *utf8)
   if (utf8)
     glyph_string = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
 }
-
-/* XXX: support creating a new ufo, instead of overwriting the old one..
- *      could be added by making an initial copy?
- */
 
 static int interactive = 1;
 
