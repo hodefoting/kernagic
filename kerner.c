@@ -28,6 +28,7 @@ KernerSettings kerner_settings = {
   KERNER_DEFAULT_MIN,
   KERNER_DEFAULT_MAX,
   KERNER_DEFAULT_TARGET_GRAY,
+  KERNER_DEFAULT_TRACKING
 };
 
 static float alpha = 0.23;

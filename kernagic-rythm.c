@@ -31,6 +31,9 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   //width = g->stems[g->stem_count-1];
   right = cadence - fmod (left + width, cadence);
 
+  left = left * kerner_settings.tracking / 100.0;
+  right = right * kerner_settings.tracking / 100.0;
+
   kernagic_set_left_bearing (g, left);
   kernagic_set_right_bearing (g, right);
 }

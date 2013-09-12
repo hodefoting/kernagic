@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include "kernagic.h"
 #include "kerner.h"
 
-#define SPECIMEN_SIZE 60
+#define SPECIMEN_SIZE 130
 
 char *kernagic_sample_text = NULL;
 
@@ -373,6 +373,11 @@ void parse_args (int argc, char **argv)
           kerner_settings.maximum_distance = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-t"))
+        {
+          EXPECT_ARG;
+          kerner_settings.tracking = atof (argv[++no]);
+        }
+      else if (!strcmp (argv[no], "-c"))
         {
           EXPECT_ARG;
           kerner_settings.alpha_target = atof (argv[++no]);
