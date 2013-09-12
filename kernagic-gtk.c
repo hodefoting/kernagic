@@ -46,11 +46,17 @@ float place_glyph (Glyph *g, float xo, float opacity)
 
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
-      if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
+      if (x + xo >= 0 && x + xo + g->left_bearing * scale_factor < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
           preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] == 0
           )
       preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] =
         g->raster[y * g->r_width + x] * opacity;
+
+  /* draw a smaller preview as well */
+  for (y = 0; y < g->r_height; y++)
+    for (x = 0; x < g->r_width; x++)
+      preview_canvas [(y/10) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/10)] +=
+        g->raster[y * g->r_width + x] * opacity / 100;
 
   return xo + kernagic_get_advance (g) * scale_factor;
 }
