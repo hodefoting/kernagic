@@ -447,7 +447,7 @@ rewrite_start_element (GMarkupParseContext *context,
          {
            char str[512];
            int value = atoi (*a_v);
-           value = value + glyph->offset_x;
+           value = value + glyph->offset_x + glyph->left_bearing;
            sprintf (str, "%d", value);
            g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
          }
