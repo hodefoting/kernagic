@@ -19,14 +19,16 @@ static void kernagic_rythm_init (void)
 static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
   float cadence = kerner_settings.alpha_target;
+  float multiplier = kerner_settings.multiplier;
   float left, right;
   float width;
 
-  left = cadence * 0.5 - g->stems[0];
+  left = cadence * (multiplier+0.5) - g->stems[0];
 
   /* XXX: should be replaced with parameter for the desired cadenc multiplier
    *      for the inter glyph stem spacing.
    */
+  if (0)
   while (left < 0)
     left += cadence * 1.0;
 

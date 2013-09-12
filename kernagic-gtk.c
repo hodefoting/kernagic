@@ -378,6 +378,19 @@ int kernagic_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
   }
+
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Multiplier");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_multiplier = gtk_spin_button_new_with_range (-0.5, 10.0, 0.25);
+    gtk_size_group_add_widget (sliders, spin_multiplier);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_multiplier);
+  }
+
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Tracking");
@@ -389,20 +402,6 @@ int kernagic_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
-
-  {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    GtkWidget *label = gtk_label_new ("Multiplier");
-    gtk_size_group_add_widget (labels, label);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_multiplier = gtk_spin_button_new_with_range (1.0, 10.0, 1.0);
-    gtk_size_group_add_widget (sliders, spin_multiplier);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_multiplier);
-  }
-
-
 #if 0
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
