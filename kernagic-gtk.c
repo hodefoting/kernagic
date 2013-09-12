@@ -17,6 +17,7 @@ static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
 static GtkWidget *spin_tracking;
+static GtkWidget *spin_multiplier;
 
 static GtkWidget *progress;
 //static GtkWidget *strip_bearing_check;
@@ -130,6 +131,8 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
+  kerner_settings.multiplier =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_multiplier));
 
   visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
@@ -196,6 +199,7 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_multiplier),    KERNER_DEFAULT_MULTIPLIER);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
@@ -214,6 +218,7 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_multiplier), kerner_settings.multiplier);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
   /*
@@ -385,6 +390,19 @@ int kernagic_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
 
+  {
+    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *label = gtk_label_new ("Multiplier");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_multiplier = gtk_spin_button_new_with_range (1.0, 10.0, 1.0);
+    gtk_size_group_add_widget (sliders, spin_multiplier);
+    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_multiplier);
+  }
+
+
 #if 0
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -495,6 +513,7 @@ int kernagic_gtk (int argc, char **argv)
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_multiplier,    "notify::value", G_CALLBACK (trigger), NULL);
 #if 0
   g_signal_connect (spin_area_target,   "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_strength, "notify::value", G_CALLBACK (trigger), NULL);
