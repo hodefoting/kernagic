@@ -25,17 +25,16 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 
   left = cadence * (multiplier+0.5) - g->stems[0];
 
-  /* XXX: should be replaced with parameter for the desired cadenc multiplier
-   *      for the inter glyph stem spacing.
-   */
-  if (0)
-  while (left < 0)
-    left += cadence * 1.0;
-
   /* can we come up with something better than ink_width here?.. */
-  width = g->ink_width;
+  width = g->stems[g->stem_count-1];//g->ink_width;
   //width = g->stems[g->stem_count-1];
-  right = cadence - fmod (left + width, cadence);
+  fprintf (stderr, "%i %f\n", (int)g->stem_count, g->stems[g->stem_count-1]);
+
+  right = cadence - fmod (left + g->ink_width + right, cadence);
+
+  fprintf (stderr, "%f  %f  .... \n", 
+      left + g->ink_width + right,
+      fmod (left + g->ink_width + right, cadence));
 
   left = left * kerner_settings.tracking / 100.0;
   right = right * kerner_settings.tracking / 100.0;

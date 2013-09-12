@@ -384,7 +384,7 @@ int kernagic_gtk (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Multiplier");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_multiplier = gtk_spin_button_new_with_range (-0.5, 10.0, 0.25);
+    spin_multiplier = gtk_spin_button_new_with_range (-20.0, 10.0, 0.25);
     gtk_size_group_add_widget (sliders, spin_multiplier);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
