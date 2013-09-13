@@ -365,6 +365,16 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.maximum_distance = atof (argv[++no]);
         }
+      else if (!strcmp (argv[no], "-o"))
+        {
+          EXPECT_ARG;
+          kerner_settings.offset = atof (argv[++no]);
+        }
+      else if (!strcmp (argv[no], "-r"))
+        {
+          EXPECT_ARG;
+          kerner_settings.rythm = atof (argv[++no]);
+        }
       else if (!strcmp (argv[no], "-t"))
         {
           EXPECT_ARG;

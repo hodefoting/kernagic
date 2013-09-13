@@ -409,7 +409,7 @@ int kernagic_gtk (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_offset = gtk_spin_button_new_with_range (-20.0, 10.0, 0.25);
+    spin_offset = gtk_spin_button_new_with_range (-50.0, 100.0, 0.01);
     gtk_size_group_add_widget (sliders, spin_offset);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -487,7 +487,7 @@ int kernagic_gtk (int argc, char **argv)
   }
 #endif
   {
-    visualize_left_bearing_check = gtk_check_button_new_with_label ("Draw seperators");
+    visualize_left_bearing_check = gtk_check_button_new_with_label ("Draw debug guidelines");
     //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_container_add (GTK_CONTAINER (vbox1), visualize_left_bearing_check);
     //gtk_size_group_add_widget (sliders, visualize_left_bearing_check);
