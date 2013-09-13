@@ -12,13 +12,16 @@ extern char *kernagic_sample_text;
 
 static GtkWidget *preview;
 static GtkWidget *test_text;
-static GtkWidget *spin_mode;
+static GtkWidget *spin_method;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
 static GtkWidget *spin_tracking;
-static GtkWidget *spin_multiplier;
-static GtkWidget *spin_fnord;
+static GtkWidget *spin_offset;
+static GtkWidget *spin_rythm;
+
+static GtkWidget *vbox_options_gray;
+static GtkWidget *vbox_options_rythm;
 
 static GtkWidget *progress;
 //static GtkWidget *strip_bearing_check;
@@ -122,7 +125,7 @@ static void redraw_test_text (void)
 static void configure_kernagic (void)
 {
   kerner_settings.method =
-      kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_mode)));
+      kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_method)));
 
   kerner_settings.maximum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
@@ -132,10 +135,10 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
-  kerner_settings.multiplier =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_multiplier));
-  kerner_settings.fnord =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_fnord));
+  kerner_settings.offset =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_offset));
+  kerner_settings.rythm =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_rythm));
 
   visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
 }
@@ -184,6 +187,21 @@ static gboolean delayed_reload_trigger (gpointer foo)
   delayed_reload_updater = 0;
   return FALSE;
 }
+
+static void trigger_prop_show (void)
+{
+  KernagicMethod *method =
+      kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_method)));
+
+  gtk_widget_hide (vbox_options_gray);
+  gtk_widget_hide (vbox_options_rythm);
+
+  if (!strcmp (method->name, "gray"))
+    gtk_widget_show (vbox_options_gray);
+  else if (!strcmp (method->name, "rythm"))
+    gtk_widget_show (vbox_options_rythm);
+}
+
 static void trigger_reload (void)
 {
   if (delayed_reload_updater)
@@ -197,13 +215,12 @@ static void trigger_reload (void)
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  //gtk_entry_set_text (GTK_ENTRY (test_text), "binlunapmno");
-  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), KERNER_DEFAULT_MODE);
+  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), KERNER_DEFAULT_MODE);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_multiplier),    KERNER_DEFAULT_MULTIPLIER);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_fnord),         KERNER_DEFAULT_FNORD);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_rythm),         KERNER_DEFAULT_RYTHM);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
@@ -215,15 +232,14 @@ static void set_defaults_from_args (void)
   gtk_entry_set_text (GTK_ENTRY (test_text), kernagic_sample_text);
   else
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  //gtk_entry_set_text (GTK_ENTRY (test_text), "binlunapmno");
-  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_mode), kernagic_active_method_no());
+  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no());
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_multiplier), kerner_settings.multiplier);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_fnord), kerner_settings.fnord);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_rythm), kerner_settings.rythm);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
   /*
@@ -331,25 +347,27 @@ int kernagic_gtk (int argc, char **argv)
 
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    GtkWidget *label = gtk_label_new ("Fitting mode");
+    GtkWidget *label = gtk_label_new ("Fitting method");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    //spin_mode = gtk_spin_button_new_with_range (0.00, 4.0, 1);
-    spin_mode = gtk_combo_box_text_new ();
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
+    spin_method = gtk_combo_box_text_new ();
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     0, "ink bounds");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     1, "x-height gray");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    2,  "cadence");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_mode),
-                                    3, "rythmic");
-    gtk_size_group_add_widget (sliders, spin_mode);
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+                                    2,  "rennaisance cadence table");
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+                                    3, "rythm");
+    gtk_size_group_add_widget (sliders, spin_method);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_mode);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_method);
 
   }
+
+  vbox_options_gray = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_gray);
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Min distance");
@@ -357,7 +375,7 @@ int kernagic_gtk (int argc, char **argv)
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_min_dist = gtk_spin_button_new_with_range (0.00, 100.0, 1);
     gtk_size_group_add_widget (sliders, spin_min_dist);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (vbox_options_gray), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_min_dist);
   }
@@ -368,45 +386,46 @@ int kernagic_gtk (int argc, char **argv)
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_max_dist = gtk_spin_button_new_with_range (0.00, 100.0, 1);
     gtk_size_group_add_widget (sliders, spin_max_dist);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (vbox_options_gray), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_max_dist);
   }
+  vbox_options_rythm = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_rythm);
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Cadence");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_gray_target = gtk_spin_button_new_with_range (0.0, 2000.0, 0.1);
+    spin_gray_target = gtk_spin_button_new_with_range (0.0, 2000.0, 0.04);
     gtk_size_group_add_widget (sliders, spin_gray_target);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
   }
 
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    GtkWidget *label = gtk_label_new ("Multiplier");
+    GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_multiplier = gtk_spin_button_new_with_range (-20.0, 10.0, 0.25);
-    gtk_size_group_add_widget (sliders, spin_multiplier);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    spin_offset = gtk_spin_button_new_with_range (-20.0, 10.0, 0.25);
+    gtk_size_group_add_widget (sliders, spin_offset);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_multiplier);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_offset);
   }
-
 
   {
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *label = gtk_label_new ("Rythm");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_fnord = gtk_spin_button_new_with_range (1.0, 10.0, 1.0);
-    gtk_size_group_add_widget (sliders, spin_fnord);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    spin_rythm = gtk_spin_button_new_with_range (1.0, 10.0, 1.0);
+    gtk_size_group_add_widget (sliders, spin_rythm);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_fnord);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_rythm);
   }
 
   {
@@ -416,7 +435,7 @@ int kernagic_gtk (int argc, char **argv)
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_tracking = gtk_spin_button_new_with_range (0.0, 300.0, 0.5);
     gtk_size_group_add_widget (sliders, spin_tracking);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
@@ -525,13 +544,15 @@ int kernagic_gtk (int argc, char **argv)
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_mode,          "notify::active", G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_reload), NULL);
+
+  g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_multiplier,    "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_fnord,    "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_offset,        "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_rythm,         "notify::value", G_CALLBACK (trigger), NULL);
 #if 0
   g_signal_connect (spin_area_target,   "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_strength, "notify::value", G_CALLBACK (trigger), NULL);
@@ -539,11 +560,13 @@ int kernagic_gtk (int argc, char **argv)
 #endif
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
+
   set_defaults_from_args ();
 
   gtk_widget_show_all (hbox);
   gtk_widget_hide (progress);
   gtk_widget_show (window);
+  trigger_prop_show ();
 
   if (getenv ("KERNAGIC_DEBUG"))
     kerner_debug_ui ();

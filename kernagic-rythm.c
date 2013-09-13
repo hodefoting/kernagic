@@ -19,8 +19,8 @@ static void kernagic_rythm_init (void)
 static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
   float cadence = kerner_settings.alpha_target;
-  float multiplier = kerner_settings.multiplier;
-  float rythm = kerner_settings.fnord;
+  float multiplier = kerner_settings.offset;
+  float rythm = kerner_settings.rythm;
   float left, right;
 
   left = cadence * (multiplier+0.5) - g->stems[0];

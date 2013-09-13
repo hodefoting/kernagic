@@ -9,8 +9,8 @@ typedef struct _KernerSettings KernerSettings;
 #define KERNER_DEFAULT_MIN          15
 #define KERNER_DEFAULT_MAX          50
 #define KERNER_DEFAULT_TARGET_GRAY  50
-#define KERNER_DEFAULT_MULTIPLIER    1
-#define KERNER_DEFAULT_FNORD         1
+#define KERNER_DEFAULT_OFFSET        1
+#define KERNER_DEFAULT_RYTHM         1
 #define KERNER_DEFAULT_TRACKING    100
 
 
@@ -25,8 +25,8 @@ struct _KernerSettings
   float minimum_distance;
   float maximum_distance;
   float alpha_target;
-  float multiplier;
-  float fnord;
+  float offset;
+  float rythm;
   float tracking;
 };
 extern KernerSettings kerner_settings;
