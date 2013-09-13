@@ -47,7 +47,7 @@ static void init_methods (void)
 {
   int i = 0;
   methods[i++] = kernagic_bounds;
-  methods[i++] = kernagic_gray;
+  //methods[i++] = kernagic_gray;
   methods[i++] = kernagic_cadence;
   methods[i++] = kernagic_rythm;
   methods[i] = NULL;
@@ -542,4 +542,22 @@ void kernagic_compute (GtkProgressBar *progress)
 
   if (kerner_settings.method->done)
     kerner_settings.method->done ();
+
+  /* space space to be with of i, if both glyphs exist */
+  {
+    Glyph *space = kernagic_find_glyph_unicode (' ');
+    Glyph *i = kernagic_find_glyph_unicode ('i');
+
+    if (i && space)
+      {
+        float desired_width = i->left_bearing + i->ink_width + i->right_bearing;
+
+        float width;
+        
+        width = desired_width - i->ink_width;
+        space->right_bearing = 0;
+        space->left_bearing = width;
+        fprintf (stderr, "!!!!\n");
+      }
+  }
 }

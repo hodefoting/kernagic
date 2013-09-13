@@ -95,9 +95,10 @@ static void redraw_test_text (void)
             x = place_glyph (g, x, 1.0);
             prev_g = g;
           }
-        else if (str2[i] == ' ') /* XXX: use spacing from the space glyph in the font */
+        else if (str2[i] == ' ') /* we're only faking it if we have to  */
           {
-            x += kernagic_x_height () * 0.4 * scale_factor;
+            Glyph *t = kernagic_find_glyph_unicode ('i');
+            x += kernagic_get_advance (t) * scale_factor;
             prev_g = NULL;
           }
       }
@@ -353,8 +354,8 @@ int kernagic_gtk (int argc, char **argv)
     spin_method = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     0, "ink bounds");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    1, "x-height gray");
+    //gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+    //                                1, "x-height gray");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2,  "rennaisance cadence table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
@@ -409,7 +410,7 @@ int kernagic_gtk (int argc, char **argv)
     GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_offset = gtk_spin_button_new_with_range (-50.0, 100.0, 0.01);
+    spin_offset = gtk_spin_button_new_with_range (-50.0, 600.0, 0.01);
     gtk_size_group_add_widget (sliders, spin_offset);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
