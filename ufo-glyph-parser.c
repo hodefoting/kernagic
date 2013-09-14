@@ -458,7 +458,12 @@ rewrite_start_element (GMarkupParseContext *context,
      {
        /* XXX: we've altered offset-x with the new desired left bearing.. 
         * this is currently invalid */
-       if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
+       if (!strcmp (element_name, "lib"))
+         {
+           fprintf (stderr, "in lib\n");
+           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, *a_v);
+         }
+       else if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
          {
            char str[512];
            int value = atoi (*a_v);

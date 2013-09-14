@@ -56,7 +56,7 @@ float place_glyph (Glyph *g, float xo, float opacity)
               )
           preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
 
-      for (y = 0; y < 10; y++)
+      for (y = 0; y < PREVIEW_HEIGHT; y++)
         {
           x = g->lstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH)
