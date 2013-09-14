@@ -8,6 +8,12 @@
 #define PREVIEW_WIDTH  1024
 #define PREVIEW_HEIGHT 400
 
+#define MAX_BIG 128
+
+Glyph *g_entries[MAX_BIG];
+int x_entries[MAX_BIG];
+int big = 0;
+
 extern char *kernagic_sample_text;
 
 static GtkWidget *preview;
@@ -52,10 +58,10 @@ float place_glyph (Glyph *g, float xo, float opacity)
 
       for (y = 0; y < 10; y++)
         {
-          x = g->lstem * scale_factor;
+          x = g->lstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH)
             preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          x = g->rstem * scale_factor;
+          x = g->rstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH)
             preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
         }
@@ -85,6 +91,7 @@ static void redraw_test_text (void)
 {
   float cadence = kerner_settings.alpha_target;
   memset (preview_canvas, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
+  big = 0;
   {
     const char *utf8;
     gunichar *str2;
@@ -104,6 +111,10 @@ static void redraw_test_text (void)
           {
             if (prev_g)
               x += kernagic_kern_get (prev_g, g) * scale_factor;
+
+              g_entries[big] = g;
+              x_entries[big++] = x;
+
             x = place_glyph (g, x, 1.0);
             prev_g = g;
           }
@@ -125,7 +136,7 @@ static void redraw_test_text (void)
       {
         int y;
         int x = (i + 0.5) * cadence * scale_factor;
-        for (y= PREVIEW_HEIGHT/2; y < PREVIEW_HEIGHT; y++)
+        for (y= PREVIEW_HEIGHT*0.7; y < PREVIEW_HEIGHT*0.8; y++)
           {
             preview_canvas[y* PREVIEW_WIDTH + x] =
               (preview_canvas[y* PREVIEW_WIDTH + x] + 96) / 2;
@@ -277,6 +288,49 @@ static void do_process (void)
   kernagic_save_kerning_info ();
 }
 
+
+static gboolean
+preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  int i = 0;
+  float x, y;
+  Glyph *g;
+  float advance;
+
+  x = event->button.x;
+  y = event->button.y;
+  for (i = 0; i+1 < big && x_entries[i+1] < event->button.x; i++);
+  x -= x_entries[i];
+  g = g_entries[i];
+
+  x /= scale_factor;
+  y /= scale_factor;
+
+  advance = kernagic_get_advance (g);
+  printf ("%i %f %f %f\n", i, x, y, advance);
+
+  if (y < 100)
+  {
+    g->rstem = x - g->left_bearing;
+    g->lstem = x - g->left_bearing;
+  }
+  else
+  {
+
+  if (x / advance < 0.5)
+  {
+    g->lstem = x - g->left_bearing;
+  }
+  else
+  {
+    g->rstem = x - g->left_bearing;
+  }
+  }
+
+  trigger ();
+  return TRUE;
+}
+
 static gboolean
 preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
@@ -331,6 +385,9 @@ int kernagic_gtk (int argc, char **argv)
   gtk_container_add (GTK_CONTAINER (hbox), preview);
 
   g_signal_connect (preview, "draw", G_CALLBACK (preview_draw_cb), NULL);
+
+  g_signal_connect (preview, "button-press-event", G_CALLBACK (preview_press_cb), NULL);
+  gtk_widget_add_events (preview, GDK_BUTTON_PRESS_MASK);
 
 #if 1
   {
@@ -558,7 +615,7 @@ int kernagic_gtk (int argc, char **argv)
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (toggle_measurement_lines_check, "toggled",   G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger), NULL);
 
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);

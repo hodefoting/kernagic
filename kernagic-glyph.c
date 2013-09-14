@@ -111,6 +111,7 @@ Glyph *kernagic_glyph_new (const char *path)
       glyph->path = g_strdup (path);
       glyph->lstem = -1;
       glyph->rstem = -1;
+      fprintf (stderr, "%s %i\n", __FILE__, __LINE__);
     }
   return glyph;
 }
