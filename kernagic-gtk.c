@@ -25,7 +25,7 @@ static GtkWidget *vbox_options_rythm;
 
 static GtkWidget *progress;
 //static GtkWidget *strip_bearing_check;
-static GtkWidget *visualize_left_bearing_check;
+static GtkWidget *toggle_measurement_lines_check;
 static GtkWidget *font_path;
 
 static uint8_t *preview_canvas = NULL;
@@ -33,13 +33,13 @@ static uint8_t *preview_canvas = NULL;
 extern float  scale_factor;
 
 
-gboolean visualize_left_bearing = FALSE;
+gboolean toggle_measurement_lines = FALSE;
 
 float place_glyph (Glyph *g, float xo, float opacity)
 {
   int x, y;
 
-  if (visualize_left_bearing)
+  if (toggle_measurement_lines)
     {
       for (y = 0; y < g->r_height; y++)
         for (x = 0; x < 1; x++)
@@ -106,7 +106,7 @@ static void redraw_test_text (void)
     }
   }
 
-  if (visualize_left_bearing) /* XXX rename veriable */
+  if (toggle_measurement_lines)
   {
     int i;
     for (i = 0; i * cadence * scale_factor < PREVIEW_WIDTH - cadence * scale_factor; i++)
@@ -115,7 +115,8 @@ static void redraw_test_text (void)
         int x = (i + 0.5) * cadence * scale_factor;
         for (y= PREVIEW_HEIGHT/2; y < PREVIEW_HEIGHT; y++)
           {
-            preview_canvas[y* PREVIEW_WIDTH + x] = 96;
+            preview_canvas[y* PREVIEW_WIDTH + x] =
+              (preview_canvas[y* PREVIEW_WIDTH + x] + 96) / 2;
           }
       }
   }
@@ -141,7 +142,7 @@ static void configure_kernagic (void)
   kerner_settings.rythm =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_rythm));
 
-  visualize_left_bearing = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check));
+  toggle_measurement_lines = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check));
 }
 
 static guint delayed_updater = 0;
@@ -224,7 +225,7 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_rythm),         KERNER_DEFAULT_RYTHM);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), KERNAGIC_DEFAULT_STRIP_LEFT_BEARING);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
 
 static void set_defaults_from_args (void)
@@ -246,7 +247,7 @@ static void set_defaults_from_args (void)
   /*
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (strip_bearing_check), kernagic_strip_left_bearing);
   */
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (visualize_left_bearing_check), TRUE); // XXX
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
 
 static void do_save (void)
@@ -488,11 +489,11 @@ int kernagic_gtk (int argc, char **argv)
   }
 #endif
   {
-    visualize_left_bearing_check = gtk_check_button_new_with_label ("Draw debug guidelines");
+    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
     //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), visualize_left_bearing_check);
-    //gtk_size_group_add_widget (sliders, visualize_left_bearing_check);
-    //gtk_box_pack_end (GTK_BOX (hbox), visualize_left_bearing_check, FALSE, TRUE, 2);
+    gtk_container_add (GTK_CONTAINER (vbox1), toggle_measurement_lines_check);
+    //gtk_size_group_add_widget (sliders, toggle_measurement_lines_check);
+    //gtk_box_pack_end (GTK_BOX (hbox), toggle_measurement_lines_check, FALSE, TRUE, 2);
   }
 #if 0
   {
@@ -544,7 +545,7 @@ int kernagic_gtk (int argc, char **argv)
 #endif
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
-  g_signal_connect (visualize_left_bearing_check, "toggled",   G_CALLBACK (trigger), NULL);
+  g_signal_connect (toggle_measurement_lines_check, "toggled",   G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_reload), NULL);
 
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
