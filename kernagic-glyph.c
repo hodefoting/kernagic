@@ -98,8 +98,7 @@ Glyph *kernagic_glyph_new (const char *path)
   if (glyph)
     {
       /* skipping some glyphs */
-      if (!glyph->name ||
-          glyph->unicode == ' ')
+      if (!glyph->name || glyph->unicode == ' ')
         {
           g_free (glyph);
           glyph = NULL;
@@ -110,6 +109,8 @@ Glyph *kernagic_glyph_new (const char *path)
     {
       glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
       glyph->path = g_strdup (path);
+      glyph->lstem = -1;
+      glyph->rstem = -1;
     }
   return glyph;
 }

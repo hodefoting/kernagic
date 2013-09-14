@@ -51,6 +51,9 @@ struct _Glyph {
   float         stems[MAX_STEMS];
   float         stem_weight[MAX_STEMS];
   int           stem_count;
+
+  float         lstem;
+  float         rstem;
 };
 
 float  kernagic_kern_get          (Glyph *a, Glyph *b);

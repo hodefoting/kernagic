@@ -28,10 +28,12 @@ static GtkWidget *progress;
 static GtkWidget *toggle_measurement_lines_check;
 static GtkWidget *font_path;
 
+/* the preview canvas should be moved out of the gtk code, it is generic
+ * code - that also should be used for the png output option
+ */
 static uint8_t *preview_canvas = NULL;
 
 extern float  scale_factor;
-
 
 gboolean toggle_measurement_lines = FALSE;
 
@@ -47,6 +49,16 @@ float place_glyph (Glyph *g, float xo, float opacity)
           preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
               )
           preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
+
+      for (y = 0; y < 10; y++)
+        {
+          x = g->lstem * scale_factor;
+          if (x + xo < PREVIEW_WIDTH)
+            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+          x = g->rstem * scale_factor;
+          if (x + xo < PREVIEW_WIDTH)
+            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+        }
     }
 
   for (y = 0; y < g->r_height; y++)
