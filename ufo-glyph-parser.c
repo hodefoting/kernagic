@@ -284,7 +284,7 @@ void gen_debug (Glyph *glyph)
     int t;
     float x_height = kernagic_x_height ();
 
-    for (t = 1; t < 8; t ++)
+    for (t = 1; t < 2; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
@@ -322,6 +322,11 @@ void gen_debug (Glyph *glyph)
           beenbelow = 1;
         delta = val - prevval;
 
+
+        if (val)
+        {
+        t = 1; raster [glyph->r_width * (glyph->r_height-t) + x] = 0;
+        }
         if (delta < 0 && goingup)
           {
              int u = x - 1; 
@@ -329,7 +334,9 @@ void gen_debug (Glyph *glyph)
              while (u > 0 && raster[glyph->r_width * (glyph->r_height-t)+u]==
                  prevval) u--;
              u = (u + x) /2;
-             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 0;
+             t = 1; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
+             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
+             t = 3; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
 
              glyph->stems[glyph->stem_count] = u / scale_factor;
              glyph->stem_weight[glyph->stem_count++] = prevval;
@@ -337,6 +344,12 @@ void gen_debug (Glyph *glyph)
              beenbelow = 0;
              goingup = 0;
           }
+        
+        if (val)
+        {
+        t = (val / 20)+1;
+        raster [glyph->r_width * (glyph->r_height-t) + x] = 255;
+        }
 
         if (delta > 0 && beenbelow)
           goingup = 1;
@@ -346,6 +359,8 @@ void gen_debug (Glyph *glyph)
 
         prevval = val;
       }
+
+
 #if 0
     for (t = 8; t < 16; t ++)
     for (x = 0; x < glyph->r_width; x++)
