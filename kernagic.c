@@ -38,6 +38,7 @@ static gunichar *glyph_string = NULL;
 
 extern KernagicMethod *kernagic_cadence,
                       *kernagic_rythm,
+                      *kernagic_gap,
                       *kernagic_gray,
                       *kernagic_bounds;
 
@@ -50,6 +51,7 @@ static void init_methods (void)
   //methods[i++] = kernagic_gray;
   methods[i++] = kernagic_cadence;
   methods[i++] = kernagic_rythm;
+  methods[i++] = kernagic_gap;
   methods[i] = NULL;
 };
 

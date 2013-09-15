@@ -229,7 +229,8 @@ static void trigger_prop_show (void)
 
   if (!strcmp (method->name, "gray"))
     gtk_widget_show (vbox_options_gray);
-  else if (!strcmp (method->name, "rythm"))
+  else if (!strcmp (method->name, "rythm")||
+           !strcmp (method->name, "gap"))
     gtk_widget_show (vbox_options_rythm);
 }
 
@@ -436,6 +437,8 @@ int kernagic_gtk (int argc, char **argv)
                                     2,  "rennaisance cadence table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "rythm");
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+                                    4, "gap");
     gtk_size_group_add_widget (sliders, spin_method);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);

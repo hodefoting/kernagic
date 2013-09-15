@@ -8,7 +8,7 @@ float left_most_center (Glyph *g);
 float right_most_center (Glyph *g);
 static float n_width = 0;
 
-static void kernagic_rythm_init (void)
+static void kernagic_gap_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
@@ -16,7 +16,7 @@ static void kernagic_rythm_init (void)
   n_width = (right_most_center (g) - left_most_center(g)) * scale_factor;
 }
 
-static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
+static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
 {
   float cadence = kerner_settings.alpha_target;
   float offset = kerner_settings.offset;
@@ -45,8 +45,6 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   right = ((int)(right/cadence))*cadence;
   right = right - (left + g->ink_width);
     
-  right = (cadence *rythm) - fmod (left + g->ink_width , cadence * rythm);
-
   left = left * kerner_settings.tracking / 100.0;
   right = right * kerner_settings.tracking / 100.0;
 
@@ -54,6 +52,6 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   kernagic_set_right_bearing (g, right);
 }
 
-static KernagicMethod method = {"rythm", kernagic_rythm_init, kernagic_rythm_each, NULL};
-KernagicMethod *kernagic_rythm = &method;
+static KernagicMethod method = {"gap", kernagic_gap_init, kernagic_gap_each, NULL};
+KernagicMethod *kernagic_gap = &method;
 
