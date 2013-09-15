@@ -451,7 +451,7 @@ rewrite_start_element (GMarkupParseContext *context,
                        GError             **error)
 {
   Glyph *glyph = user_data;
-  g_string_append_printf (ts, "<%s ", element_name);
+  g_string_append_printf (ts, "<%s", element_name);
   const char **a_n, **a_v;
 
   if (!strcmp (element_name, "lib"))
@@ -468,17 +468,17 @@ rewrite_start_element (GMarkupParseContext *context,
            int value = atoi (*a_v);
            value = value + glyph->offset_x + glyph->left_bearing;
            sprintf (str, "%d", value);
-           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
+           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
          }
        else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
          {
            char str[512];
            sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
-           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, str);
+           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
          }
        else
          {
-           g_string_append_printf (ts, "%s=\"%s\" ", *a_n, *a_v);
+           g_string_append_printf (ts, " %s=\"%s\"", *a_n, *a_v);
          }
      }
   g_string_append_printf (ts, ">");
@@ -500,6 +500,7 @@ rewrite_text (GMarkupParseContext *context,
               gpointer             user_data,
               GError             **error)
 {
+  printf ("[%s]\n", text);
   g_string_append_len (ts, text, text_len);
 }
 
@@ -519,12 +520,60 @@ static GMarkupParser glif_rewrite =
 void
 rewrite_ufo_glyph (Glyph *glyph)
 {
+  GString *tmp = g_string_new ("");
   ts = g_string_new ("");
   GMarkupParseContext *ctx = g_markup_parse_context_new (&glif_rewrite, 0, glyph, NULL);
 
-  g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
+  /* ensure that a lib section exist and that it contains a skeleton kernagic
+   * section.
+   */
+  
+  if (strstr (glyph->xml, "<lib"))
+  {
+    if (strstr (glyph->xml, "org.pippin.gimp.kernagic"))
+    {
+      /* crossing fingers that we've done things right before*/
+    }
+    else
+    {
+      char *cut = strdup (glyph->xml);
+      char *p = strstr (cut, "<lib>");
+      char *rest;
+      p = strstr (p, "<dict");
+      p = strstr (p, ">");
+      rest = p+1;
+      if (p)
+        *p = 0;
+      g_string_append (tmp, cut);
+      g_string_append (tmp, "<key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict>\n");
+      g_string_append (tmp, "");
+      g_string_append (tmp, rest);
+      free (cut);
+    }
+  }
+  else
+  {
+    char *cut = strdup (glyph->xml);
+    char *p = strstr (cut, "</glyph>");
+    if (p)
+      *p = 0;
+    g_string_append (tmp, cut);
+    g_string_append (tmp, "<lib><dict><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>33</integer><key>rstem</key><integer></integer></dict></dict></lib>");
+    g_string_append (tmp, "</glyph>");
+    free (cut);
+  }
+
+  /* detect whether lstem and rstem are already existing,. if they do rewrite
+   * them.
+   *
+   * otherwise insert stems.. after initial rewrite by simple search and
+   * replace.
+   */
+
+  g_markup_parse_context_parse (ctx, tmp->str, strlen (tmp->str), NULL);
   g_markup_parse_context_free (ctx);
   g_file_set_contents (glyph->path, ts->str, ts->len, NULL);
   g_string_free (ts, TRUE);
+  g_string_free (tmp, TRUE);
   ts = NULL;
 }

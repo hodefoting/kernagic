@@ -76,7 +76,8 @@ float place_glyph (Glyph *g, float xo, float opacity)
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
       if (x + xo + g->left_bearing * scale_factor >= 0 && x + xo + g->left_bearing * scale_factor < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
-          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] == 0
+          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] <
+        g->raster[y * g->r_width + x] * opacity
           )
       preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] =
         g->raster[y * g->r_width + x] * opacity;
@@ -87,8 +88,12 @@ float place_glyph (Glyph *g, float xo, float opacity)
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
       if ((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN >= 0 && (x + xo + g->left_bearing * scale_factor)/SCALE_DOWN < PREVIEW_WIDTH && y/SCALE_DOWN < PREVIEW_HEIGHT)
-      preview_canvas [(y/SCALE_DOWN) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN)] +=
-        g->raster[y * g->r_width + x] * opacity / SCALE_DOWN / SCALE_DOWN;
+      {
+        int val = preview_canvas [(y/SCALE_DOWN) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN)];
+        val += g->raster[y * g->r_width + x] * opacity / SCALE_DOWN / SCALE_DOWN;
+        if (val > 255) val = 255;
+        preview_canvas [(y/SCALE_DOWN) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN)] = val;
+      }
 
   return xo + kernagic_get_advance (g) * scale_factor;
 }
