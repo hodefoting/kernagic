@@ -32,9 +32,9 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   rstem = g->stems[g->stem_count-1];
 
   /* if manual overrides are set, use them */
-  if (g->lstem > -0.5)
+  if (g->lstem > 0.0)
     lstem = g->lstem;
-  if (g->rstem > -0.5)
+  if (g->rstem > 0.0)
     rstem = g->rstem;
 
   left = cadence * (offset + 0.5) - lstem;
@@ -48,9 +48,11 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
     //(cadence *rythm )- fmod (left + rstem + , cadence * rythm);
   //right = (cadence *rythm )- fmod (left + g->ink_width , cadence * rythm);
 
+  /*
   fprintf (stderr, "%f  %f  .... \n", 
       left + g->ink_width + right,
       fmod (left + g->ink_width + right, cadence));
+      */
 
   left = left * kerner_settings.tracking / 100.0;
   right = right * kerner_settings.tracking / 100.0;

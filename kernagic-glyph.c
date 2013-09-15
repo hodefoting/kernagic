@@ -109,9 +109,8 @@ Glyph *kernagic_glyph_new (const char *path)
     {
       glyph->kerning = g_hash_table_new (g_direct_hash, g_direct_equal);
       glyph->path = g_strdup (path);
-      glyph->lstem = -1;
-      glyph->rstem = -1;
-      fprintf (stderr, "%s %i\n", __FILE__, __LINE__);
+      glyph->lstem = 0.0;
+      glyph->rstem = 0.0;
     }
   return glyph;
 }

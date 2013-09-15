@@ -6,7 +6,7 @@
 #include "kerner.h"
 
 #define PREVIEW_WIDTH  1024
-#define PREVIEW_HEIGHT 400
+#define PREVIEW_HEIGHT 500
 
 #define MAX_BIG 128
 
@@ -58,12 +58,18 @@ float place_glyph (Glyph *g, float xo, float opacity)
 
       for (y = 0; y < PREVIEW_HEIGHT; y++)
         {
+          if (g->lstem > 0)
+          {
           x = g->lstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH)
             preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+          }
+          if (g->rstem > 0)
+          {
           x = g->rstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH)
             preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+          }
         }
     }
 
@@ -136,7 +142,7 @@ static void redraw_test_text (void)
       {
         int y;
         int x = (i + 0.5) * cadence * scale_factor;
-        for (y= PREVIEW_HEIGHT*0.7; y < PREVIEW_HEIGHT*0.8; y++)
+        for (y= PREVIEW_HEIGHT*0.8; y < PREVIEW_HEIGHT*0.85; y++)
           {
             preview_canvas[y* PREVIEW_WIDTH + x] =
               (preview_canvas[y* PREVIEW_WIDTH + x] + 96) / 2;
