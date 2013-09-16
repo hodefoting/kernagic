@@ -132,7 +132,8 @@ static void redraw_test_text (void)
         else if (str2[i] == ' ') /* we're only faking it if we have to  */
           {
             Glyph *t = kernagic_find_glyph_unicode ('i');
-            x += kernagic_get_advance (t) * scale_factor;
+            if (t)
+              x += kernagic_get_advance (t) * scale_factor;
             prev_g = NULL;
           }
       }

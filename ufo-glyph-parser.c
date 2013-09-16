@@ -558,7 +558,7 @@ rewrite_ufo_glyph (Glyph *glyph)
     if (p)
       *p = 0;
     g_string_append (tmp, cut);
-    g_string_append (tmp, "<lib><dict><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>33</integer><key>rstem</key><integer></integer></dict></dict></lib>");
+    g_string_append (tmp, "<lib><dict><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict></dict></lib>");
     g_string_append (tmp, "</glyph>");
     free (cut);
   }
