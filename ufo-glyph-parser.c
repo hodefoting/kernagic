@@ -33,6 +33,9 @@ static int   first = 0;
 
 extern gboolean kernagic_strip_bearing; /* XXX: global and passed out of bounds.. */
 
+static int pinlib = 0;
+static int pinself = 0;
+
 static void
 parse_start_element (GMarkupParseContext *context,
                      const gchar         *element_name,
@@ -99,6 +102,38 @@ parse_start_element (GMarkupParseContext *context,
       if (x > glyph->ink_max_x) glyph->ink_max_x = x;
       if (y > glyph->ink_max_y) glyph->ink_max_y = y;
     }
+  else if (!strcmp (element_name, "lib"))
+    {
+      pinlib++;
+    }
+}
+
+static void
+parse_text (GMarkupParseContext *context,
+            const gchar         *text,
+            gsize                text_len,
+            gpointer             user_data,
+            GError             **error)
+{
+  Glyph *glyph = user_data;
+  if (pinself)
+    {
+      if (!strcmp (text, "rstem"))
+        pinself = 2;
+
+      int number = atoi (text);
+      if (number)
+      {
+        if (pinself == 1)
+          glyph->lstem = number;
+        else
+          glyph->rstem = number;
+      }
+    }
+  if (!strcmp (text, "org.pippin.gimp.org.kernagic"))
+    {
+      pinself = 1;
+    }
 }
 
 static void
@@ -108,6 +143,10 @@ parse_end_element (GMarkupParseContext *context,
                    GError             **error)
 {
   //Glyph *glyph = user_data;
+  if (!strcmp (element_name, "lib"))
+    pinlib --;
+  if (!strcmp (element_name, "dict"))
+    pinself = 0;
 }
 
 
@@ -219,7 +258,7 @@ glif_end_element (GMarkupParseContext *context,
 }
 
 static GMarkupParser glif_parse =
-{ parse_start_element, parse_end_element, NULL, NULL, NULL };
+{ parse_start_element, parse_end_element, parse_text, NULL, NULL };
 
 static GMarkupParser glif_render =
 { glif_start_element, glif_end_element, NULL, NULL, NULL };
@@ -443,6 +482,8 @@ render_ufo_glyph (Glyph *glyph)
 static GString *ts = NULL;
 
 static int inlib = 0;
+static int inself = 0;
+
 
 static void
 rewrite_start_element (GMarkupParseContext *context,
@@ -453,6 +494,10 @@ rewrite_start_element (GMarkupParseContext *context,
                        GError             **error)
 {
   Glyph *glyph = user_data;
+
+  if (inself)
+    return;
+
   g_string_append_printf (ts, "<%s", element_name);
   const char **a_n, **a_v;
 
@@ -492,11 +537,26 @@ rewrite_end_element (GMarkupParseContext *context,
                      gpointer             user_data,
                      GError             **error)
 {
+  Glyph *glyph = user_data;
+
   if (!strcmp (element_name, "lib"))
     {
       inlib --;
     }
-  g_string_append_printf (ts, "</%s>", element_name);
+
+  if (!inself)
+    g_string_append_printf (ts, "</%s>", element_name);
+
+  if (inself)
+  {
+    if (!strcmp (element_name, "dict"))
+      {
+        inself = 0;
+        g_string_append_printf (ts, "</key><dict><key>lstem</key><integer>%0.0f</integer><key>rstem</key><integer>%0.0f</integer></dict>",
+            glyph->lstem, glyph->rstem);
+      }
+  }
+
 }
 
 static void
@@ -506,11 +566,15 @@ rewrite_text (GMarkupParseContext *context,
               gpointer             user_data,
               GError             **error)
 {
+  if (inself)
+    return;
+  g_string_append_len (ts, text, text_len);
+
   if (inlib)
   {
-    printf ("[%s]\n", text);
+    if (!strcmp (text, "org.pippin.gimp.org.kernagic"))
+      inself = 1;
   }
-  g_string_append_len (ts, text, text_len);
 }
 
 static void
@@ -541,7 +605,7 @@ rewrite_ufo_glyph (Glyph *glyph)
   {
     if (strstr (glyph->xml, "org.pippin.gimp.kernagic"))
     {
-      /* crossing fingers that we've done things right before*/
+      g_string_append (tmp, glyph->xml);
     }
     else
     {
@@ -567,8 +631,8 @@ rewrite_ufo_glyph (Glyph *glyph)
     if (p)
       *p = 0;
     g_string_append (tmp, cut);
-    g_string_append (tmp, "<lib><dict><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict></dict></lib>");
-    g_string_append (tmp, "</glyph>");
+    g_string_append (tmp, "<lib><dict><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict>\n</dict></lib>\n");
+    g_string_append (tmp, "</glyph>\n");
     free (cut);
   }
 
