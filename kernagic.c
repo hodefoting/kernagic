@@ -36,7 +36,7 @@ static GList *glyphs = NULL;
 float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
 
-extern KernagicMethod *kernagic_period,
+extern KernagicMethod *kernagic_cadence,
                       *kernagic_rythm,
                       *kernagic_gap,
                       *kernagic_gray,
@@ -49,7 +49,7 @@ static void init_methods (void)
   int i = 0;
   methods[i++] = kernagic_bounds;
   //methods[i++] = kernagic_gray;
-  methods[i++] = kernagic_period;
+  methods[i++] = kernagic_cadence;
   methods[i++] = kernagic_rythm;
   methods[i++] = kernagic_gap;
   methods[i] = NULL;
@@ -406,6 +406,12 @@ void parse_args (int argc, char **argv)
           if (!found)
             {
               fprintf (stderr, "unknown method %s\n", method);
+              fprintf (stderr, "Available methods:");
+              for (i = 0; methods[i]; i++)
+                {
+                  fprintf (stderr, " %s", methods[i]->name);
+                }
+              fprintf (stderr, "\n");
               exit (-1);
             }
         }

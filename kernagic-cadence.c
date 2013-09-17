@@ -16,9 +16,9 @@ typedef struct Cadence
 #define BOTH_EXTREME    (LEFT_EXTREME | RIGHT_EXTREME)
 #define BOTH_STEM       (LEFT_STEM | RIGHT_STEM)
 
-/* period unit table; from lettermodel.org august 2013, manually typed
+/* cadence unit table; from lettermodel.org august 2013, manually typed
  * from image by Øyvind Kolås */
-Cadence period[]={
+Cadence cadence[]={
 {1,"A",1,BOTH_EXTREME},
 {8,"B",3,LEFT_STEM | RIGHT_EXTREME},
 {3,"C",2,BOTH_EXTREME},
@@ -88,20 +88,20 @@ float right_most_center (Glyph *g)
   return g->rightmost[(int)(kernagic_x_height() * 1.5 * scale_factor)] / scale_factor;
 }
 
-Cadence *glyph_get_period (Glyph *g)
+Cadence *glyph_get_cadence (Glyph *g)
 {
   int i;
-  for (i = 0; i < sizeof (period)/sizeof(period[0]) - 1; i++)
+  for (i = 0; i < sizeof (cadence)/sizeof(cadence[0]) - 1; i++)
     {
-      if (period[i].utf8[0] == g->unicode)
-        return &period[i];
+      if (cadence[i].utf8[0] == g->unicode)
+        return &cadence[i];
     }
-  return &period[0];
+  return &cadence[0];
 }
 
 float n_width = 0;
 
-static void period_init (void)
+static void cadence_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
@@ -110,12 +110,12 @@ static void period_init (void)
   n_width = (right_most_center (g) - left_most_center(g)) / 24.0;
 }
 
-static void period_each (Glyph *g, GtkProgressBar *progress)
+static void cadence_each (Glyph *g, GtkProgressBar *progress)
 {
   float left;
   float right;
   Cadence *c;
-  c = glyph_get_period (g);
+  c = glyph_get_cadence (g);
 
   left = n_width * c->left;
   right = n_width * c->right;
@@ -135,10 +135,10 @@ static void period_each (Glyph *g, GtkProgressBar *progress)
 }
 
 static KernagicMethod method = {
-  "period", 
-  period_init,
-  period_each,
+  "cadence", 
+  cadence_init,
+  cadence_each,
   NULL
 };
 
-KernagicMethod *kernagic_period = &method;
+KernagicMethod *kernagic_cadence = &method;
