@@ -1,27 +1,67 @@
-Kernagic 
---------
+kernagic
+========
 
-Kernagic is libre software for automatically kerning and spacing fonts.
+Kernagic is a tool for spacing and kerning fonts. It provides a selection of
+methods that can be previewed and tuned interactively. 
 
-Figuring out and tuning inter-glyph spacing with kerning is one of the final,
-and very time consuming, refinements when mastering a typeface design. This
-process adjusts both the font metrics (the normal spaces to the left and
-right sides of each glyph, known as side-bearings) as well adjustments for
-specific pairs of glyphs (known as kerning pairs.)
+To fit into a diverse set of workflows; kernagic uses UFO fonts as it's input
+- UFO can act as a superset of other formats; and tools like fontforge can be
+used for converting to and from it.
 
-Kernagic aims to automate this process. The heuristic currently implemented
-generates a raster-based distance map for measuring distances between the
-facing sides of every possible glyph pair. From each map it finds an optimum
-graylevel for the gap between the letter forms, and outputs a comprehensive
-kerning table. 
+Some methods relies on automatically detected stems, if the detected stems
+work poorly with your font or you want to override spacing decisions, you can
+insert your own stems by clicking in the preview; override stems are
+persistent across saves of the UFO.
 
-The exhaustive kerning table is used as a basis for computing an average
-advance value (or right bearing) for each glyph. This simplistic approach;
-along with 0 left-bearings acts as a starting point for also letting kernagic
-generate reasonable metrics for a font for use when kerning is not available.
+When a good setting is found it can be stored back into the UFO file being
+edited; this shifts the x coordinates of glyphs, and writes a new advance
+value.
 
-If the starting point is a ttf file, you must convert quadratic
-curves to cubic curves “normal” beziers before using kernagic, in the future
-kernagic might support working directly with quadratic outlines as well.
-To do this in fontforge invoke the action at the following menu path:
-   element -> font info -> layer -> all layers cubic
+For help about the commandline, kernagic --help is the entry-point for further
+documentation.
+
+The following subsections documents the different spacing modes in kernagic
+
+Todo:
+  add parameters for stem-detector
+  add collision avoidance to methods (use kerning?)
+  improve discoverability of ui
+  add removal of user stems
+  harmonize commandline
+  generate png output
+  pan preview
+  multiline wrapping preview text
+
+gap
+---
+
+The gap method allows specifying the gap to use between stems in neighbouring
+glyphs. (The resulting advance is a multiple of period.)
+
+rythm
+-----
+
+Rythm does spacing of the first stem in glyphs. The rythm being generated can
+be controlled in terms of the rythms period. And an offset in rythm units to
+use to the first stem.
+
+Snaps the first stem of each glyph into a rythm. With the stem determined
+either automatically or with a manual override. The /offset/ provides a
+multiple of the rythm to use as an offset to the edge of the glyph.
+. (XXX: improve right side handling, for now it just snaps ink to rythm)
+
+
+rainnesance cadence table
+-------------------------
+
+This method uses a predefined spacing table; with encoded knowledge of
+the glyphs morphologies. It works best on traditional rainessance fonts
+with classic proportions.
+
+Assumes that the glyphs have been designed with proportions similar to
+rainessance fonts. And automatically prepares a fitting.
+
+inkbounds
+---------
+simplest possible fallback spacer
+
