@@ -24,8 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <assert.h>
 #include <pthread.h>
 #include <math.h>
-#include "kernagic-glyph.h"
-
+#include "glyph.h"
 
 void   kernagic_set_advance        (Glyph *a, float advance)
 {

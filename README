@@ -27,19 +27,21 @@ Todo:
   add collision avoidance to methods (use kerning?)
   improve discoverability of ui
   add removal of user stems
-  harmonize commandline
+  harmonise commandline
   generate png output
   pan preview
   multiline wrapping preview text
 
 gap
 ---
+left = period * (offset + 0.5) - lstem;
 
 The gap method allows specifying the gap to use between stems in neighbouring
 glyphs. (The resulting advance is a multiple of period.)
 
 rythm
 -----
+left = period * (offset + 0.5) - lstem, right = snap_to (period)
 
 Rythm does spacing of the first stem in glyphs. The rythm being generated can
 be controlled in terms of the rythms period. And an offset in rythm units to
@@ -63,5 +65,6 @@ rainessance fonts. And automatically prepares a fitting.
 
 inkbounds
 ---------
-simplest possible fallback spacer
+left = 0, right = 0
 
+simple fallback spacer - that has no side bearings

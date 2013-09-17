@@ -37,7 +37,7 @@ float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
 
 extern KernagicMethod *kernagic_cadence,
-                      *kernagic_rythm,
+   //                   *kernagic_rythm,
                       *kernagic_gap,
                       *kernagic_gray,
                       *kernagic_bounds;
@@ -50,7 +50,7 @@ static void init_methods (void)
   methods[i++] = kernagic_bounds;
   //methods[i++] = kernagic_gray;
   methods[i++] = kernagic_cadence;
-  methods[i++] = kernagic_rythm;
+  //methods[i++] = kernagic_rythm;
   methods[i++] = kernagic_gap;
   methods[i] = NULL;
 };
@@ -470,7 +470,7 @@ void parse_args (int argc, char **argv)
     }
 }
 
-int kernagic_gtk (int argc, char **argv);
+int ui_gtk (int argc, char **argv);
 KernagicMethod *kernagic_method_no (int no)
 {
   if (no < 0) no = 0;
@@ -497,7 +497,7 @@ int main (int argc, char **argv)
   parse_args (argc, argv);
 
   if (interactive)
-    return kernagic_gtk (argc, argv);
+    return ui_gtk (argc, argv);
 
   if (!ufo_path)
     {

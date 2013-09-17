@@ -369,7 +369,7 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 
 extern const char *ufo_path;
 
-int kernagic_gtk (int argc, char **argv)
+int ui_gtk (int argc, char **argv)
 {
   GtkWidget    *window;
   GtkWidget    *hbox;
@@ -441,10 +441,10 @@ int kernagic_gtk (int argc, char **argv)
     //                                1, "x-height gray");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2,  "rennaisance period table");
+    //gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+                                    //3, "rythm");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "rythm");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    4, "gap");
+                                    3, "gap");
     gtk_size_group_add_widget (sliders, spin_method);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);

@@ -6,7 +6,7 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
 
-#include "kernagic-glyph.h"
+#include "glyph.h"
 
 void   kernagic_load_ufo           (const char *ufo_path, gboolean strip_left_bearing);
 void   load_ufo_glyph              (Glyph *glyph);
