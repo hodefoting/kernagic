@@ -442,6 +442,8 @@ render_ufo_glyph (Glyph *glyph)
 
 static GString *ts = NULL;
 
+static int inlib = 0;
+
 static void
 rewrite_start_element (GMarkupParseContext *context,
                        const gchar         *element_name,
@@ -456,7 +458,7 @@ rewrite_start_element (GMarkupParseContext *context,
 
   if (!strcmp (element_name, "lib"))
     {
-      fprintf (stderr, "in lib\n");
+      inlib ++;
     }
 
   for (a_n = attribute_names,
@@ -490,6 +492,10 @@ rewrite_end_element (GMarkupParseContext *context,
                      gpointer             user_data,
                      GError             **error)
 {
+  if (!strcmp (element_name, "lib"))
+    {
+      inlib --;
+    }
   g_string_append_printf (ts, "</%s>", element_name);
 }
 
@@ -500,7 +506,10 @@ rewrite_text (GMarkupParseContext *context,
               gpointer             user_data,
               GError             **error)
 {
-  printf ("[%s]\n", text);
+  if (inlib)
+  {
+    printf ("[%s]\n", text);
+  }
   g_string_append_len (ts, text, text_len);
 }
 
@@ -537,7 +546,7 @@ rewrite_ufo_glyph (Glyph *glyph)
     else
     {
       char *cut = strdup (glyph->xml);
-      char *p = strstr (cut, "<lib>");
+      char *p = strstr (cut, "<lib");
       char *rest;
       p = strstr (p, "<dict");
       p = strstr (p, ">");
@@ -545,7 +554,7 @@ rewrite_ufo_glyph (Glyph *glyph)
       if (p)
         *p = 0;
       g_string_append (tmp, cut);
-      g_string_append (tmp, "<key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict>\n");
+      g_string_append (tmp, "><key>org.pippin.gimp.org.kernagic</key><dict><key>lstem</key><integer>0</integer><key>rstem</key><integer>0</integer></dict>\n");
       g_string_append (tmp, "");
       g_string_append (tmp, rest);
       free (cut);

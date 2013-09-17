@@ -422,7 +422,7 @@ void parse_args (int argc, char **argv)
         EXPECT_ARG;
         kernagic_sample_text = argv[++no];
       }
-      else if (!strcmp (argv[no], "-o"))
+      else if (!strcmp (argv[no], "-O"))
       {
         EXPECT_ARG;
         kernagic_output = argv[++no];
