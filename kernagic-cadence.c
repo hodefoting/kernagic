@@ -3,10 +3,10 @@
 
 typedef struct Cadence
 {
-  int left;
+  int   left;
   char *utf8;
-  int right;
-  int flags;
+  int   right;
+  int   flags;
 } Cadence;
 
 #define LEFT_EXTREME    (1<<0)
@@ -16,9 +16,9 @@ typedef struct Cadence
 #define BOTH_EXTREME    (LEFT_EXTREME | RIGHT_EXTREME)
 #define BOTH_STEM       (LEFT_STEM | RIGHT_STEM)
 
-/* cadence unit table; from lettermodel.org august 2013, manually typed
+/* period unit table; from lettermodel.org august 2013, manually typed
  * from image by Øyvind Kolås */
-Cadence cadence[]={
+Cadence period[]={
 {1,"A",1,BOTH_EXTREME},
 {8,"B",3,LEFT_STEM | RIGHT_EXTREME},
 {3,"C",2,BOTH_EXTREME},
@@ -88,20 +88,20 @@ float right_most_center (Glyph *g)
   return g->rightmost[(int)(kernagic_x_height() * 1.5 * scale_factor)] / scale_factor;
 }
 
-Cadence *glyph_get_cadence (Glyph *g)
+Cadence *glyph_get_period (Glyph *g)
 {
   int i;
-  for (i = 0; i < sizeof (cadence)/sizeof(cadence[0]) - 1; i++)
+  for (i = 0; i < sizeof (period)/sizeof(period[0]) - 1; i++)
     {
-      if (cadence[i].utf8[0] == g->unicode)
-        return &cadence[i];
+      if (period[i].utf8[0] == g->unicode)
+        return &period[i];
     }
-  return &cadence[0];
+  return &period[0];
 }
 
 float n_width = 0;
 
-static void cadence_init (void)
+static void period_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
@@ -110,12 +110,12 @@ static void cadence_init (void)
   n_width = (right_most_center (g) - left_most_center(g)) / 24.0;
 }
 
-static void cadence_each (Glyph *g, GtkProgressBar *progress)
+static void period_each (Glyph *g, GtkProgressBar *progress)
 {
   float left;
   float right;
   Cadence *c;
-  c = glyph_get_cadence (g);
+  c = glyph_get_period (g);
 
   left = n_width * c->left;
   right = n_width * c->right;
@@ -135,11 +135,10 @@ static void cadence_each (Glyph *g, GtkProgressBar *progress)
 }
 
 static KernagicMethod method = {
-  "cadence", 
-  cadence_init,
-  cadence_each,
+  "period", 
+  period_init,
+  period_each,
   NULL
 };
 
-KernagicMethod *kernagic_cadence = &method;
-
+KernagicMethod *kernagic_period = &method;

@@ -5,7 +5,7 @@
 
 typedef struct _KernerSettings KernerSettings;
 
-#define KERNER_DEFAULT_MODE          0 /* only two at first, gray and cadence */
+#define KERNER_DEFAULT_MODE          0 /* only two at first, gray and period */
 #define KERNER_DEFAULT_MIN          15
 #define KERNER_DEFAULT_MAX          50
 #define KERNER_DEFAULT_TARGET_GRAY  50

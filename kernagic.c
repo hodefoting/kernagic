@@ -36,7 +36,7 @@ static GList *glyphs = NULL;
 float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
 
-extern KernagicMethod *kernagic_cadence,
+extern KernagicMethod *kernagic_period,
                       *kernagic_rythm,
                       *kernagic_gap,
                       *kernagic_gray,
@@ -49,7 +49,7 @@ static void init_methods (void)
   int i = 0;
   methods[i++] = kernagic_bounds;
   //methods[i++] = kernagic_gray;
-  methods[i++] = kernagic_cadence;
+  methods[i++] = kernagic_period;
   methods[i++] = kernagic_rythm;
   methods[i++] = kernagic_gap;
   methods[i] = NULL;
@@ -315,7 +315,7 @@ void help (void)
   printf ("kernagic [options] <font.ufo>\n"
           "\n"
           "Options:\n"
-          "   -m <method>   specify method, one of gray, cadence and rythmic "
+          "   -m <method>   specify method, one of gray, period and rythmic "
           "   suboptions influencing x-height gray:\n"
           "       -d <0..100>   minimum distance default = %i\n"
           "       -D <0..100>   maximum distance default = %i\n"
@@ -329,7 +329,7 @@ void help (void)
           "\n"
 
  //         "Examples:\n"
-    //      "    Use the cadence unit method on Test.ufo, overwriting file\n"
+    //      "    Use the period unit method on Test.ufo, overwriting file\n"
     //      "      kernagic -c Test.ufo\n"
    /*     "    Preview default settings on string shoplift to test.png\n"
           "      kernagic Original.ufo -s 'shoplift' -p test.png\n"
@@ -382,7 +382,7 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.tracking = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-c"))
+      else if (!strcmp (argv[no], "-p"))
         {
           EXPECT_ARG;
           kerner_settings.alpha_target = atof (argv[++no]);

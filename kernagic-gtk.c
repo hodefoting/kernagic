@@ -100,7 +100,7 @@ float place_glyph (Glyph *g, float xo, float opacity)
 
 static void redraw_test_text (void)
 {
-  float cadence = kerner_settings.alpha_target;
+  float period = kerner_settings.alpha_target;
   memset (preview_canvas, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
   big = 0;
   {
@@ -144,10 +144,10 @@ static void redraw_test_text (void)
   if (toggle_measurement_lines)
   {
     int i;
-    for (i = 0; i * cadence * scale_factor < PREVIEW_WIDTH - cadence * scale_factor; i++)
+    for (i = 0; i * period * scale_factor < PREVIEW_WIDTH - period * scale_factor; i++)
       {
         int y;
-        int x = (i + 0.5) * cadence * scale_factor;
+        int x = (i + 0.5) * period * scale_factor;
         for (y= PREVIEW_HEIGHT*0.8; y < PREVIEW_HEIGHT*0.85; y++)
           {
             preview_canvas[y* PREVIEW_WIDTH + x] =
@@ -440,7 +440,7 @@ int kernagic_gtk (int argc, char **argv)
     //gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
     //                                1, "x-height gray");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2,  "rennaisance cadence table");
+                                    2,  "rennaisance period table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "rythm");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
