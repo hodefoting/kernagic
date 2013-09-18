@@ -20,13 +20,9 @@ static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
 {
   float period = kerner_settings.alpha_target;
   float offset = kerner_settings.offset;
-  float rythm = kerner_settings.rythm;
   float left, right;
   float lstem;
   float rstem;
-
-  if (rythm == 0)
-    rythm = 1;
 
   lstem = g->stems[0];
   rstem = g->stems[g->stem_count-1];

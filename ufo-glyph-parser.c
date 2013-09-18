@@ -323,7 +323,7 @@ void gen_debug (Glyph *glyph)
     int t;
     float x_height = kernagic_x_height ();
 
-    for (t = 1; t < 2; t ++)
+    for (t = 1; t < 4; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
@@ -339,84 +339,68 @@ void gen_debug (Glyph *glyph)
         }
       {
         int foo = sum / c;
-        foo /= 16;
-        foo *= 16;
+        foo /= 32;
+        foo *= 32;
         raster [glyph->r_width * (glyph->r_height-t) + x] = foo;
       }
     }
 
     /* detect candidates; with confidence */
-    int prevval = 0;
-    int goingup = 0;
-    int beenbelow = 1;
+    long sum = 0;
+    long sum2 = 0;
 
-    for (x = 0; x < glyph->r_width; x++)
+    for (x = glyph->ink_width/2 * scale_factor * 0.0;
+         x < glyph->ink_width * scale_factor * 0.3; x++)
       {
         int val;
-        int delta;
         t = 1;
         val = raster [glyph->r_width * (glyph->r_height-t) + x];
-
-        if (val < 128)
-          beenbelow = 1;
-        delta = val - prevval;
-
-
-        if (val)
-        {
-        t = 1; raster [glyph->r_width * (glyph->r_height-t) + x] = 0;
-        }
-        if (delta < 0 && goingup)
-          {
-             int u = x - 1; 
-             /* backtrack half the distance back that is of the same level */
-             while (u > 0 && raster[glyph->r_width * (glyph->r_height-t)+u]==
-                 prevval) u--;
-             u = (u + x) /2;
-             t = 1; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
-             t = 2; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
-             t = 3; raster [glyph->r_width * (glyph->r_height-t) + u] = 255;
-
-             glyph->stems[glyph->stem_count] = u / scale_factor;
-             glyph->stem_weight[glyph->stem_count++] = prevval;
-
-             beenbelow = 0;
-             goingup = 0;
-          }
-        
-        if (val)
-        {
-        t = (val / 20)+1;
-        raster [glyph->r_width * (glyph->r_height-t) + x] = 255;
-        }
-
-        if (delta > 0 && beenbelow)
-          goingup = 1;
-
-        if (delta < 0)
-          goingup = 0;
-
-        prevval = val;
+        sum += val;
+      }
+    sum2 = 0;
+    for (x = 0; sum2 < sum/2; x++)
+      {
+        int val;
+        t = 1;
+        val = raster [glyph->r_width * (glyph->r_height-t) + x];
+        sum2 += val;
       }
 
+    glyph->stems[glyph->stem_count] = x / scale_factor;
+    glyph->stem_weight[glyph->stem_count++] = x;
+
+    sum = 0;
+    sum2 = 0;
+    for (x = glyph->ink_width * scale_factor * 0.7;
+         x < glyph->ink_width * scale_factor * 1.0; x++)
+      {
+        int val;
+        t = 2;
+        val = raster [glyph->r_width * (glyph->r_height-t) + x];
+        sum += val;
+      }
+    sum2 = 0;
+    for (x = glyph->ink_width * scale_factor * 0.7;
+        sum2 < sum /2 && x < glyph->r_width; x++)
+      {
+        int val;
+        t = 1;
+        val = raster [glyph->r_width * (glyph->r_height-t) + x];
+        sum2 += val;
+      }
+
+    glyph->stems[glyph->stem_count] = x / scale_factor;
+    glyph->stem_weight[glyph->stem_count++] = 1;
+
+    for (t = 8; t < 256; t ++)
+    {
+      x = glyph->stems[0] * scale_factor;
+      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
+      x = glyph->stems[1] * scale_factor;
+      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
+    }
 
 #if 0
-    for (t = 8; t < 16; t ++)
-    for (x = 0; x < glyph->r_width; x++)
-    {
-      long sum = 0;
-      int y;
-      long c = 0;
-
-      for (y = x_height * 1.45 * scale_factor ;
-          y <  x_height * 1.55 * scale_factor;
-          y++)
-        {
-          sum += raster[glyph->r_width * y + x] * 16;
-          c+= 16;
-        }
-      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
-    }
 
     for (t = 16; t < 32; t ++)
     for (x = 0; x < glyph->r_width; x++)

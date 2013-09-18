@@ -20,7 +20,7 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
   float period = kerner_settings.alpha_target;
   float offset = kerner_settings.offset;
-  float rythm = kerner_settings.rythm;
+  float rythm = 1;
   float left, right;
   float lstem;
   float rstem;

@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include "kernagic.h"
 #include "kerner.h"
 
-#define SPECIMEN_SIZE 180
+#define SPECIMEN_SIZE 220
 
 char *kernagic_sample_text = NULL;
 
@@ -371,11 +371,6 @@ void parse_args (int argc, char **argv)
         {
           EXPECT_ARG;
           kerner_settings.offset = atof (argv[++no]);
-        }
-      else if (!strcmp (argv[no], "-r"))
-        {
-          EXPECT_ARG;
-          kerner_settings.rythm = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-t"))
         {
