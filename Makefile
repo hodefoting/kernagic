@@ -1,4 +1,4 @@
-BIN_PKGMODULES=cairo gtk+-3.0
+BIN_PKGMODULES=cairo gtk+-2.0
 
 CFLAGS += -O2 -g
 

@@ -8,11 +8,18 @@
 #define PREVIEW_WIDTH  1024
 #define PREVIEW_HEIGHT 500
 
-
 #define INDEX_WIDTH  256
 #define INDEX_HEIGHT 256
 
 #define MAX_BIG 128
+
+#define GTK2 1
+
+#ifdef GTK2
+#else
+#define gtk_hbox_new(a,n)  gtk_box_new (GTK_ORIENTATION_HORIZONTAL, n)
+#define gtk_vbox_new(a,n)  gtk_box_new (GTK_ORIENTATION_VERTICAL, n)
+#endif
 
 Glyph *g_entries[MAX_BIG];
 int x_entries[MAX_BIG];
@@ -381,9 +388,17 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   return TRUE;
 }
 
+
+#ifdef GTK2
+static gboolean
+preview_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+  cairo_t *cr = gdk_cairo_create (widget->window);
+#else
 static gboolean
 preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
+#endif
   cairo_save (cr);
   cairo_set_source_rgb (cr, 0.93,0.93,0.93);
   cairo_paint (cr);
@@ -401,6 +416,9 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
       cairo_surface_destroy (surface);
     }
   cairo_restore (cr);
+#ifdef GTK2
+  cairo_destroy (cr);
+#endif
   return FALSE;
 }
 
@@ -440,9 +458,16 @@ static void d2xy(int n, int d, int *x, int *y) {
 }
 
 
+#ifdef GTK2
+static gboolean
+index_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+  cairo_t *cr = gdk_cairo_create (widget->window);
+#else
 static gboolean
 index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
+#endif
   memset (index_canvas, 0, INDEX_WIDTH * INDEX_HEIGHT);
   GList *list, *l;
   list = kernagic_glyphs ();
@@ -474,6 +499,9 @@ index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
       cairo_surface_destroy (surface);
     }
   cairo_restore (cr);
+#ifdef GTK2
+  cairo_destroy (cr);
+#endif
   return FALSE;
 }
 
@@ -501,9 +529,10 @@ int ui_gtk (int argc, char **argv)
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
 
-  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+
+  hbox = gtk_hbox_new (FALSE, 5);
   gtk_container_add (GTK_CONTAINER (window), hbox);
-  vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  vbox1 = gtk_vbox_new (FALSE, 5);
   gtk_container_add (GTK_CONTAINER (hbox), vbox1);
 
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 6);
@@ -512,13 +541,17 @@ int ui_gtk (int argc, char **argv)
   gtk_widget_set_size_request (preview, PREVIEW_WIDTH, PREVIEW_HEIGHT);
   gtk_container_add (GTK_CONTAINER (hbox), preview);
 
+#ifdef GTK2
+  g_signal_connect (preview, "expose-event", G_CALLBACK (preview_draw_cb), NULL);
+#else
   g_signal_connect (preview, "draw", G_CALLBACK (preview_draw_cb), NULL);
+#endif
 
   g_signal_connect (preview, "button-press-event", G_CALLBACK (preview_press_cb), NULL);
   gtk_widget_add_events (preview, GDK_BUTTON_PRESS_MASK);
 
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Font");
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -531,7 +564,7 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), font_path);
   }
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Text sample");
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     test_text = gtk_entry_new ();
@@ -543,7 +576,7 @@ int ui_gtk (int argc, char **argv)
   }
 
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Fitting method");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -561,10 +594,10 @@ int ui_gtk (int argc, char **argv)
 
   }
 
-  vbox_options_gray = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  vbox_options_gray = gtk_vbox_new (FALSE, 4);
   gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_gray);
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Min distance");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -575,7 +608,7 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), spin_min_dist);
   }
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Max distance");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -585,10 +618,10 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_max_dist);
   }
-  vbox_options_rythm = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+  vbox_options_rythm = gtk_vbox_new (FALSE, 4);
   gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_rythm);
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Cadence");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -600,7 +633,7 @@ int ui_gtk (int argc, char **argv)
   }
 
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -612,7 +645,7 @@ int ui_gtk (int argc, char **argv)
   }
 
   {
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Tracking");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
@@ -653,12 +686,12 @@ int ui_gtk (int argc, char **argv)
     GtkWidget *process_button  = gtk_button_new_with_label ("Process");
     GtkWidget *save_button     = gtk_button_new_with_label ("Save (modifies UFO in place)");
 
-    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    hbox = gtk_hbox_new (FALSE, 4);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
 
-    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    hbox = gtk_hbox_new (FALSE, 4);
     gtk_container_add (GTK_CONTAINER (vbox1), hbox);
     gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
 
@@ -669,7 +702,9 @@ int ui_gtk (int argc, char **argv)
 
   {
     progress = gtk_progress_bar_new ();
+#if 0
     gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progress), TRUE);
+#endif
     gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0.112);
     gtk_container_add (GTK_CONTAINER (vbox1), progress);
   }
@@ -679,7 +714,15 @@ int ui_gtk (int argc, char **argv)
   gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT);
   gtk_container_add (GTK_CONTAINER (vbox1), index);
 
+  //g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
+  g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
+
+#ifdef GTK2
+  g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
+#else
   g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
+#endif
+
   g_signal_connect (index, "button-press-event", G_CALLBACK (index_press_cb), NULL);
   gtk_widget_add_events (index, GDK_BUTTON_PRESS_MASK);
 

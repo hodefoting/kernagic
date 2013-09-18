@@ -23,9 +23,8 @@ documentation.
 The following subsections documents the different spacing modes in kernagic
 
 Todo:
-  add parameters for stem-detector
-  add collision avoidance to methods (use kerning?)
   improve discoverability of ui
+  add collision avoidance to methods (use kerning?)
   add removal of user stems
   harmonise commandline
   generate png output
