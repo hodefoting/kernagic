@@ -1,45 +1,46 @@
-kernagic
+Kernagic
 ========
 
-Kernagic is a tool for spacing and kerning fonts. It provides a selection of
-methods that can be previewed and tuned interactively. 
+Kernagic is a tool for spacing and kerning fonts. It provides a selection of methods that can be previewed and tuned interactively. 
 
-To fit into a diverse set of workflows; kernagic uses UFO fonts as it's input
-- UFO can act as a superset of other formats; and tools like fontforge can be
-used for converting to and from it.
+To fit into a diverse set of workflows, Kernagic uses UFO fonts for input. UFO can act as a superset of other formats, and tools like [Fontforge](http://github.com/fontforge/fontforge/) can be used for converting to and from it.
 
-Some methods relies on automatically detected stems, if the detected stems
-work poorly with your font or you want to override spacing decisions, you can
-insert your own stems by clicking in the preview; override stems are
-persistent across saves of the UFO.
+Some methods relies on automatically detected stems, if the stem detection works poorly with your font, or you want to override spacing decisions, you can insert your own stems by clicking in the preview; stem overrides are saved in the UFO's private `lib.plist`.
 
-When a good setting is found it can be stored back into the UFO file being
-edited; this shifts the x coordinates of glyphs, and writes a new advance
-value.
+If metrics are determined, they can be saved back into the UFO (shifting the x co-ordinates of all points in all glyphs to change the left bearings, and setting a new advance width to set the right bearings.)
 
-For help about the commandline, kernagic --help is the entry-point for further
-documentation.
+For help about the commandline interface, `kernagic --help` provides further documentation.
 
-The following subsections documents kernagics different spacing modes:
+Spacing Methods
+===================
 
-gap
----
-left = period * (offset + 0.5) - lstem;
+These are the various spacing methods implemented in Kernagic to date. The application is intended to be modular, so any programmer familiar with C and GTK+ can explore their own methods:
 
-The gap method allows specifying the gap to use between stems in neighbouring
-glyphs. (The resulting advance is snapped to a multiple of the period.)
+Inkbounds
+--------------
 
+A simple fallback spacing method.
 
-rainnesance cadence table
+This calculates an even 'grey value' between each letter pair. 
+
+Currently this only produces kerning, not metrics.
+
+Renaissance Cadence Table
 -------------------------
 
-This method uses a predefined spacing table; with encoded knowledge of
-the glyphs morphologies. It works best on traditional rainessance fonts
-with classic proportions.
+A predefined spacing table method. 
 
-Assumes that the glyphs have been designed with proportions similar to
-rainessance fonts. And automatically prepares a fitting.
+This table encodes knowledge of glyph morphologies, found in Frank Blokland's excellent [Letter Model](http://lettermodel.org). 
 
-inkbounds
----------
-simple fallback spacer - that has no side bearings
+It assumes your typeface is a traditional renaissance design, with classic glyph proportions, and automatically prepares a fitting.
+
+Currently this only produces metrics, not kerning.
+
+Gap Cadence Discovery
+-------------------------
+
+`left bearing = gap * (offset + 0.5) - left stem width`
+
+The gap method allows specifying the gap to use between stems in neighbouring glyphs. (The resulting advance is snapped to a multiple of the gap.)
+
+Currently this only produces metrics, not kerning.
