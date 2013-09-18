@@ -27,20 +27,7 @@ gap
 left = period * (offset + 0.5) - lstem;
 
 The gap method allows specifying the gap to use between stems in neighbouring
-glyphs. (The resulting advance is a multiple of period.)
-
-rythm
------
-left = period * (offset + 0.5) - lstem, right = snap_to (period)
-
-Rythm does spacing of the first stem in glyphs. The rythm being generated can
-be controlled in terms of the rythms period. And an offset in rythm units to
-use to the first stem.
-
-Snaps the first stem of each glyph into a rythm. With the stem determined
-either automatically or with a manual override. The /offset/ provides a
-multiple of the rythm to use as an offset to the edge of the glyph.
-. (XXX: improve right side handling, for now it just snaps ink to rythm)
+glyphs. (The resulting advance is snapped to a multiple of the period.)
 
 
 rainnesance cadence table
@@ -55,6 +42,4 @@ rainessance fonts. And automatically prepares a fitting.
 
 inkbounds
 ---------
-left = 0, right = 0
-
 simple fallback spacer - that has no side bearings
