@@ -26,7 +26,7 @@ install: _install_bin
 uninstall: _uninstall_bin
 _install_bin: $(BIN_TARGETS)
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -t $(DESTDIR)$(PREFIX)/bin $(BIN_TARGETS)
+	install $(BIN_TARGETS) $(DESTDIR)$(PREFIX)/bin
 _uninstall_bin:
 	sudo rm -f $(DESTDIR)$(PREFIX)/bin/$(BINARY)
 
