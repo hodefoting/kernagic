@@ -20,16 +20,7 @@ value.
 For help about the commandline, kernagic --help is the entry-point for further
 documentation.
 
-The following subsections documents the different spacing modes in kernagic
-
-Todo:
-  improve discoverability of ui
-  add collision avoidance to methods (use kerning?)
-  add removal of user stems
-  harmonise commandline
-  generate png output
-  pan preview
-  multiline wrapping preview text
+The following subsections documents kernagics different spacing modes:
 
 gap
 ---

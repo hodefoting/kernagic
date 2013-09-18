@@ -14,6 +14,7 @@
 #define MAX_BIG 128
 
 #define GTK2 1
+//#define HILBERTCODE
 
 #ifdef GTK2
 #else
@@ -28,7 +29,7 @@ int big = 0;
 extern char *kernagic_sample_text;
 
 static GtkWidget *preview;
-static GtkWidget *index;
+static GtkWidget *index = NULL;
 static GtkWidget *test_text;
 static GtkWidget *spin_method;
 static GtkWidget *spin_min_dist;
@@ -122,11 +123,14 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity)
 
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
-      if (x + xo + g->left_bearing * scale_factor >= 0 && x + xo + g->left_bearing * scale_factor < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
-          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] <
-        g->raster[y * g->r_width + x] * opacity
+      if (x + xo + g->left_bearing * scale_factor >= 0 &&
+          x + xo + g->left_bearing * scale_factor < PREVIEW_WIDTH &&
+          y + yo > 0 &&
+          y + yo < PREVIEW_HEIGHT &&
+          
+        preview_canvas [(y+yo) * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] < g->raster[y * g->r_width + x] * opacity
           )
-      preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] =
+      preview_canvas [(y+yo) * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] =
         g->raster[y * g->r_width + x] * opacity;
 
 #define SCALE_DOWN 10
@@ -213,6 +217,8 @@ static void redraw_test_text (void)
   }
  
   gtk_widget_queue_draw (preview);
+  if (index)
+    gtk_widget_queue_draw (index);
 }
 
 static void configure_kernagic (void)
@@ -342,7 +348,6 @@ static void do_process (void)
   gtk_widget_show (progress);
   kernagic_compute (GTK_PROGRESS_BAR (progress));
   gtk_widget_hide (progress);
-  fprintf (stderr, "done kerning!\n");
   kernagic_save_kerning_info ();
 }
 
@@ -422,11 +427,6 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   return FALSE;
 }
 
-static gboolean
-index_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-  return TRUE;
-}
 
 /* hilbert curve functions from wikipedia */
 static void rot(int n, int *x, int *y, int rx, int ry) {
@@ -457,9 +457,34 @@ static void d2xy(int n, int d, int *x, int *y) {
     }
 }
 
+//convert (x,y) to d
+static int xy2d (int n, int x, int y) {
+    int rx, ry, s, d=0;
+    for (s=n/2; s>0; s/=2) {
+        rx = (x & s) > 0;
+        ry = (y & s) > 0;
+        d += s * s * ((3 * rx) ^ ry);
+        rot(s, &x, &y, rx, ry);
+    }
+    return d;
+}
+
+gboolean
+index_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  float x, y;
+  int unicode;
+  x = event->button.x;
+  y = event->button.y;
+  unicode = xy2d (256, x, y);
+  fprintf (stderr, "%f %f %i\n", x, y, unicode);
+
+  return TRUE;
+}
+
 
 #ifdef GTK2
-static gboolean
+gboolean
 index_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
   cairo_t *cr = gdk_cairo_create (widget->window);
@@ -477,13 +502,12 @@ index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
       Glyph *glyph = l->data;
       int unicode = glyph->unicode;
       int x, y;
-      d2xy (255, unicode, &x, &y);
+      d2xy (256, unicode, &x, &y);
 
       if (x <0) x = 0;
       if (y <0) y = 0;
       if (x >= INDEX_WIDTH) x= INDEX_WIDTH-1;
       if (y >= INDEX_HEIGHT) y= INDEX_WIDTH-1;
-
       index_canvas [y * INDEX_WIDTH + x] = 255;
     }
 
@@ -709,7 +733,7 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (vbox1), progress);
   }
 
-
+#if 0
   index = gtk_drawing_area_new ();
   gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT);
   gtk_container_add (GTK_CONTAINER (vbox1), index);
@@ -725,7 +749,7 @@ int ui_gtk (int argc, char **argv)
 
   g_signal_connect (index, "button-press-event", G_CALLBACK (index_press_cb), NULL);
   gtk_widget_add_events (index, GDK_BUTTON_PRESS_MASK);
-
+#endif
 
   /* when these change, we need to reinitialize from scratch */
   g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);

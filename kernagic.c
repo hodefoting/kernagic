@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include "kernagic.h"
 #include "kerner.h"
 
-#define SPECIMEN_SIZE 220
+#define SPECIMEN_SIZE 200
 
 char *kernagic_sample_text = NULL;
 
@@ -316,32 +316,13 @@ void help (void)
           "\n"
           "Options:\n"
           "   -m <method>   specify method, one of gray, period and rythmic "
-          "   suboptions influencing x-height gray:\n"
-          "       -d <0..100>   minimum distance default = %i\n"
-          "       -D <0..100>   maximum distance default = %i\n"
-          "       -t <0..100>   target gray value default = %i\n"
-     //     "       -l            don't strip left bearing\n"
-     //     "       -L            strip left bearing (default)\n"
+          "   suboptions influencing gap method:\n"
+          "       -p   period of rythm, in fonts units\n"
+          "       -o   offset, in number of periods from edge of glyph to stem\n"
           "\n"
-          "   -o <output.ufo>  create a copy of the input font, without it kernagic overwrites the input ufo\n"
-   /*     "   -s <string>      sample string (for use with -p)\n"
-          "   -p <output.png>   render sample string with settings (do not change font)\n" */
-          "\n"
-
- //         "Examples:\n"
-    //      "    Use the period unit method on Test.ufo, overwriting file\n"
-    //      "      kernagic -c Test.ufo\n"
-   /*     "    Preview default settings on string shoplift to test.png\n"
-          "      kernagic Original.ufo -s 'shoplift' -p test.png\n"
-          "    Run gray with a different gray target, still previewing to test.png\n"
-          "      kernagic Original.ufo -s 'shoplift' -p test.png -t 0.4\n"
-          "    Write a final adjusted font to Output.ufo\n" */
-//          "      kernagic Original.ufo -s 'shoplift' -o Output.ufo -t 0.32 -m 10 -M 30\n"
-          ,
-    KERNER_DEFAULT_MIN,
-    KERNER_DEFAULT_MAX,
-    KERNER_DEFAULT_TARGET_GRAY
-          );
+          "   -O <output.ufo>  create a copy of the input font, this make kernagic run non-interactive\n"
+          "   -T <string>      sample string\n"
+          "\n");
   exit (0);
 }
 
