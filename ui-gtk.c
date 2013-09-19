@@ -87,10 +87,13 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity)
           }
 #endif
 
+          if (g->lstem > 0)
+          {
           x = g->lstem * scale_factor + g->left_bearing * scale_factor;
           if (x + xo < PREVIEW_WIDTH &&
               x + xo >= 0)
             preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+          }
 
           if (g->rstem > 0)
           {
@@ -371,22 +374,26 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 
   advance = kernagic_get_advance (g);
 
-  if (y < 100)
+  if (y < kernagic_x_height () * 1)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
   }
-  else
+  else if (y > kernagic_x_height () * 2 )
   {
-
-  if (x / advance < 0.5)
-  {
-    g->lstem = x - g->left_bearing;
+    g->rstem = 0;
+    g->lstem = 0;
   }
   else
   {
-    g->rstem = x - g->left_bearing;
-  }
+    if (x / advance < 0.5)
+    {
+      g->lstem = x - g->left_bearing;
+    }
+    else
+    {
+      g->rstem = x - g->left_bearing;
+    }
   }
 
   trigger ();
