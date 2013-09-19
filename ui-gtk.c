@@ -14,7 +14,7 @@
 #define MAX_BIG 128
 
 #define GTK2 1
-//#define HILBERTCODE
+#define HILBERTCODE 1
 
 #ifdef GTK2
 #else
@@ -472,13 +472,38 @@ static int xy2d (int n, int x, int y) {
 gboolean
 index_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
+  GString *str = g_string_new ("");
   float x, y;
+  int i;
   int unicode;
   x = event->button.x;
   y = event->button.y;
   unicode = xy2d (256, x, y);
-  fprintf (stderr, "%f %f %i\n", x, y, unicode);
+  //sprintf (buf, "%f %f %i", x, y, unicode);
 
+  GList *list, *l;
+  list = kernagic_glyphs ();
+
+  for (l = list; l->next; l = l->next)
+    {
+      Glyph *glyph = l->data;
+      if (glyph->unicode >= unicode)
+        {
+          break;
+        }
+    }
+  list = l;
+
+  for (i = 0, l = list;l->prev && i < 10; i++, l = l->prev);
+  for (i = 0; l && i < 20; i++, l = l->next)
+    {
+      Glyph *glyph = l->data;
+      g_string_append_unichar (str, glyph->unicode);
+    }
+
+
+  gtk_entry_set_text (GTK_ENTRY (test_text), str->str);
+  g_string_free (str, TRUE);
   return TRUE;
 }
 
@@ -735,7 +760,7 @@ int ui_gtk (int argc, char **argv)
     gtk_box_pack_start (GTK_BOX (vbox1), progress, FALSE, FALSE, 2);
   }
 
-#if 0
+#if 1
   index = gtk_drawing_area_new ();
   gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT);
   gtk_box_pack_start (GTK_BOX (vbox1), index, FALSE, FALSE, 2);

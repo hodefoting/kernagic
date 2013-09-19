@@ -68,6 +68,13 @@ void init_kernagic (void)
   init_kerner ();
 }
 
+static gint unicode_sort (gconstpointer a, gconstpointer b)
+{
+  const Glyph *ga = a;
+  const Glyph *gb = b;
+
+  return ga->unicode - gb->unicode;
+}
 
 static int
 add_glyph(const char *fpath, const struct stat *sb,
@@ -78,7 +85,8 @@ add_glyph(const char *fpath, const struct stat *sb,
   Glyph *glyph = kernagic_glyph_new (fpath);
 
   if (glyph)
-    glyphs = g_list_prepend (glyphs, glyph);
+    glyphs = g_list_insert_sorted (glyphs, glyph, unicode_sort);
+    //glyphs = g_list_prepend (glyphs, glyph);
   return 0;
 }
 
