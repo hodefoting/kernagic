@@ -8,8 +8,8 @@
 #define PREVIEW_WIDTH  1024
 #define PREVIEW_HEIGHT 500
 
-#define INDEX_WIDTH  256
-#define INDEX_HEIGHT 256
+#define INDEX_WIDTH    256
+#define INDEX_HEIGHT   256
 
 #define MAX_BIG 128
 
@@ -577,7 +577,9 @@ int ui_gtk (int argc, char **argv)
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Font");
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+
+
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
     gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
       gtk_size_group_add_widget (labels, label);
@@ -590,7 +592,7 @@ int ui_gtk (int argc, char **argv)
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Text sample");
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     test_text = gtk_entry_new ();
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     gtk_size_group_add_widget (labels, label);
@@ -612,14 +614,14 @@ int ui_gtk (int argc, char **argv)
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "gap");
     gtk_size_group_add_widget (sliders, spin_method);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_method);
 
   }
 
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
-  gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_gray);
+  gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_gray, FALSE, FALSE, 2);
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Min distance");
@@ -643,7 +645,7 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), spin_max_dist);
   }
   vbox_options_rythm = gtk_vbox_new (FALSE, 4);
-  gtk_container_add (GTK_CONTAINER (vbox1), vbox_options_rythm);
+  gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Cadence");
@@ -683,7 +685,7 @@ int ui_gtk (int argc, char **argv)
   {
     toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
     //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), toggle_measurement_lines_check);
+    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
     //gtk_size_group_add_widget (sliders, toggle_measurement_lines_check);
     //gtk_box_pack_end (GTK_BOX (hbox), toggle_measurement_lines_check, FALSE, TRUE, 2);
   }
@@ -691,14 +693,14 @@ int ui_gtk (int argc, char **argv)
   {
     GtkWidget *label = gtk_check_button_new_with_label ("Generate left bearing");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_size_group_add_widget (sliders, label);
     gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, TRUE, 2);
   }
   {
     GtkWidget *label = gtk_check_button_new_with_label ("Simulate no kerning");
     GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_size_group_add_widget (sliders, label);
     gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, TRUE, 2);
   }
@@ -711,12 +713,12 @@ int ui_gtk (int argc, char **argv)
     GtkWidget *save_button     = gtk_button_new_with_label ("Save (modifies UFO in place)");
 
     hbox = gtk_hbox_new (FALSE, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
 
     hbox = gtk_hbox_new (FALSE, 4);
-    gtk_container_add (GTK_CONTAINER (vbox1), hbox);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
 
     g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
@@ -730,13 +732,13 @@ int ui_gtk (int argc, char **argv)
     gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progress), TRUE);
 #endif
     gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0.112);
-    gtk_container_add (GTK_CONTAINER (vbox1), progress);
+    gtk_box_pack_start (GTK_BOX (vbox1), progress, FALSE, FALSE, 2);
   }
 
 #if 0
   index = gtk_drawing_area_new ();
   gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT);
-  gtk_container_add (GTK_CONTAINER (vbox1), index);
+  gtk_box_pack_start (GTK_BOX (vbox1), index, FALSE, FALSE, 2);
 
   //g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
   g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
