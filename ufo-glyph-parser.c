@@ -104,6 +104,7 @@ parse_start_element (GMarkupParseContext *context,
     }
   else if (!strcmp (element_name, "component"))
     {
+#if 0
       const char *base = "";
       float xoffset = 0;
       float yoffset = 0;
@@ -115,6 +116,7 @@ parse_start_element (GMarkupParseContext *context,
           else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
           else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
         }
+#endif
       /* XXX: needs incorporation into ink-bounds */
     }
   else if (!strcmp (element_name, "lib"))
