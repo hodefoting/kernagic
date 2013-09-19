@@ -102,6 +102,21 @@ parse_start_element (GMarkupParseContext *context,
       if (x > glyph->ink_max_x) glyph->ink_max_x = x;
       if (y > glyph->ink_max_y) glyph->ink_max_y = y;
     }
+  else if (!strcmp (element_name, "component"))
+    {
+      const char *base = "";
+      float xoffset = 0;
+      float yoffset = 0;
+      const char **a_n, **a_v;
+      for (a_n = attribute_names,
+           a_v = attribute_values; *a_n; a_n++, a_v++)
+        {
+          if (!strcmp (*a_n, "base")) base = *a_v;
+          else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+          else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+        }
+      /* XXX: needs incorporation into ink-bounds */
+    }
   else if (!strcmp (element_name, "lib"))
     {
       pinlib++;
@@ -149,6 +164,21 @@ parse_end_element (GMarkupParseContext *context,
     pinself = 0;
 }
 
+void render_glyph (Glyph *glyph);
+
+static void 
+render_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
+{
+  Glyph *cglyph = NULL;
+  cairo_t *cr = glyph->cr;
+  cglyph = kernagic_find_glyph (base);
+  fprintf (stderr, "Component %s  %f,%f %p\n", base, xoffset, yoffset, cglyph);
+  cairo_save (cr);
+  cairo_translate (cr, xoffset, yoffset);
+  cglyph->cr = cr;
+  render_glyph (cglyph);
+  cairo_restore (cr);
+}
 
 static void
 glif_start_element (GMarkupParseContext *context,
@@ -228,6 +258,21 @@ glif_start_element (GMarkupParseContext *context,
       first = 1;
       sc = 0;
       cc = 0;
+    }
+  else if (!strcmp (element_name, "component"))
+    {
+      const char *base = "";
+      float xoffset = 0;
+      float yoffset = 0;
+      const char **a_n, **a_v;
+      for (a_n = attribute_names,
+           a_v = attribute_values; *a_n; a_n++, a_v++)
+        {
+          if (!strcmp (*a_n, "base")) base = *a_v;
+          else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+          else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+        }
+      render_component (glyph, base, xoffset, yoffset);
     }
 }
 

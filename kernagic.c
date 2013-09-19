@@ -254,6 +254,18 @@ void kernagic_kern_clear_all (void)
     }
 }
 
+Glyph *kernagic_find_glyph (const char *name)
+{
+  GList *l;
+  for (l = glyphs; l; l = l->next)
+    {
+      Glyph *glyph = l->data;
+      if (glyph->name && !strcmp (glyph->name, name))
+        return glyph;
+    }
+  return NULL;
+}
+
 Glyph *kernagic_find_glyph_unicode (unsigned int unicode)
 {
   GList *l;
