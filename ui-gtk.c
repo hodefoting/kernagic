@@ -5,13 +5,12 @@
 #include "kernagic.h"
 #include "kerner.h"
 
-#define PREVIEW_WIDTH  1024
-#define PREVIEW_HEIGHT 500
+
+void redraw_test_text (const char *intext, int debuglevel);
 
 #define INDEX_WIDTH    256
 #define INDEX_HEIGHT   256
 
-#define MAX_BIG 128
 
 #define GTK2 1
 #define HILBERTCODE 1
@@ -22,11 +21,14 @@
 #define gtk_vbox_new(a,n)  gtk_box_new (GTK_ORIENTATION_VERTICAL, n)
 #endif
 
-Glyph *g_entries[MAX_BIG];
-int x_entries[MAX_BIG];
-int big = 0;
+extern Glyph   *g_entries[];
+extern int      x_entries[];
+extern int      big;
+extern gboolean toggle_measurement_lines;
+extern float  scale_factor;
 
 extern char *kernagic_sample_text;
+extern uint8_t *kernagic_preview;
 
 static GtkWidget *preview;
 static GtkWidget *index = NULL;
@@ -44,185 +46,8 @@ static GtkWidget *vbox_options_rythm;
 static GtkWidget *progress;
 static GtkWidget *toggle_measurement_lines_check;
 static GtkWidget *font_path;
-
-/* the preview canvas should be moved out of the gtk code, it is generic
- * code - that also should be used for the png output option
- */
-static uint8_t *preview_canvas = NULL;
 static uint8_t *index_canvas = NULL;
 
-extern float  scale_factor;
-
-gboolean toggle_measurement_lines = FALSE;
-
-float place_glyph (Glyph *g, float xo, int yo, float opacity)
-{
-  int x, y;
-
-  if (toggle_measurement_lines)
-    {
-      for (y = 0; y < g->r_height; y++)
-        for (x = 0; x < 1; x++)
-          if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
-          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
-              )
-          preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
-
-
-      for (y = 0; y < PREVIEW_HEIGHT; y++)
-        {
-#if 0
-          if (g->stem_count >=1)
-            {
-            x = g->stems[0] * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH)
-              preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-            }
-
-          if (g->stem_count > 1)
-          {
-            x = g->stems[g->stem_count-1] * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH)
-              preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          }
-#endif
-
-          if (g->lstem > 0)
-          {
-          x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          }
-
-          if (g->rstem > 0)
-          {
-          x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          }
-        }
-
-
-      for (y = 0; y < PREVIEW_HEIGHT; y++)
-        {
-          if (g->lstem > 0)
-          {
-          x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          }
-          if (g->rstem > 0)
-          {
-          x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            preview_canvas [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
-          }
-        }
-    }
-
-  for (y = 0; y < g->r_height; y++)
-    for (x = 0; x < g->r_width; x++)
-      if (x + xo + g->left_bearing * scale_factor >= 0 &&
-          x + xo + g->left_bearing * scale_factor < PREVIEW_WIDTH &&
-          y + yo > 0 &&
-          y + yo < PREVIEW_HEIGHT &&
-          
-        preview_canvas [(y+yo) * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] < g->raster[y * g->r_width + x] * opacity
-          )
-      preview_canvas [(y+yo) * PREVIEW_WIDTH + (int)(x + xo + g->left_bearing * scale_factor)] =
-        g->raster[y * g->r_width + x] * opacity;
-
-#define SCALE_DOWN 10
-
-  int xp = 5;
-  int yp = 5;
-
-  /* draw a smaller preview as well */
-  for (y = 0; y < g->r_height; y++)
-    for (x = 0; x < g->r_width; x++)
-      if ((xp + x + xo + g->left_bearing * scale_factor)/SCALE_DOWN >= 0 && (xp + x + xo + g->left_bearing * scale_factor)/SCALE_DOWN < PREVIEW_WIDTH && yp + y/SCALE_DOWN < PREVIEW_HEIGHT)
-      {
-        int val = preview_canvas [(yp + ((y+yo)/SCALE_DOWN)) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN) + xp]; 
-        val += g->raster[y * g->r_width + x] * opacity / SCALE_DOWN / SCALE_DOWN;
-        if (val > 255) val = 255;
-        preview_canvas [(yp + ((y+yo)/SCALE_DOWN)) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)/SCALE_DOWN) + xp] = val;
-      }
-
-  return xo + kernagic_get_advance (g) * scale_factor;
-}
-
-static void redraw_test_text (void)
-{
-  float period = kerner_settings.alpha_target;
-  memset (preview_canvas, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
-  big = 0;
-  {
-    const char *utf8;
-    gunichar *str2;
-    int i;
-    utf8 = gtk_entry_get_text (GTK_ENTRY (test_text));
-    float x = 0;
-    float y = 0;
-
-    str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
-
-    if (str2)
-    {
-      Glyph *prev_g = NULL;
-    for (i = 0; str2[i]; i++)
-      {
-        Glyph *g = kernagic_find_glyph_unicode (str2[i]);
-        if (g)
-          {
-            if (prev_g)
-              x += kernagic_kern_get (prev_g, g) * scale_factor;
-
-              g_entries[big] = g;
-              x_entries[big++] = x;
-
-            x = place_glyph (g, x, y, 1.0);
-            prev_g = g;
-          }
-        else if (str2[i] == ' ') /* we're only faking it if we have to  */
-          {
-            Glyph *t = kernagic_find_glyph_unicode ('i');
-            if (t)
-              x += kernagic_get_advance (t) * scale_factor;
-            prev_g = NULL;
-          }
-        if (x > 8192)
-          {
-            y += 512;
-            x = 0;
-          }
-      }
-    g_free (str2);
-    }
-  }
-
-  if (toggle_measurement_lines)
-  {
-    int i;
-    for (i = 0; i * period * scale_factor < PREVIEW_WIDTH - period * scale_factor; i++)
-      {
-        int y;
-        int x = (i + 0.5) * period * scale_factor;
-        for (y= PREVIEW_HEIGHT*0.8; y < PREVIEW_HEIGHT*0.85; y++)
-          {
-            preview_canvas[y* PREVIEW_WIDTH + x] =
-              (preview_canvas[y* PREVIEW_WIDTH + x] + 96) / 2;
-          }
-      }
-  }
- 
-  gtk_widget_queue_draw (preview);
-  if (index)
-    gtk_widget_queue_draw (index);
-}
 
 static void configure_kernagic (void)
 {
@@ -249,7 +74,12 @@ static gboolean delayed_trigger (gpointer foo)
   configure_kernagic ();
   kernagic_set_glyph_string (gtk_entry_get_text (GTK_ENTRY (test_text)));
   kernagic_compute (NULL);
-  redraw_test_text ();
+  redraw_test_text (gtk_entry_get_text (GTK_ENTRY (test_text)), toggle_measurement_lines);
+
+  gtk_widget_queue_draw (preview);
+  if (index)
+    gtk_widget_queue_draw (index);
+
   delayed_updater = 0;
   return FALSE;
 }
@@ -415,13 +245,13 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   cairo_set_source_rgb (cr, 0.93,0.93,0.93);
   cairo_paint (cr);
 
-  if (!preview_canvas)
+  if (!kernagic_preview)
     {
     }
   else
     {
       cairo_surface_t *surface =
-        cairo_image_surface_create_for_data (preview_canvas,
+        cairo_image_surface_create_for_data (kernagic_preview,
             CAIRO_FORMAT_A8, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_WIDTH);
       cairo_set_source_rgb (cr, 0,0,0);
       cairo_mask_surface (cr, surface, 0, 0);
@@ -572,8 +402,8 @@ int ui_gtk (int argc, char **argv)
   GtkSizeGroup *labels;
   GtkSizeGroup *sliders;
 
-  if (!preview_canvas)
-    preview_canvas = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
+  if (!kernagic_preview)
+    kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
   if (!index_canvas)
     index_canvas = g_malloc0 (INDEX_WIDTH * INDEX_HEIGHT);
 
@@ -709,7 +539,7 @@ int ui_gtk (int argc, char **argv)
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_tracking = gtk_spin_button_new_with_range (0.0, 300.0, 0.5);
     gtk_size_group_add_widget (sliders, spin_tracking);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
+    //gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
