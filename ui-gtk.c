@@ -464,6 +464,34 @@ int ui_gtk (int argc, char **argv)
   }
 
   {
+    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
+    //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
+    //gtk_size_group_add_widget (sliders, toggle_measurement_lines_check);
+    //gtk_box_pack_end (GTK_BOX (hbox), toggle_measurement_lines_check, FALSE, TRUE, 2);
+  }
+  {
+    GtkWidget *hbox;
+    /* XXX: add a button to remove all custom stems? */
+    GtkWidget *defaults_button = gtk_button_new_with_label ("defaults");
+    GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
+    GtkWidget *save_button     = gtk_button_new_with_label ("Save");
+
+    hbox = gtk_hbox_new (FALSE, 4);
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
+
+    //hbox = gtk_hbox_new (FALSE, 4);
+    //gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
+
+    g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
+    g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
+    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
+  }
+
+  {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Fitting method");
     gtk_size_group_add_widget (labels, label);
@@ -544,49 +572,6 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
 
-  {
-    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
-    //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
-    //gtk_size_group_add_widget (sliders, toggle_measurement_lines_check);
-    //gtk_box_pack_end (GTK_BOX (hbox), toggle_measurement_lines_check, FALSE, TRUE, 2);
-  }
-#if 0
-  {
-    GtkWidget *label = gtk_check_button_new_with_label ("Generate left bearing");
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_size_group_add_widget (sliders, label);
-    gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, TRUE, 2);
-  }
-  {
-    GtkWidget *label = gtk_check_button_new_with_label ("Simulate no kerning");
-    GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_size_group_add_widget (sliders, label);
-    gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, TRUE, 2);
-  }
-#endif
-
-  {
-    GtkWidget *hbox;
-    GtkWidget *defaults_button = gtk_button_new_with_label ("Reset to defaults");
-    GtkWidget *process_button  = gtk_button_new_with_label ("Process");
-    GtkWidget *save_button     = gtk_button_new_with_label ("Save (modifies UFO in place)");
-
-    hbox = gtk_hbox_new (FALSE, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
-
-    hbox = gtk_hbox_new (FALSE, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
-
-    g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
-    g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
-    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
-  }
 
   {
     progress = gtk_progress_bar_new ();
