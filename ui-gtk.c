@@ -46,6 +46,7 @@ static GtkWidget *vbox_options_rythm;
 static GtkWidget *progress;
 static GtkWidget *toggle_measurement_lines_check;
 static GtkWidget *font_path;
+static GtkWidget *ipsum_path;
 static uint8_t *index_canvas = NULL;
 
 
@@ -438,9 +439,23 @@ int ui_gtk (int argc, char **argv)
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Font");
+    GtkWidget *label = gtk_label_new ("Ipsum");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
 
+    ipsum_path = gtk_file_chooser_button_new ("ipsum", GTK_FILE_CHOOSER_ACTION_OPEN);
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+
+    gtk_size_group_add_widget (sliders, ipsum_path);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), ipsum_path);
+  }
+
+
+  {
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *label = gtk_label_new ("Font");
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
 
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
     gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
@@ -571,7 +586,6 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
-
 
   {
     progress = gtk_progress_bar_new ();
