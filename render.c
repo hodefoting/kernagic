@@ -50,7 +50,6 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
               )
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
 
-
       for (y = 0; y < PREVIEW_HEIGHT; y++)
         {
 #if 0
@@ -86,7 +85,6 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
           }
         }
 
-
       for (y = 0; y < PREVIEW_HEIGHT; y++)
         {
           if (g->lstem > 0)
@@ -107,7 +105,7 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
     }
 }
 
-void redraw_test_text (const char *intext, int debuglevel)
+void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
 {
   float period = kerner_settings.alpha_target;
   const char *utf8;
@@ -117,12 +115,10 @@ void redraw_test_text (const char *intext, int debuglevel)
   float y = 0;
 
   memset (kernagic_preview, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
+
   big = 0;
-  
-  utf8 = intext;
-
+  utf8 = ipsum;
   str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
-
   if (str2)
   {
     Glyph *prev_g = NULL;
@@ -137,8 +133,46 @@ void redraw_test_text (const char *intext, int debuglevel)
             g_entries[big] = g;
             x_entries[big++] = x;
 
-          place_glyph (g, x, y, 1.0, 0.1);
           place_glyph_debug (g, x, y, 1.0, 0.1, debuglevel);
+          x = place_glyph (g, x, y, 1.0, 0.1);
+          prev_g = g;
+        }
+      else if (str2[i] == ' ') /* we're only faking it if we have to  */
+        {
+          Glyph *t = kernagic_find_glyph_unicode ('i');
+          if (t)
+            x += kernagic_get_advance (t) * scale_factor;
+          prev_g = NULL;
+        }
+      if (x > 8192)
+        {
+          y += 512;
+          x = 0;
+        }
+    }
+    g_free (str2);
+  }
+
+  x = 0;
+  y = 0;
+  big = 0;
+  utf8 = intext;
+  str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
+  if (str2)
+  {
+    Glyph *prev_g = NULL;
+  for (i = 0; str2[i]; i++)
+    {
+      Glyph *g = kernagic_find_glyph_unicode (str2[i]);
+      if (g)
+        {
+          if (prev_g)
+            x += kernagic_kern_get (prev_g, g) * scale_factor;
+
+            g_entries[big] = g;
+            x_entries[big++] = x;
+
+          place_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
           x = place_glyph (g, x, y, 1.0, 1.0);
           prev_g = g;
         }

@@ -5,8 +5,9 @@
 #include "kernagic.h"
 #include "kerner.h"
 
+static char *ipsum = "fnord";
 
-void redraw_test_text (const char *intext, int debuglevel);
+void redraw_test_text (const char *intext, const char *ipsum, int debuglevel);
 
 #define INDEX_WIDTH    256
 #define INDEX_HEIGHT   256
@@ -72,12 +73,21 @@ static void configure_kernagic (void)
 static guint delayed_updater = 0;
 static gboolean delayed_trigger (gpointer foo)
 {
+  GString *str = g_string_new ("");
   configure_kernagic ();
-  kernagic_set_glyph_string (gtk_entry_get_text (GTK_ENTRY (test_text)));
+
+  g_string_append (str, gtk_entry_get_text (GTK_ENTRY (test_text)));
+  if (ipsum)
+    g_string_append (str, ipsum);
+
+  kernagic_set_glyph_string (str->str);
+  g_string_free (str, TRUE);
   kernagic_compute (NULL);
-  redraw_test_text (gtk_entry_get_text (GTK_ENTRY (test_text)), toggle_measurement_lines);
+
+  redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, toggle_measurement_lines);
 
   gtk_widget_queue_draw (preview);
+
   if (index)
     gtk_widget_queue_draw (index);
 

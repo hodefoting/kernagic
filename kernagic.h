@@ -31,7 +31,6 @@ void   rewrite_ufo_glyph           (Glyph *glyph);
 #define KERNAGIC_DEFAULT_STRIP_LEFT_BEARING  1
 extern gboolean kernagic_strip_left_bearing;
 
-
 gboolean kernagic_deal_with_glyphs (gunichar left, gunichar right);
 gboolean kernagic_deal_with_glyph (gunichar unicode);
 
@@ -52,5 +51,3 @@ struct _KernagicMethod {
 #define PREVIEW_HEIGHT 500
 
 #endif
-
-
