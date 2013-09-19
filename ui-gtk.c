@@ -5,7 +5,11 @@
 #include "kernagic.h"
 #include "kerner.h"
 
-static char *ipsum = "fnord";
+static char *ipsum = "The quick brown fox jumped over the lazy dog.\n"
+"abcdefghijklmnopqrstuvwxyz\n"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
+"01234567890 +/?,.;'-\\\n"
+"The quick brown fox jumped over the lazy dog.\n";
 
 void redraw_test_text (const char *intext, const char *ipsum, int debuglevel);
 
@@ -292,29 +296,35 @@ static void rot(int n, int *x, int *y, int rx, int ry) {
 }
 
 
-static void d2xy(int n, int d, int *x, int *y) {
-    int rx, ry, s, t=d;
-    *x = *y = 0;
-    for (s=1; s<n; s*=2) {
-        rx = 1 & (t/2);
-        ry = 1 & (t ^ rx);
-        rot(s, x, y, rx, ry);
-        *x += s * rx;
-        *y += s * ry;
-        t /= 4;
+static void
+d2xy (int n, int d, int *x, int *y)
+{
+  int rx, ry, s, t=d;
+  *x = *y = 0;
+  for (s=1; s<n; s*=2)
+    {
+      rx = 1 & (t/2);
+      ry = 1 & (t ^ rx);
+      rot(s, x, y, rx, ry);
+      *x += s * rx;
+      *y += s * ry;
+      t /= 4;
     }
 }
 
 //convert (x,y) to d
-static int xy2d (int n, int x, int y) {
-    int rx, ry, s, d=0;
-    for (s=n/2; s>0; s/=2) {
-        rx = (x & s) > 0;
-        ry = (y & s) > 0;
-        d += s * s * ((3 * rx) ^ ry);
-        rot(s, &x, &y, rx, ry);
+static int
+xy2d (int n, int x, int y)
+{
+  int rx, ry, s, d=0;
+  for (s=n/2; s>0; s/=2)
+    {
+      rx = (x & s) > 0;
+      ry = (y & s) > 0;
+      d += s * s * ((3 * rx) ^ ry);
+      rot(s, &x, &y, rx, ry);
     }
-    return d;
+  return d;
 }
 
 gboolean
@@ -349,12 +359,10 @@ index_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
       g_string_append_unichar (str, glyph->unicode);
     }
 
-
   gtk_entry_set_text (GTK_ENTRY (test_text), str->str);
   g_string_free (str, TRUE);
   return TRUE;
 }
-
 
 #ifdef GTK2
 gboolean
@@ -387,14 +395,14 @@ index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
   cairo_save (cr);
   cairo_set_source_rgb (cr, 0.93,0.93,0.93);
   cairo_paint (cr);
-    {
-      cairo_surface_t *surface =
-        cairo_image_surface_create_for_data (index_canvas,
-            CAIRO_FORMAT_A8, INDEX_WIDTH, INDEX_HEIGHT, INDEX_WIDTH);
-      cairo_set_source_rgb (cr, 0,0,0);
-      cairo_mask_surface (cr, surface, 0, 0);
-      cairo_surface_destroy (surface);
-    }
+  {
+    cairo_surface_t *surface =
+      cairo_image_surface_create_for_data (index_canvas,
+          CAIRO_FORMAT_A8, INDEX_WIDTH, INDEX_HEIGHT, INDEX_WIDTH);
+    cairo_set_source_rgb (cr, 0,0,0);
+    cairo_mask_surface (cr, surface, 0, 0);
+    cairo_surface_destroy (surface);
+  }
   cairo_restore (cr);
 #ifdef GTK2
   cairo_destroy (cr);
@@ -532,7 +540,6 @@ int ui_gtk (int argc, char **argv)
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_method);
-
   }
 
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
@@ -584,7 +591,6 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_offset);
   }
-
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Tracking");

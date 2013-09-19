@@ -26,12 +26,17 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
-      if ((xp + x + xo + g->left_bearing * scale_factor)* scale >= 0 && (xp + x + xo + g->left_bearing * scale_factor)* scale < PREVIEW_WIDTH && yp + y* scale < PREVIEW_HEIGHT)
+      if (xo + (xp + x + g->left_bearing * scale_factor)* scale >= 0 &&
+          xo + (xp + x + g->left_bearing * scale_factor)* scale < PREVIEW_WIDTH &&
+          yp + yo + y* scale < PREVIEW_HEIGHT &&
+          yp + yo + y* scale >= 0
+          )
       {
-        int val = kernagic_preview [(int)(yp + ((y+yo)* scale)) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor)* scale) + xp]; 
+        int val = kernagic_preview [(int)(yp + yo + ((y)* scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor)* scale) + xp]; 
         val += g->raster[y * g->r_width + x] * opacity * scale * scale;
-        if (val > 255) val = 255;
-        kernagic_preview [(int)(yp + ((y+yo) * scale)) * PREVIEW_WIDTH + (int)((x + xo + g->left_bearing * scale_factor) * scale) + xp] = val;
+        if (val > 255)
+          val = 255;
+        kernagic_preview [(int)(yp + yo + ((y) * scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor) * scale) + xp] = val;
       }
 
   return xo + kernagic_get_advance (g) * scale_factor * scale;
@@ -67,21 +72,20 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
 #endif
-
           if (g->lstem > 0)
           {
-          x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+            x = g->lstem * scale_factor + g->left_bearing * scale_factor;
+            if (x + xo < PREVIEW_WIDTH &&
+                x + xo >= 0)
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
 
           if (g->rstem > 0)
           {
-          x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+            x = g->rstem * scale_factor + g->left_bearing * scale_factor;
+            if (x + xo < PREVIEW_WIDTH &&
+                x + xo >= 0)
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
         }
 
@@ -89,17 +93,17 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
         {
           if (g->lstem > 0)
           {
-          x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+            x = g->lstem * scale_factor + g->left_bearing * scale_factor;
+            if (x + xo < PREVIEW_WIDTH &&
+                x + xo >= 0)
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
           if (g->rstem > 0)
           {
-          x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-          if (x + xo < PREVIEW_WIDTH &&
-              x + xo >= 0)
-            kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+            x = g->rstem * scale_factor + g->left_bearing * scale_factor;
+            if (x + xo < PREVIEW_WIDTH &&
+                x + xo >= 0)
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
         }
     }
@@ -122,35 +126,32 @@ void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
   if (str2)
   {
     Glyph *prev_g = NULL;
-  for (i = 0; str2[i]; i++)
-    {
-      Glyph *g = kernagic_find_glyph_unicode (str2[i]);
-      if (g)
-        {
-          if (prev_g)
-            x += kernagic_kern_get (prev_g, g) * scale_factor;
+    float scale = 0.1;
+    for (i = 0; str2[i]; i++)
+      {
+        Glyph *g = kernagic_find_glyph_unicode (str2[i]);
+        if (g)
+          {
+            if (prev_g)
+              x += kernagic_kern_get (prev_g, g) * scale_factor;
 
-            g_entries[big] = g;
-            x_entries[big++] = x;
-
-          place_glyph_debug (g, x, y, 1.0, 0.1, debuglevel);
-          x = place_glyph (g, x, y, 1.0, 0.1);
-          prev_g = g;
-        }
-      else if (str2[i] == ' ') /* we're only faking it if we have to  */
-        {
-          Glyph *t = kernagic_find_glyph_unicode ('i');
-          if (t)
-            x += kernagic_get_advance (t) * scale_factor;
-          prev_g = NULL;
-        }
-      if (x > 8192)
-        {
-          y += 512;
-          x = 0;
-        }
-    }
-    g_free (str2);
+            x = place_glyph (g, x, y, 1.0, scale);
+            prev_g = g;
+          }
+        else if (str2[i] == ' ') /* we're only faking it if we have to  */
+          {
+            Glyph *t = kernagic_find_glyph_unicode ('i');
+            if (t)
+              x += kernagic_get_advance (t) * scale_factor * scale;
+            prev_g = NULL;
+          }
+        if (x > 800)
+          {
+            y += 512;
+            x = 0;
+          }
+      }
+      g_free (str2);
   }
 
   x = 0;
