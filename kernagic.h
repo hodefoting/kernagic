@@ -48,6 +48,6 @@ struct _KernagicMethod {
 };
 
 #define PREVIEW_WIDTH  1024
-#define PREVIEW_HEIGHT 500
+#define PREVIEW_HEIGHT 600
 
 #endif

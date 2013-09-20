@@ -11,7 +11,7 @@ static char *ipsum = "The quick brown fox jumped over the lazy dog.\n"
 "01234567890 +/?,.;'-\\\n"
 "The quick brown fox jumped over the lazy dog.\n";
 
-void redraw_test_text (const char *intext, const char *ipsum, int debuglevel);
+void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
 
 #define INDEX_WIDTH    256
 #define INDEX_HEIGHT   256
@@ -44,6 +44,7 @@ static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
 static GtkWidget *spin_tracking;
 static GtkWidget *spin_offset;
+GtkWidget *spin_ipsum_no;
 
 static GtkWidget *vbox_options_gray;
 static GtkWidget *vbox_options_rythm;
@@ -88,7 +89,10 @@ static gboolean delayed_trigger (gpointer foo)
   g_string_free (str, TRUE);
   kernagic_compute (NULL);
 
-  redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, toggle_measurement_lines);
+  redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, 
+      
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no))
+      ,toggle_measurement_lines);
 
   gtk_widget_queue_draw (preview);
 
@@ -219,6 +223,11 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 
   advance = kernagic_get_advance (g);
 
+  /* should be adjusted according to an y-offset */
+
+  /* for lowest y coords- do word picking from background ipsum,
+   * for detailed adjustments
+   */
   if (y < kernagic_x_height () * 1)
   {
     g->rstem = x - g->left_bearing;
@@ -465,8 +474,11 @@ int ui_gtk (int argc, char **argv)
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
     gtk_size_group_add_widget (sliders, ipsum_path);
+    spin_ipsum_no = gtk_spin_button_new_with_range (0, 100, 1);
+
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), ipsum_path);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_ipsum_no);
   }
 
 
@@ -637,6 +649,7 @@ int ui_gtk (int argc, char **argv)
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger), NULL);
 
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
+  g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);

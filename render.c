@@ -3,7 +3,6 @@
 #include "kerner.h"
 
 /* This is the main rendering code of kernagic.. 
- * 
  */
 uint8_t *kernagic_preview = NULL;
 #define MAX_BIG       1024
@@ -109,7 +108,7 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
     }
 }
 
-void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
+void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel)
 {
   float period = kerner_settings.alpha_target;
   const char *utf8;
@@ -126,11 +125,32 @@ void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
   if (str2)
   {
     Glyph *prev_g = NULL;
-    float scale = 0.1;
-    for (i = 0; str2[i]; i++)
+    float scale = 0.08;
+    int n = 0;
+
+    i = 0;
+    if (ipsum_no)
+    {
+      while (n < (ipsum_no-1) && str2[i])
+      {
+        if (str2[i] == '\n')
+          n++;
+        i++;
+      }
+    }
+
+    for (; str2[i]; i++)
       {
         Glyph *g = kernagic_find_glyph_unicode (str2[i]);
-        if (g)
+
+        if (str2[i] == '\n')
+          {
+            if (ipsum_no != 0)
+              break;
+            y += 512 * scale;
+            x = 0;
+          }
+        else if (g)
           {
             if (prev_g)
               x += kernagic_kern_get (prev_g, g) * scale_factor;
@@ -145,9 +165,9 @@ void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
               x += kernagic_get_advance (t) * scale_factor * scale;
             prev_g = NULL;
           }
-        if (x > 800)
+        if (x > PREVIEW_WIDTH - 8)
           {
-            y += 512;
+            y += 512 * scale;
             x = 0;
           }
       }
@@ -155,7 +175,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
   }
 
   x = 0;
-  y = 0;
+  y = 100;
   big = 0;
   utf8 = intext;
   str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
@@ -174,7 +194,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int debuglevel)
             x_entries[big++] = x;
 
           place_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
-          x = place_glyph (g, x, y, 1.0, 1.0);
+          x = place_glyph (g, x, y, 0.3, 1.0);
           prev_g = g;
         }
       else if (str2[i] == ' ') /* we're only faking it if we have to  */
