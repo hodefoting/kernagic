@@ -5,11 +5,7 @@
 #include "kernagic.h"
 #include "kerner.h"
 
-static char *ipsum = "The quick brown fox jumped over the lazy dog.\n"
-"abcdefghijklmnopqrstuvwxyz\n"
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
-"01234567890 +/?,.;'-\\\n"
-"The quick brown fox jumped over the lazy dog.\n";
+static char *ipsum = NULL;
 
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
 
@@ -121,6 +117,9 @@ static gboolean delayed_reload_trigger (gpointer foo)
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
   kernagic_strip_left_bearing = TRUE;
 
+//  if (ipsum)
+//    g_free (ipsum);
+//  ipsum = NULL;
 
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
   g_free (ufo_path);
@@ -149,6 +148,15 @@ static void trigger_prop_show (void)
     gtk_widget_show (vbox_options_rythm);
 }
 
+static void ipsum_reload (void)
+{
+  if (ipsum)
+    g_free (ipsum);
+  g_file_get_contents (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (ipsum_path)),
+      &ipsum, NULL, NULL);
+  trigger ();
+}
+
 static void trigger_reload (void)
 {
   if (delayed_reload_updater)
@@ -163,6 +171,7 @@ static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), KERNER_DEFAULT_MODE);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
@@ -177,6 +186,7 @@ static void set_defaults_from_args (void)
   gtk_entry_set_text (GTK_ENTRY (test_text), kernagic_sample_text);
   else
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no());
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
@@ -228,12 +238,12 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
-  if (y < kernagic_x_height () * 1)
+  if (y < kernagic_x_height () * 1.5)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
   }
-  else if (y > kernagic_x_height () * 2 )
+  else if (y > kernagic_x_height () * 2.5)
   {
     g->rstem = 0;
     g->lstem = 0;
@@ -434,6 +444,7 @@ int ui_gtk (int argc, char **argv)
     kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
   if (!index_canvas)
     index_canvas = g_malloc0 (INDEX_WIDTH * INDEX_HEIGHT);
+
 
   gtk_init (&argc, &argv);
 
@@ -643,7 +654,8 @@ int ui_gtk (int argc, char **argv)
 #endif
 
   /* when these change, we need to reinitialize from scratch */
-  g_signal_connect (font_path,           "file-set",      G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (font_path,          "file-set",      G_CALLBACK (trigger_reload), NULL);
+  g_signal_connect (ipsum_path,         "file-set",      G_CALLBACK (ipsum_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (toggle_measurement_lines_check, "toggled",   G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger), NULL);
@@ -659,6 +671,7 @@ int ui_gtk (int argc, char **argv)
 
   set_defaults_from_args ();
 
+
   gtk_widget_show_all (hbox);
   gtk_widget_hide (progress);
   gtk_widget_show (window);
@@ -668,6 +681,13 @@ int ui_gtk (int argc, char **argv)
     kerner_debug_ui ();
 
   trigger_reload ();
+
+  ipsum = g_strdup ("the quick brown fox jumped over the lazy dog\n"
+      "abcd efgh ijkl mnop qrst uvw xyz\n"
+      "ABCD EFGH IJKL MNOP QRST UVW XYZ\n"
+      "01234 56789\n"
+      "-=+ ,.:;' ()[]{} *&^%$#@!\n");
+
   gtk_main ();
   return 0;
 }

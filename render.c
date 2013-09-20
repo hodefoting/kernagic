@@ -121,6 +121,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
   big = 0;
   utf8 = ipsum;
+  if (ipsum)
+  {
   str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
   if (str2)
   {
@@ -145,7 +147,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
         if (str2[i] == '\n')
           {
-            if (ipsum_no != 0)
+            if (ipsum_no != 0 || y > 100)
               break;
             y += 512 * scale;
             x = 0;
@@ -173,6 +175,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       }
       g_free (str2);
   }
+  }
 
   x = 0;
   y = 100;
@@ -194,7 +197,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             x_entries[big++] = x;
 
           place_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
-          x = place_glyph (g, x, y, 0.3, 1.0);
+          x = place_glyph (g, x, y, 1.0, 1.0);
           prev_g = g;
         }
       else if (str2[i] == ' ') /* we're only faking it if we have to  */
