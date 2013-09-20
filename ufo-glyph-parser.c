@@ -370,7 +370,7 @@ void gen_debug (Glyph *glyph)
     int t;
     float x_height = kernagic_x_height ();
 
-    for (t = 1; t < 2; t ++)
+    for (t = 1; t < 4; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
@@ -438,6 +438,7 @@ void gen_debug (Glyph *glyph)
 
     glyph->stems[glyph->stem_count] = x / scale_factor;
     glyph->stem_weight[glyph->stem_count++] = 1;
+
 #if 0
     for (t = 8; t < 256; t ++)
     {

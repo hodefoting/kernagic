@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -442,6 +443,47 @@ index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 
 extern const char *ufo_path;
 
+static gboolean
+kernagic_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+  switch (event->keyval)
+  {
+    case GDK_Page_Up:
+      gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),  
+        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no)) - 1);
+      return TRUE;
+    case GDK_Page_Down:
+      gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),  
+        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no)) + 1);
+      return TRUE;
+    case GDK_F1: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 0); break;
+    case GDK_F2: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 1); break;
+    case GDK_F3: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 2); break;
+    case GDK_F4: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 3); break;
+    case GDK_F5: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 4); break;
+    case GDK_F6: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 5); break;
+    case GDK_s:
+    case GDK_S:
+      if (event->state & GDK_CONTROL_MASK)
+      {
+        do_save ();
+        return TRUE;
+      }
+      break;
+    case GDK_q:
+    case GDK_Q:
+      if (event->state & GDK_CONTROL_MASK)
+      {
+        gtk_main_quit ();
+        return TRUE;
+      }
+      break;
+    default:
+      break;
+  }
+  return FALSE; 
+}
+
 int ui_gtk (int argc, char **argv)
 {
   GtkWidget    *window;
@@ -464,6 +506,7 @@ int ui_gtk (int argc, char **argv)
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key_press), NULL);
 
 
   hbox = gtk_hbox_new (FALSE, 5);
@@ -487,22 +530,30 @@ int ui_gtk (int argc, char **argv)
   gtk_widget_add_events (preview, GDK_BUTTON_PRESS_MASK);
 
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Ipsum");
+    GtkWidget *hbox;
+    /* XXX: add a button to remove all custom stems? */
+    GtkWidget *defaults_button = gtk_button_new_with_label ("defaults");
+    GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
+    GtkWidget *save_button     = gtk_button_new_with_label ("Save");
+
+    gtk_widget_set_tooltip_text (save_button, "Ctrl + S");
+
+    hbox = gtk_hbox_new (FALSE, 4);
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
+    gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
 
-    ipsum_path = gtk_file_chooser_button_new ("ipsum", GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_size_group_add_widget (labels, label);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    //hbox = gtk_hbox_new (FALSE, 4);
+    //gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
 
-    spin_ipsum_no = gtk_spin_button_new_with_range (0, 100, 1);
-    gtk_container_add (GTK_CONTAINER (hbox2), ipsum_path);
-    gtk_container_add (GTK_CONTAINER (hbox2), spin_ipsum_no);
-    gtk_size_group_add_widget (sliders, hbox2);
-
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), hbox2);
+    g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
+    g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
+    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
+  }
+  {
+    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
+    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
   }
 
 
@@ -520,6 +571,27 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), font_path);
   }
+
+  {
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *label = gtk_label_new ("Ipsum");
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
+
+    ipsum_path = gtk_file_chooser_button_new ("ipsum", GTK_FILE_CHOOSER_ACTION_OPEN);
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+
+    spin_ipsum_no = gtk_spin_button_new_with_range (0, 100, 1);
+    gtk_widget_set_tooltip_text (spin_ipsum_no, "PgUp / PgDn");
+    gtk_container_add (GTK_CONTAINER (hbox2), ipsum_path);
+    gtk_container_add (GTK_CONTAINER (hbox2), spin_ipsum_no);
+    gtk_size_group_add_widget (sliders, hbox2);
+
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), hbox2);
+  }
+
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Text sample");
@@ -532,33 +604,6 @@ int ui_gtk (int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
   }
 
-  {
-    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
-    //GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
-    //gtk_size_group_add_widget (sliders, toggle_measurement_lines_check);
-    //gtk_box_pack_end (GTK_BOX (hbox), toggle_measurement_lines_check, FALSE, TRUE, 2);
-  }
-  {
-    GtkWidget *hbox;
-    /* XXX: add a button to remove all custom stems? */
-    GtkWidget *defaults_button = gtk_button_new_with_label ("defaults");
-    GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
-    GtkWidget *save_button     = gtk_button_new_with_label ("Save");
-
-    hbox = gtk_hbox_new (FALSE, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
-
-    //hbox = gtk_hbox_new (FALSE, 4);
-    //gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
-
-    g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
-    g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
-    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
-  }
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
@@ -573,6 +618,7 @@ int ui_gtk (int argc, char **argv)
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "gap");
     gtk_size_group_add_widget (sliders, spin_method);
+    gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_method);
@@ -665,6 +711,19 @@ int ui_gtk (int argc, char **argv)
   g_signal_connect (index, "button-press-event", G_CALLBACK (index_press_cb), NULL);
   gtk_widget_add_events (index, GDK_BUTTON_PRESS_MASK);
 #endif
+
+
+  {
+    GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom stems, within the x-height left and right stems are set, above the x-height single stem overrides are set.\n\nWeak lines from baseline to top of line indicate glyph starts\nweak lines going through the baseline are auto-detected stems.\nStrong lines going through the baseline are custom stem overrides.");
+    gtk_label_set_line_wrap (GTK_LABEL (help), TRUE);
+    gtk_misc_set_alignment (GTK_MISC (help), 0.0, 0.0);
+    gtk_box_pack_start (GTK_BOX (vbox1), help, FALSE, FALSE, 2);
+  }
+
+
+  /************/
+
+
 
   /* when these change, we need to reinitialize from scratch */
   g_signal_connect (font_path,          "file-set",      G_CALLBACK (trigger_reload), NULL);
