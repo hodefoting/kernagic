@@ -60,7 +60,7 @@ struct _Word
 const char *detect_word (int x, int y);
 float n_distance (void);
 
-#define DEBUG_START_Y 160
+#define DEBUG_START_Y 100
 #define PREVIEW_WIDTH  900
 #define PREVIEW_HEIGHT 600
 

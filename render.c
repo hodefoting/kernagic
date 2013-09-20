@@ -77,19 +77,30 @@ static void draw_glyph_debug
 {
   int x, y;
 
+  float yline = DEBUG_START_Y + kernagic_x_height () * scale_factor * 2.5 - 10;
+
   if (toggle_measurement_lines)
     {
-      for (y = DEBUG_START_Y; y < g->r_height; y++)
-        for (x = 0; x < 1; x++)
+      int radius = 64;
+      for (y = yline - radius; y < yline + radius; y++)
+      {
+        int xs[] = {0, kernagic_get_advance (g) * scale_factor * scale};
+        int i;
+        for (i = 0; i < sizeof(xs)/sizeof(xs[0]); i++)
+        {
+          x = xs[i];
           if (x + xo >= 0 &&
               x + xo < PREVIEW_WIDTH &&
               y >= 0 &&
               y < PREVIEW_HEIGHT &&
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
               )
-          kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
+          kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+        }
+      }
 
-      for (y = DEBUG_START_Y; y < PREVIEW_HEIGHT; y++)
+      radius = 32;
+      for (y = yline - radius; y < yline + radius; y++)
         {
 #if 1
           if (g->stem_count >=1)
@@ -115,34 +126,43 @@ static void draw_glyph_debug
           if (g->lstem > 0)
           {
             x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH &&
-                x + xo >= 0)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
 
           if (g->rstem > 0)
           {
             x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH &&
-                x + xo >= 0)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
         }
 
-      for (y = DEBUG_START_Y; y < PREVIEW_HEIGHT; y++)
+      radius = 32;
+      for (y = yline - radius; y < yline + radius; y++)
         {
           if (g->lstem > 0)
           {
             x = g->lstem * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH &&
-                x + xo >= 0)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
           if (g->rstem > 0)
           {
             x = g->rstem * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH &&
-                x + xo >= 0)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
         }
@@ -303,11 +323,30 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       {
         int y;
         int x = (i + 0.5) * period * scale_factor;
-        for (y= PREVIEW_HEIGHT*0.8; y < PREVIEW_HEIGHT*0.85; y++)
+        float yline = DEBUG_START_Y + kernagic_x_height () * scale_factor * 2.5 - 10;
+        int radius = kernagic_x_height () * scale_factor * 1.5;
+        for (y = yline - radius; y < yline + radius; y++)
           {
+            if (x >= 0 &&
+                x < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
+            kernagic_preview[y* PREVIEW_WIDTH + x] =
+              kernagic_preview[y* PREVIEW_WIDTH + x] * 0.9 +
+              255 * 0.1;
+          }
+#if 0
+        radius = 4;
+        for (y = yline - radius; y < yline + radius; y++)
+          {
+            if (x >= 0 &&
+                x < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
             kernagic_preview[y* PREVIEW_WIDTH + x] =
               (kernagic_preview[y* PREVIEW_WIDTH + x] + 96) / 2;
           }
+#endif
       }
   }
 }

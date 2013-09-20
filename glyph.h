@@ -59,7 +59,7 @@ float  kernagic_kern_get          (Glyph *a, Glyph *b);
 void   kernagic_set_kerning       (Glyph *a, Glyph *b, float kerning);
 void   kernagic_set_left_bearing  (Glyph *g, float left_bearing);
 void   kernagic_set_right_bearing (Glyph *g, float right_bearing);
-float  kernagic_get_advance       (Glyph *unicode);
+float  kernagic_get_advance       (Glyph *g);
 Glyph *kernagic_glyph_new         (const char *path);
 void   kernagic_glyph_free        (Glyph *glyph);
 

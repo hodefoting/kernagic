@@ -13,7 +13,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 #define INDEX_WIDTH    256
 #define INDEX_HEIGHT   256
 
-
 #define GTK2 1
 #define HILBERTCODE 1
 
@@ -23,15 +22,13 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 #define gtk_vbox_new(a,n)  gtk_box_new (GTK_ORIENTATION_VERTICAL, n)
 #endif
 
-extern Glyph   *g_entries[];
-extern int      x_entries[];
-extern int      big;
-extern gboolean toggle_measurement_lines;
-extern float  scale_factor;
-
-extern char *kernagic_sample_text;
-extern uint8_t *kernagic_preview;
-
+extern Glyph     *g_entries[];
+extern int        x_entries[];
+extern int        big;
+extern gboolean   toggle_measurement_lines;
+extern float      scale_factor;
+extern char      *kernagic_sample_text;
+extern uint8_t   *kernagic_preview;
 static GtkWidget *preview;
 static GtkWidget *index = NULL;
 static GtkWidget *test_text;

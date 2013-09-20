@@ -386,8 +386,8 @@ void gen_debug (Glyph *glyph)
         }
       {
         int foo = sum / c;
-        foo /= 32;
-        foo *= 32;
+       // foo /= 32;
+       // foo *= 32;
         raster [glyph->r_width * (glyph->r_height-t) + x] = foo;
       }
     }

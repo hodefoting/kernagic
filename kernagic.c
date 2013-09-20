@@ -285,7 +285,7 @@ float kernagic_x_height (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('x');
   if (!g)
-    return 0.0;
+    return 1.0; /* avoiding 0, for divisions by it.. */
   return (g->ink_max_y - g->ink_min_y);
 }
 
