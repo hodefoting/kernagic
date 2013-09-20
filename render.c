@@ -91,7 +91,7 @@ static void draw_glyph_debug
 
       for (y = DEBUG_START_Y; y < PREVIEW_HEIGHT; y++)
         {
-#if 0
+#if 1
           if (g->stem_count >=1)
             {
             x = g->stems[0] * scale_factor + g->left_bearing * scale_factor;
@@ -99,7 +99,7 @@ static void draw_glyph_debug
                 x + xo < PREVIEW_WIDTH &&
                 y >= 0 &&
                 y < PREVIEW_HEIGHT)
-              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
             }
 
           if (g->stem_count > 1)
@@ -109,7 +109,7 @@ static void draw_glyph_debug
                 x + xo < PREVIEW_WIDTH &&
                 y >= 0 &&
                 y < PREVIEW_HEIGHT)
-              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
+              kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
           }
 #endif
           if (g->lstem > 0)
@@ -155,8 +155,12 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
   const char *utf8;
   gunichar *str2;
   int i;
-  float x = 0;
-  float y = 0;
+  float x0 = 10;
+  float y0 = 10;
+  float linestep = 512;
+
+  float x = x0;
+  float y = y0;
 
   memset (kernagic_preview, 0, PREVIEW_WIDTH * PREVIEW_HEIGHT);
 
@@ -170,6 +174,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       Glyph *prev_g = NULL;
       float scale = 0.07;
       int n = 0;
+
+      linestep = 512 * scale;
 
       i = 0;
       if (ipsum_no)
@@ -201,8 +207,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             {
               if (ipsum_no != 0 || y > 100)
                 break;
-              y += 512 * scale;
-              x = 0;
+              y += linestep;
+              x = x0;
               /* XXX */
               add_word (word->str, startx, y, x - startx, 40);
               startx = x;
@@ -230,8 +236,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             }
           if (x > PREVIEW_WIDTH - 8)
             {
-              y += 512 * scale;
-              x = 0;
+              y += linestep;
+              x = x0;
             }
         }
 
@@ -246,8 +252,12 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
   /**********************************/
 
-  x = 0;
-  y = 100;
+  x0 = 0;
+  y0 = 100;
+
+  x = x0;
+  y = y0;
+  linestep = 512;
   big = 0;
   utf8 = intext;
   str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
@@ -278,8 +288,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
         }
       if (x > 8192)
         {
-          y += 512;
-          x = 0;
+          y += linestep;
+          x = x0;
         }
     }
     g_free (str2);
