@@ -58,6 +58,7 @@ struct _Word
   int height;
 };
 const char *detect_word (int x, int y);
+float n_distance (void);
 
 #define DEBUG_START_Y 160
 #define PREVIEW_WIDTH  900

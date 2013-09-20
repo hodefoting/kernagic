@@ -86,6 +86,7 @@ static gboolean delayed_trigger (gpointer foo)
   g_string_free (str, TRUE);
   kernagic_compute (NULL);
 
+  fprintf (stderr, "[%f]\n", n_distance ());
   redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, 
       
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no))
