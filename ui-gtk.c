@@ -36,6 +36,7 @@ static GtkWidget *spin_method;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
 static GtkWidget *spin_gray_target;
+static GtkWidget *spin_divisor;
 static GtkWidget *spin_tracking;
 static GtkWidget *spin_offset;
 GtkWidget *spin_ipsum_no;
@@ -61,6 +62,8 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
   kerner_settings.alpha_target =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  kerner_settings.divisor =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
   kerner_settings.offset =
@@ -83,7 +86,6 @@ static gboolean delayed_trigger (gpointer foo)
   g_string_free (str, TRUE);
   kernagic_compute (NULL);
 
-  fprintf (stderr, "[%f]\n", n_distance ());
   redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, 
       
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no))
@@ -96,6 +98,17 @@ static gboolean delayed_trigger (gpointer foo)
 
   delayed_updater = 0;
   return FALSE;
+}
+
+static void trigger_divisor (void)
+{
+  float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
+  /* freeze notify and such.. */
+  //g_object_freeze_notify (spin_target_gray);
+  //g_object_thaw_notify (spin_target_gray);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
+      n_distance () / divisor);
+
 }
 
 static void trigger (void)
@@ -173,6 +186,7 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
@@ -191,6 +205,7 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
@@ -648,6 +663,20 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
   vbox_options_rythm = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
+
+
+  {
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *label = gtk_label_new ("Divisor");
+    gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_divisor = gtk_spin_button_new_with_range (0.0, 2000.0, 0.04);
+    gtk_size_group_add_widget (sliders, spin_divisor);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), spin_divisor);
+  }
+
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Cadence");
@@ -712,7 +741,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
 
   {
-    GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom stems, within the x-height left and right stems are set, above the x-height single stem overrides are set.\n\nWeak lines from baseline to top of line indicate glyph starts\nweak lines going through the baseline are auto-detected stems.\nStrong lines going through the baseline are custom stem overrides.");
+    GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom stems, within the x-height left and right stems are set, above the x-height single stem overrides are set.\n\nThe short lines are stem-lines, weak ones auto-detected and dark ones manual overrides.");
     gtk_label_set_line_wrap (GTK_LABEL (help), TRUE);
     gtk_misc_set_alignment (GTK_MISC (help), 0.0, 0.0);
     gtk_box_pack_start (GTK_BOX (vbox1), help, FALSE, FALSE, 2);
@@ -735,6 +764,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_divisor,       "notify::value", G_CALLBACK (trigger_divisor), NULL);
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_offset,        "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
@@ -753,9 +783,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   trigger_reload ();
 
   ipsum = g_strdup ("the five boxing wizards jump quickly\n"
-      "abcd efgh ijkl mnop qrst uvw xyz\n"
-      "ABCD EFGH IJKL MNOP QRST UVW XYZ\n"
-      "01234 56789 -=+_ ,.:;'\" ()[]{} *&^%$#?@! <>~`/|\\ \n"
+      "lodger jets keller viewed breast catty magi eskimo sudden allay sitars glues snub quail myself criers parole hunts sync bulky nissan recede freud sculpt numbs arias doyens vector liming polyp yamaha boodle legree zigzag lusty babies unwind ginkgo\n"
+      "shrub wisdom cipher causal sigh grubby ate gaffs hutch mapped levitt duluth peeks hyping halos shoed bog enable copra distil storm zuni besets trump quaver modem reap murals kurtis fazing pursed vaguer aisle tilt began gentry effect convoy crowds\n"
+      "illegally roach unlimited variable costello downscale cloak walton radius rojas lemony nuke theses tipped skids sullen stael hopi toward highly croak purina croup rector pantie yeahs irks scuds egoism queen sags deity fenced taegu adams somali flaws swords dwarfs webern fronde cayuga pilaf roving verb hotel needy\n"
+      "abcdefghijklmnopqrstuvwxyz\n"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
+      "0123456789 -=+_ ,.:;'\" ()[]{} *&^%$#?@! <>~`/|\\ \n"
       "kernagic is free software distributed under the AGPL\n"
       "Øyvind Kolås pippin@gimp.org\n");
 
