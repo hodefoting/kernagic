@@ -238,7 +238,13 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
-  if (y < kernagic_x_height () * 1.5)
+  if (y < 200)
+  {
+    const char *word = "foo";
+    fprintf (stderr, "%s\n", word);
+    gtk_entry_set_text (GTK_ENTRY (test_text), word);
+  }
+  else if (y < kernagic_x_height () * 1.5)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
@@ -479,17 +485,19 @@ int ui_gtk (int argc, char **argv)
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Ipsum");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
 
     ipsum_path = gtk_file_chooser_button_new ("ipsum", GTK_FILE_CHOOSER_ACTION_OPEN);
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
-    gtk_size_group_add_widget (sliders, ipsum_path);
     spin_ipsum_no = gtk_spin_button_new_with_range (0, 100, 1);
+    gtk_container_add (GTK_CONTAINER (hbox2), ipsum_path);
+    gtk_container_add (GTK_CONTAINER (hbox2), spin_ipsum_no);
+    gtk_size_group_add_widget (sliders, hbox2);
 
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), ipsum_path);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_ipsum_no);
+    gtk_container_add (GTK_CONTAINER (hbox), hbox2);
   }
 
 
@@ -685,8 +693,9 @@ int ui_gtk (int argc, char **argv)
   ipsum = g_strdup ("the quick brown fox jumped over the lazy dog\n"
       "abcd efgh ijkl mnop qrst uvw xyz\n"
       "ABCD EFGH IJKL MNOP QRST UVW XYZ\n"
-      "01234 56789\n"
-      "-=+ ,.:;' ()[]{} *&^%$#@!\n");
+      "01234 56789 -=+_ ,.:;'\" ()[]{} *&^%$#?@! <>~`/|\\ \n"
+      "kernagic is free software distributed under the AGPL\n"
+      "Øyvind Kolås pippin@gimp.org\n");
 
   gtk_main ();
   return 0;
