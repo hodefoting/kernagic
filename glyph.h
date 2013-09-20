@@ -47,7 +47,6 @@ struct _Glyph {
   cairo_t      *cr; /* used transiently during glyph rendering */
 
 #define MAX_STEMS 32
-
   float         stems[MAX_STEMS];
   float         stem_weight[MAX_STEMS];
   int           stem_count;

@@ -6,17 +6,49 @@
  */
 uint8_t *kernagic_preview = NULL;
 #define MAX_BIG       1024
-#define DEBUG_START_Y 160
 
 Glyph  *g_entries[MAX_BIG];
 int     x_entries[MAX_BIG];
 int     big = 0;
 
+
+#define MAX_WORDS    1000
+Word words[MAX_WORDS];
+int n_words = 0;
+
+void add_word (const char *utf8, int x, int y, int width, int height)
+{
+  words[n_words].utf8 = g_strdup (utf8);
+  words[n_words].x = x;
+  words[n_words].y = y;
+  words[n_words].width = width;
+  words[n_words].height = height;
+  n_words++;
+}
+
+const char *detect_word (int x, int y)
+{
+  int i;
+  for (i = 0; i < n_words; i++)
+    if (x >= words[i].x &&
+        x <  words[i].x + words[i].width &&
+        y >= words[i].y &&
+        y <  words[i].y + words[i].height)
+      {
+        return words[i].utf8;
+      }
+  return NULL;
+}
+
 extern float  scale_factor;
 
 gboolean toggle_measurement_lines = FALSE;
 
-#define SCALE_DOWN 10
+
+float advance_glyph (Glyph *g, float xo, int yo, float scale)
+{
+  return xo + kernagic_get_advance (g) * scale_factor * scale;
+}
 
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
@@ -39,7 +71,7 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
         kernagic_preview [(int)(yp + yo + ((y) * scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor) * scale) + xp] = val;
       }
 
-  return xo + kernagic_get_advance (g) * scale_factor * scale;
+  return advance_glyph (g, xo, yo, scale);
 }
 
 static void draw_glyph_debug
@@ -51,7 +83,10 @@ static void draw_glyph_debug
     {
       for (y = DEBUG_START_Y; y < g->r_height; y++)
         for (x = 0; x < 1; x++)
-          if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
+          if (x + xo >= 0 &&
+              x + xo < PREVIEW_WIDTH &&
+              y >= 0 &&
+              y < PREVIEW_HEIGHT &&
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
               )
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
@@ -62,14 +97,20 @@ static void draw_glyph_debug
           if (g->stem_count >=1)
             {
             x = g->stems[0] * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
             }
 
           if (g->stem_count > 1)
           {
             x = g->stems[g->stem_count-1] * scale_factor + g->left_bearing * scale_factor;
-            if (x + xo < PREVIEW_WIDTH)
+            if (x + xo >= 0 &&
+                x + xo < PREVIEW_WIDTH &&
+                y >= 0 &&
+                y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
 #endif
@@ -125,59 +166,87 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
   utf8 = ipsum;
   if (ipsum)
   {
-  str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
-  if (str2)
-  {
-    Glyph *prev_g = NULL;
-    float scale = 0.08;
-    int n = 0;
-
-    i = 0;
-    if (ipsum_no)
+    str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
+    if (str2)
     {
-      while (n < (ipsum_no-1) && str2[i])
+      Glyph *prev_g = NULL;
+      float scale = 0.07;
+      int n = 0;
+
+      i = 0;
+      if (ipsum_no)
       {
-        if (str2[i] == '\n')
-          n++;
-        i++;
+        while (n < (ipsum_no-1) && str2[i])
+        {
+          if (str2[i] == '\n')
+            n++;
+          i++;
+        }
       }
-    }
+      GString *word = g_string_new ("");
+      float startx = x;
 
-    for (; str2[i]; i++)
-      {
-        Glyph *g = kernagic_find_glyph_unicode (str2[i]);
+      int j;
+      for (j = 0; j < n_words; j++)
+        if (words[j].utf8)
+          {
+            g_free (words[j].utf8);
+            words[j].utf8 = NULL;
+          }
+      n_words = 0;
 
-        if (str2[i] == '\n')
-          {
-            if (ipsum_no != 0 || y > 100)
-              break;
-            y += 512 * scale;
-            x = 0;
-          }
-        else if (g)
-          {
-            if (prev_g)
-              x += kernagic_kern_get (prev_g, g) * scale_factor;
+      for (; str2[i]; i++)
+        {
+          Glyph *g = kernagic_find_glyph_unicode (str2[i]);
 
-            x = place_glyph (g, x, y, 1.0, scale);
-            prev_g = g;
-          }
-        else if (str2[i] == ' ') /* we're only faking it if we have to  */
-          {
-            Glyph *t = kernagic_find_glyph_unicode ('i');
-            if (t)
-              x += kernagic_get_advance (t) * scale_factor * scale;
-            prev_g = NULL;
-          }
-        if (x > PREVIEW_WIDTH - 8)
-          {
-            y += 512 * scale;
-            x = 0;
-          }
-      }
+          if (str2[i] == '\n')
+            {
+              if (ipsum_no != 0 || y > 100)
+                break;
+              y += 512 * scale;
+              x = 0;
+              /* XXX */
+              add_word (word->str, startx, y, x - startx, 40);
+              startx = x;
+              g_string_assign (word, "");
+            }
+          else if (g)
+            {
+              g_string_append_unichar (word, g->unicode);
+              if (prev_g)
+                x += kernagic_kern_get (prev_g, g) * scale_factor;
+
+              x = place_glyph (g, x, y, 1.0, scale);
+              prev_g = g;
+            }
+          else if (str2[i] == ' ') /* we're only faking it if we have to  */
+            {
+              Glyph *t = kernagic_find_glyph_unicode ('i');
+              if (t)
+                x += kernagic_get_advance (t) * scale_factor * scale;
+              prev_g = NULL;
+              /* XXX */
+              add_word (word->str, startx, y, x - startx, 40);
+              startx = x;
+              g_string_assign (word, "");
+            }
+          if (x > PREVIEW_WIDTH - 8)
+            {
+              y += 512 * scale;
+              x = 0;
+            }
+        }
+
+      if (word->len)
+        add_word (word->str, startx, y, x - startx, 40);
+      startx = x;
+
+      g_string_free (word, TRUE);
       g_free (str2);
+    }
   }
-  }
+
+  /**********************************/
 
   x = 0;
   y = 100;

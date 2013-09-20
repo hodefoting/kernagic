@@ -47,6 +47,19 @@ struct _KernagicMethod {
   void (*done) (void);
 };
 
+typedef struct _Word Word;
+struct _Word
+{
+  gchar *utf8;
+  int len;
+  int x;
+  int y;
+  int width;
+  int height;
+};
+const char *detect_word (int x, int y);
+
+#define DEBUG_START_Y 160
 #define PREVIEW_WIDTH  900
 #define PREVIEW_HEIGHT 600
 

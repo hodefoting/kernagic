@@ -238,10 +238,15 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
-  if (y < 200)
+  if (y < DEBUG_START_Y / scale_factor)
   {
-    const char *word = "foo";
-    fprintf (stderr, "%s\n", word);
+    const char *word;
+    /* it is ugly to have to do this */
+    x = event->button.x;
+    y = event->button.y;
+    word = detect_word (x, y);
+    if (!word)
+      word = "fnord";
     gtk_entry_set_text (GTK_ENTRY (test_text), word);
   }
   else if (y < kernagic_x_height () * 1.5)

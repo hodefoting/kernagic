@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include "kernagic.h"
 #include "kerner.h"
 
-#define SPECIMEN_SIZE 200
+#define SPECIMEN_SIZE 170
 
 char *kernagic_sample_text = NULL;
 
