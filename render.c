@@ -53,22 +53,20 @@ float advance_glyph (Glyph *g, float xo, int yo, float scale)
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
   int x, y;
-  int xp = 5;
-  int yp = 5;
 
   for (y = 0; y < g->r_height; y++)
     for (x = 0; x < g->r_width; x++)
-      if (xo + (xp + x + g->left_bearing * scale_factor)* scale >= 0 &&
-          xo + (xp + x + g->left_bearing * scale_factor)* scale < PREVIEW_WIDTH &&
-          yp + yo + y* scale < PREVIEW_HEIGHT &&
-          yp + yo + y* scale >= 0
+      if (xo + (x + g->left_bearing * scale_factor)* scale >= 0 &&
+          xo + (x + g->left_bearing * scale_factor)* scale < PREVIEW_WIDTH &&
+          yo + y* scale < PREVIEW_HEIGHT &&
+          yo + y* scale >= 0
           )
       {
-        int val = kernagic_preview [(int)(yp + yo + ((y)* scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor)* scale) + xp]; 
+        int val = kernagic_preview [(int)(yo + ((y)* scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor)* scale)]; 
         val += g->raster[y * g->r_width + x] * opacity * scale * scale;
         if (val > 255)
           val = 255;
-        kernagic_preview [(int)(yp + yo + ((y) * scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor) * scale) + xp] = val;
+        kernagic_preview [(int)(yo + ((y) * scale)) * PREVIEW_WIDTH + (int)(xo + (x + g->left_bearing * scale_factor) * scale)] = val;
       }
 
   return advance_glyph (g, xo, yo, scale);
