@@ -531,7 +531,6 @@ void kernagic_compute (GtkProgressBar *progress)
     {
       float fraction = count / (float)total;
       gtk_progress_bar_set_fraction (progress, fraction);
-      gtk_main_iteration_do (FALSE);
     }
 
     kernagic_glyph_reset (lg);

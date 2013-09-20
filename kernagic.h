@@ -47,7 +47,7 @@ struct _KernagicMethod {
   void (*done) (void);
 };
 
-#define PREVIEW_WIDTH  1024
+#define PREVIEW_WIDTH  900
 #define PREVIEW_HEIGHT 600
 
 #endif

@@ -6,6 +6,7 @@
  */
 uint8_t *kernagic_preview = NULL;
 #define MAX_BIG       1024
+#define DEBUG_START_Y 160
 
 Glyph  *g_entries[MAX_BIG];
 int     x_entries[MAX_BIG];
@@ -41,20 +42,21 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
   return xo + kernagic_get_advance (g) * scale_factor * scale;
 }
 
-void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, int debuglevel)
+static void draw_glyph_debug
+(Glyph *g, float xo, int yo, float opacity, float scale, int debuglevel)
 {
   int x, y;
 
   if (toggle_measurement_lines)
     {
-      for (y = 0; y < g->r_height; y++)
+      for (y = DEBUG_START_Y; y < g->r_height; y++)
         for (x = 0; x < 1; x++)
           if (x + xo >= 0 && x + xo < PREVIEW_WIDTH && y < PREVIEW_HEIGHT &&
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] == 0
               )
           kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 64;
 
-      for (y = 0; y < PREVIEW_HEIGHT; y++)
+      for (y = DEBUG_START_Y; y < PREVIEW_HEIGHT; y++)
         {
 #if 0
           if (g->stem_count >=1)
@@ -88,7 +90,7 @@ void place_glyph_debug (Glyph *g, float xo, int yo, float opacity, float scale, 
           }
         }
 
-      for (y = 0; y < PREVIEW_HEIGHT; y++)
+      for (y = DEBUG_START_Y; y < PREVIEW_HEIGHT; y++)
         {
           if (g->lstem > 0)
           {
@@ -196,7 +198,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             g_entries[big] = g;
             x_entries[big++] = x;
 
-          place_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
+          draw_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
           x = place_glyph (g, x, y, 1.0, 1.0);
           prev_g = g;
         }

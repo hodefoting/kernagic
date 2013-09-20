@@ -164,7 +164,7 @@ static void trigger_reload (void)
       g_source_remove (delayed_reload_updater);
       delayed_reload_updater = 0;
     }
-  delayed_reload_updater = g_timeout_add (500, delayed_reload_trigger, NULL);
+  delayed_reload_updater = g_timeout_add (250, delayed_reload_trigger, NULL);
 }
 
 static void set_defaults (void)
@@ -377,8 +377,8 @@ index_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     }
   list = l;
 
-  for (i = 0, l = list;l->prev && i < 10; i++, l = l->prev);
-  for (i = 0; l && i < 20; i++, l = l->next)
+  for (i = 0, l = list;l->prev && i < 1; i++, l = l->prev);
+  for (i = 0; l && i < 3; i++, l = l->next)
     {
       Glyph *glyph = l->data;
       g_string_append_unichar (str, glyph->unicode);
@@ -690,7 +690,7 @@ int ui_gtk (int argc, char **argv)
 
   trigger_reload ();
 
-  ipsum = g_strdup ("the quick brown fox jumped over the lazy dog\n"
+  ipsum = g_strdup ("the five boxing wizards jump quickly\n"
       "abcd efgh ijkl mnop qrst uvw xyz\n"
       "ABCD EFGH IJKL MNOP QRST UVW XYZ\n"
       "01234 56789 -=+_ ,.:;'\" ()[]{} *&^%$#?@! <>~`/|\\ \n"
