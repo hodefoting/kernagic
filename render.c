@@ -81,7 +81,7 @@ static void draw_glyph_debug
 
   if (toggle_measurement_lines)
     {
-      int radius = 64;
+      int radius = 196;
       for (y = yline - radius; y < yline + radius; y++)
       {
         int xs[] = {0, kernagic_get_advance (g) * scale_factor * scale};

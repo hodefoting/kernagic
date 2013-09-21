@@ -34,6 +34,13 @@ extern gboolean kernagic_strip_left_bearing;
 gboolean kernagic_deal_with_glyphs (gunichar left, gunichar right);
 gboolean kernagic_deal_with_glyph (gunichar unicode);
 
+/* ipsum generator is a single c function, relies on state from srandom ()  */
+char *ipsumat_generate (const char *dict_path,
+                        const char *charset,
+                        const char *desired_glyphs,
+                        int         max_wordlen,
+                        int         max_words);
+
 GList *kernagic_glyphs (void);
 
 typedef struct _KernagicMethod KernagicMethod;

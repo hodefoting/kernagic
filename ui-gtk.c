@@ -32,6 +32,7 @@ extern uint8_t   *kernagic_preview;
 static GtkWidget *preview;
 static GtkWidget *index = NULL;
 static GtkWidget *test_text;
+static GtkWidget *ipsum_glyphs;
 static GtkWidget *spin_method;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
@@ -103,13 +104,10 @@ static gboolean delayed_trigger (gpointer foo)
 static void trigger_divisor (void)
 {
   float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
-  /* freeze notify and such.. */
-  //g_object_freeze_notify (spin_target_gray);
-  //g_object_thaw_notify (spin_target_gray);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
       n_distance () / divisor);
-
 }
+
 
 static void trigger (void)
 {
@@ -122,16 +120,21 @@ static void trigger (void)
   delayed_updater = g_timeout_add (100, delayed_trigger, NULL);
 }
 
+static void trigger_ipsum (void)
+{
+  if (ipsum)
+    g_free (ipsum);
+  ipsum = g_strdup (ipsumat_generate (NULL, NULL, gtk_entry_get_text
+        (GTK_ENTRY (ipsum_glyphs)  ), 7, 42));
+  trigger ();
+}
+
 
 static guint delayed_reload_updater = 0;
 static gboolean delayed_reload_trigger (gpointer foo)
 {
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
   kernagic_strip_left_bearing = TRUE;
-
-//  if (ipsum)
-//    g_free (ipsum);
-//  ipsum = NULL;
 
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
   g_free (ufo_path);
@@ -142,6 +145,10 @@ static gboolean delayed_reload_trigger (gpointer foo)
     }
   delayed_trigger (foo);
   delayed_reload_updater = 0;
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+
   return FALSE;
 }
 
@@ -167,6 +174,7 @@ static void ipsum_reload (void)
   g_file_get_contents (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (ipsum_path)),
       &ipsum, NULL, NULL);
   trigger ();
+
 }
 
 static void trigger_reload (void)
@@ -186,8 +194,8 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
@@ -205,8 +213,9 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
@@ -252,17 +261,20 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
-  if (y < DEBUG_START_Y / scale_factor)
   {
     const char *word;
     /* it is ugly to have to do this */
-    x = event->button.x;
-    y = event->button.y;
-    word = detect_word (x, y);
-    if (!word)
-      word = "fnord";
-    gtk_entry_set_text (GTK_ENTRY (test_text), word);
+    word = detect_word (event->button.x, event->button.y);
+    if (word)
+    {
+      gtk_entry_set_text (GTK_ENTRY (test_text), word);
+      trigger ();
+      return TRUE;
+    }
   }
+
+  if (y < 0)
+  {}
   else if (y < kernagic_x_height () * 1.5)
   {
     g->rstem = x - g->left_bearing;
@@ -607,6 +619,18 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *label = gtk_label_new ("Ipsum glyphs");
+    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
+    ipsum_glyphs = gtk_entry_new ();
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    gtk_size_group_add_widget (labels, label);
+    gtk_size_group_add_widget (sliders, ipsum_glyphs);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), ipsum_glyphs);
+  }
+
+  {
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Text sample");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     test_text = gtk_entry_new ();
@@ -768,6 +792,8 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_offset,        "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
+
+  g_signal_connect (ipsum_glyphs,          "notify::text",  G_CALLBACK (trigger_ipsum), NULL);
 
   set_defaults_from_args ();
 

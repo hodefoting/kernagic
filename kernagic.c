@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <assert.h>
@@ -347,15 +348,21 @@ void help (void)
 }
 
 const char *ufo_path = NULL;
+int ipsumat (int argc, char **argv);
 
 void parse_args (int argc, char **argv)
 {
   int no;
+  kerner_settings.method = methods[2];
   for (no = 1; no < argc; no++)
     {
       if (!strcmp (argv[no], "--help") ||
           !strcmp (argv[no], "-h"))
         help ();
+      else if (!strcmp (argv[no], "--ipsumat"))
+        {
+          exit (ipsumat (argc, argv));
+        }
       else if (!strcmp (argv[no], "-d"))
         {
 #define EXPECT_ARG if (!argv[no+1]) {fprintf (stderr, "expected argument after %s\n", argv[no]);exit(-1);}
@@ -489,6 +496,9 @@ int kernagic_active_method_no (void)
 
 int main (int argc, char **argv)
 {
+  if (!strcmp (basename(argv[0]), "ipsumat"))
+    return ipsumat (argc, argv);
+
   init_methods ();
   parse_args (argc, argv);
 
