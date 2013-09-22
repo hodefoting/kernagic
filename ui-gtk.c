@@ -134,7 +134,7 @@ static void trigger_ipsum (void)
   if (ipsum)
     g_free (ipsum);
   ipsum = g_strdup (ipsumat_generate (NULL, str->str,
-        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 42));
+        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 23));
   trigger ();
   g_string_free (str, TRUE);
 }
@@ -710,7 +710,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *label = gtk_label_new ("Divisor");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_divisor = gtk_spin_button_new_with_range (0.0, 2000.0, 0.04);
+    spin_divisor = gtk_spin_button_new_with_range (0.0, 2000.0, 1);
     gtk_size_group_add_widget (sliders, spin_divisor);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -734,7 +734,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_offset = gtk_spin_button_new_with_range (-50.0, 600.0, 0.01);
+    spin_offset = gtk_spin_button_new_with_range (-50.0, 600.0, 0.25);
     gtk_size_group_add_widget (sliders, spin_offset);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
