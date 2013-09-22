@@ -213,15 +213,22 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
     struct dirent *dirp;
     dp = opendir(path);
 
-    while ((dirp = readdir(dp)) != NULL) {
-      if (dirp->d_name[0] != '.')
-        {
-          char buf[1024];
-          sprintf (buf, "%s/%s", path, dirp->d_name);
-          add_glyph (buf);
-        }
+    if (dp)
+      {
+      while ((dirp = readdir(dp)) != NULL) {
+        if (dirp->d_name[0] != '.')
+          {
+            char buf[1024];
+            sprintf (buf, "%s/%s", path, dirp->d_name);
+            add_glyph (buf);
+          }
+      }
+      closedir(dp);
     }
-    closedir(dp);
+    else
+    {
+      return ;
+    }
   }
 
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();
