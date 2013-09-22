@@ -15,7 +15,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
-#include <ftw.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <assert.h>
-#include <pthread.h>
 #include <math.h>
 #include "kernagic.h"
 #include "kerner.h"
@@ -77,9 +77,7 @@ static gint unicode_sort (gconstpointer a, gconstpointer b)
   return ga->unicode - gb->unicode;
 }
 
-static int
-add_glyph(const char *fpath, const struct stat *sb,
-             int tflag, struct FTW *ftwbuf)
+static int add_glyph(const char *fpath)
 {
   if (strstr (fpath, "contents.plist"))
     return 0;
@@ -210,10 +208,21 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 
   sprintf (path, "%s/glyphs", loaded_ufo_path);
 
-  if (nftw(path, add_glyph, 20, 0) == -1)
-    {
-      fprintf (stderr, "EEEeeek! '%s' probably not a ufo dir\n", loaded_ufo_path);
+  {
+    DIR *dp;
+    struct dirent *dirp;
+    dp = opendir(path);
+
+    while ((dirp = readdir(dp)) != NULL) {
+      if (dirp->d_name[0] != '.')
+        {
+          char buf[1024];
+          sprintf (buf, "%s/%s", path, dirp->d_name);
+          add_glyph (buf);
+        }
     }
+    closedir(dp);
+  }
 
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();
 
