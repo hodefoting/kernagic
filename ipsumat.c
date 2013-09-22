@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 int attempts = 500;
 
-
 static int print_score = 0;
 
 /** score_string:

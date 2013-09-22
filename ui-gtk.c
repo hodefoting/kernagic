@@ -121,11 +121,22 @@ static void trigger (void)
 
 static void trigger_ipsum (void)
 {
+  GString *str = g_string_new ("");
+  GList *l, *list = kernagic_glyphs ();
+  for (l = list; l; l = l->next)
+    {
+      Glyph *glyph = l->data;
+      if (glyph->unicode)
+        g_string_append_unichar (str, glyph->unicode);
+    }
+  if (!list)
+    g_string_append (str, "abcdefghijklmnopqrstuvxyz");
   if (ipsum)
     g_free (ipsum);
-  ipsum = g_strdup (ipsumat_generate (NULL, NULL, gtk_entry_get_text
-        (GTK_ENTRY (ipsum_glyphs)  ), 7, 42));
+  ipsum = g_strdup (ipsumat_generate (NULL, str->str,
+        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 42));
   trigger ();
+  g_string_free (str, TRUE);
 }
 
 
@@ -247,12 +258,18 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   x = event->button.x;
   y = event->button.y;
   for (i = 0; i+1 < big && x_entries[i+1] < event->button.x; i++);
+  
+  if (i + 1 >= big)
+    return TRUE;
+
   x -= x_entries[i];
   g = g_entries[i];
 
   x /= scale_factor;
   y /= scale_factor;
 
+  if (!g)
+    return TRUE;
   advance = kernagic_get_advance (g);
 
   /* should be adjusted according to an y-offset */
