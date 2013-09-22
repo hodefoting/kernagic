@@ -50,6 +50,8 @@ Usage
 
 A video on how to use the program is at: TODO
 
+Running `kernagic --ipsumat` is a way to run the ipsum generator stand-alone as a commandline utility. Run `kernagic --ipsumat --help` for more information.
+
 Debugging
 -----------
 
