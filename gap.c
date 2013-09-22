@@ -1,6 +1,5 @@
 #include <math.h>
 #include "kernagic.h"
-#include "kerner.h"
 
 extern float scale_factor;
 

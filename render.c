@@ -1,6 +1,5 @@
 #include <string.h>
 #include "kernagic.h"
-#include "kerner.h"
 
 /* This is the main rendering code of kernagic.. 
  */
@@ -229,7 +228,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
                 break;
               y += linestep;
               x = x0;
-              /* XXX */
               add_word (word->str, startx, y, x - startx, 40);
               startx = x;
               g_string_assign (word, "");
@@ -249,7 +247,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               if (t)
                 x += kernagic_get_advance (t) * scale_factor * scale;
               prev_g = NULL;
-              /* XXX */
               add_word (word->str, startx, y, x - startx, 40);
               startx = x;
               g_string_assign (word, "");

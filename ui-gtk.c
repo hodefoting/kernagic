@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "kernagic.h"
-#include "kerner.h"
 
 static char *ipsum = NULL;
 

@@ -46,7 +46,7 @@ static int score_string (const char *str,
   /* we pick slightly larger than a power of two, to aovid aliasing of things
    * starting on multiples of 512 in the unicode set.
    */
-#define ADJ_DIM   513
+#define ADJ_DIM   1023
   gunichar *ustr;
   char adjacency_matrix[ADJ_DIM*ADJ_DIM]={0,};
   gunichar *p;
@@ -98,19 +98,21 @@ static int score_string (const char *str,
   }
 }
 
-/* XXX: make this code utf8 */
-
 char *ipsumat_generate (const char *dict_path,
                         const char *charset,
                         const char *desired_glyphs,
                         int         max_wordlen,
                         int         max_words)
 {
-  char    *p;
+  gunichar *p;
+  gunichar *ucharset;
+  gunichar *udesired_glyphs = NULL;
+
   int      count = 0;
   int      best_sentence[MAX_WORDS]={0,};
   int      sentence[MAX_WORDS]={0,};
   char    *words_str = NULL;
+  gunichar *uwords_str = NULL;
   GList   *words = NULL;
   GString *word = g_string_new ("");
   int      best_score = 0;
@@ -123,28 +125,38 @@ char *ipsumat_generate (const char *dict_path,
   if (!words_str)
     return g_strdup ("problem opening dictionary");
 
+  uwords_str = g_utf8_to_ucs4 (words_str, -1, NULL, NULL, NULL);
+
   if (charset == NULL)
     charset = "abcdefghijklmnopqrstuvwxyz";
+
+  ucharset = g_utf8_to_ucs4 (charset, -1, NULL, NULL, NULL);
+  if (desired_glyphs)
+    udesired_glyphs = g_utf8_to_ucs4 (desired_glyphs, -1, NULL, NULL, NULL);
+
 
   if (max_words > MAX_WORDS)
     max_words = MAX_WORDS;
 
-  for (p = words_str; *p; p++)
+  for (p = uwords_str; *p; p++)
     {
       switch (*p)
       {
         case '\n':
+        case '\r':
         case ' ':
+        case '\t':
           if (word->len)
           {
             int skip = 0;
             int i;
-            for (i = 0; word->str[i]; i++)
+            gunichar *uword = g_utf8_to_ucs4 (word->str, -1, NULL, NULL, NULL);
+            for (i = 0; uword[i]; i++)
               {
                 int k;
                 skip++;
-                for (k = 0; charset[k]; k++)
-                  if (charset[k]==word->str[i])
+                for (k = 0; ucharset[k]; k++)
+                  if (ucharset[k]==uword[i])
                     {
                       skip--;break;
                     }
@@ -157,16 +169,18 @@ char *ipsumat_generate (const char *dict_path,
               words = g_list_prepend (words, g_strdup (word->str));
               count ++;
             }
+            g_free (uword);
           }
           g_string_assign (word, "");
           break;
         default:
-          g_string_append_unichar (word, tolower (*p));
+          g_string_append_unichar (word, *p);
           break;
       }
     }
+  g_free (ucharset);
   g_free (words_str);
-
+  g_free (uwords_str);
 
   for (i = 0; i < attempts; i ++)
     {
@@ -176,7 +190,7 @@ char *ipsumat_generate (const char *dict_path,
         {
           int n;
           const char *str;
-          n = random()%count;
+          n = rand()%count;
  
           {
             int k;
@@ -185,7 +199,7 @@ char *ipsumat_generate (const char *dict_path,
                 {
                   /* we try once more if it collides with already picked
                    * random number,. - but this value will stick */
-                  n = random()%count;
+                  n = rand()%count;
                   break;
                 }
           }
@@ -236,6 +250,7 @@ char *ipsumat_generate (const char *dict_path,
     }
     ret = strdup (s->str);
     g_string_free (s, TRUE);
+    g_free (udesired_glyphs);
     return ret;
   }
 }
@@ -251,10 +266,9 @@ int ipsumat (int argc, char **argv)
   const char *desired_glyphs = "";
   const char *dict_path = NULL;
 
-  /* XXX: should initialize seed from time? */
   struct timeval time;
   gettimeofday (&time, NULL);
-  srandom (time.tv_sec);
+  srand (time.tv_sec);
 
   for (argno = 1; argno < argc; argno++)
     {
@@ -293,7 +307,7 @@ int ipsumat (int argc, char **argv)
       else if (!strcmp (argv[argno], "-s"))
       {
         EXPECT_ARG;
-        srandom (atoi(argv[++argno]));
+        srand (atoi(argv[++argno]));
       }
       else if (!strcmp (argv[argno], "-D"))
       {

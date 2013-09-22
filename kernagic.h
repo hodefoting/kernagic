@@ -71,4 +71,31 @@ float n_distance (void);
 #define PREVIEW_WIDTH  900
 #define PREVIEW_HEIGHT 600
 
+
+typedef struct _KernerSettings KernerSettings;
+
+#define KERNER_DEFAULT_MODE          0
+#define KERNER_DEFAULT_MIN          15
+#define KERNER_DEFAULT_MAX          50
+#define KERNER_DEFAULT_DIVISOR      12
+#define KERNER_DEFAULT_TARGET_GRAY  50
+#define KERNER_DEFAULT_OFFSET        5
+#define KERNER_DEFAULT_TRACKING    100
+
+struct _KernerSettings
+{
+  KernagicMethod *method;
+  float minimum_distance;
+  float maximum_distance;
+  float divisor;
+  float alpha_target;
+  float offset;
+  float tracking;
+};
+extern KernerSettings kerner_settings;
+
+float kerner_kern (KernerSettings *settings, Glyph *left, Glyph *right);
+void init_kerner (void);
+void kerner_debug_ui (void);
+
 #endif

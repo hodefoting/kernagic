@@ -1,7 +1,6 @@
 /* implementation of frank bloklands reinaissance spacing scheme */
 
 #include "kernagic.h"
-#include "kerner.h"
 
 typedef struct Cadence
 {

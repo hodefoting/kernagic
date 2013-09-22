@@ -26,9 +26,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <assert.h>
 #include <math.h>
 #include "kernagic.h"
-#include "kerner.h"
 
 #define SPECIMEN_SIZE 170
+
+KernerSettings kerner_settings = {
+  KERNER_DEFAULT_MODE,
+  KERNER_DEFAULT_MIN,
+  KERNER_DEFAULT_MAX,
+  KERNER_DEFAULT_DIVISOR,
+  KERNER_DEFAULT_TARGET_GRAY,
+  KERNER_DEFAULT_OFFSET,
+  KERNER_DEFAULT_TRACKING
+};
+
+
 
 char *kernagic_sample_text = NULL;
 
@@ -455,7 +466,7 @@ void parse_args (int argc, char **argv)
 
         if (!ufo_path)
           {
-            fprintf (stderr, "no font file to work on specified before -o\n");
+            fprintf (stderr, "must specify input font before -o\n");
             exit (-1);
           }
 
@@ -463,6 +474,7 @@ void parse_args (int argc, char **argv)
         /* XXX: does not work on windows */
         sprintf (cmd, "rm -rf %s;cp -Rva %s %s", kernagic_output, ufo_path, kernagic_output);
         fprintf (stderr, "%s\n", cmd);
+
         system (cmd);
         ufo_path = kernagic_output;
       }
