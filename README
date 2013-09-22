@@ -55,4 +55,4 @@ Running `kernagic --ipsumat` is a way to run the ipsum generator stand-alone as 
 Debugging
 -----------
 
-A shell script, `kernagic-debug.sh`, is included that allows you to produce backtraces conveniently.
+A shell script, `kernagic-debug-osx.sh`, is included that allows you to produce backtraces conveniently on Mac OS X.
