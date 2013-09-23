@@ -7,10 +7,6 @@ LD_FLAGS += -lm
 include .mm/magic
 include .mm/bin
 
-
-
-
-
 # Win32 cross-compilation catch-all gtk2 build, relies on the correct compiler
 # i686-w64-mingw32-gcc being in path, and dependencies' include and lib dirs
 # to exist as symlinks from the build location. 
@@ -65,3 +61,7 @@ kernagic-installer.exe: kernagic.exe kernagic.nsis
 clean: clean-extra
 clean-extra:
 	rm -f *.exe kernagic
+	rf -f tests/output
+
+sync:
+	cp tests/output/* tests/reference
