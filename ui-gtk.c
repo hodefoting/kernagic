@@ -603,7 +603,10 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
 
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
+    if (ufo_path)
+    {
+      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
+    }
       gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
@@ -788,10 +791,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_box_pack_start (GTK_BOX (vbox1), help, FALSE, FALSE, 2);
   }
 
-
   /************/
-
-
 
   /* when these change, we need to reinitialize from scratch */
   g_signal_connect (font_path,          "file-set",      G_CALLBACK (trigger_reload), NULL);
@@ -813,7 +813,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (ipsum_glyphs,          "notify::text",  G_CALLBACK (trigger_ipsum), NULL);
 
   set_defaults_from_args ();
-
 
   gtk_widget_show_all (hbox);
   gtk_widget_hide (progress);
