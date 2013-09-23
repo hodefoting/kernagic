@@ -551,10 +551,7 @@ int main (int argc, char **argv)
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
 
   kernagic_set_glyph_string (NULL);
-  fprintf (stderr, "computing!\n");
   kernagic_compute (NULL);
-  fprintf (stderr, "done fitting!\n");
-  fprintf (stderr, "saving\n");
 
   if (kernagic_output_png)
     {
@@ -562,17 +559,13 @@ int main (int argc, char **argv)
       cairo_surface_t *surface =
         cairo_image_surface_create_for_data (kernagic_preview,
             CAIRO_FORMAT_A8, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_WIDTH);
-      redraw_test_text ("foo", kernagic_sample_text, 0, 0); 
+      redraw_test_text ("", kernagic_sample_text, 0, 0); 
       for (i = 0; i < PREVIEW_WIDTH * PREVIEW_HEIGHT; i++)
         kernagic_preview[i] = 255 - kernagic_preview[i];
       cairo_surface_write_to_png (surface, kernagic_output_png);
-      fprintf (stderr, "should render and save png\n");
       return 0;
     }
-
   kernagic_save_kerning_info ();
-  fprintf (stderr, "done saving!\n");
-
   return 0;
 }
 
