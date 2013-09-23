@@ -218,7 +218,8 @@ static void set_defaults_from_args (void)
   else
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
-  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no());
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no()); 
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
@@ -660,14 +661,16 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Fitting method");
+    GtkWidget *label = gtk_label_new ("Fitting");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_method = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    0, "ink bounds");
+                                    0, "original");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2,  "rennaisance period table");
+                                    1, "ink bounds");
+    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
+                                    2, "rennaisance period table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "gap");
     gtk_size_group_add_widget (sliders, spin_method);

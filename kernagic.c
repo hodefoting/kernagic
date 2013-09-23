@@ -52,6 +52,7 @@ extern KernagicMethod *kernagic_cadence,
    //                   *kernagic_rythm,
                       *kernagic_gap,
                       *kernagic_gray,
+                      *kernagic_original,
                       *kernagic_bounds;
 
 KernagicMethod *methods[32] = {NULL};
@@ -59,6 +60,7 @@ KernagicMethod *methods[32] = {NULL};
 static void init_methods (void)
 {
   int i = 0;
+  methods[i++] = kernagic_original;
   methods[i++] = kernagic_bounds;
   //methods[i++] = kernagic_gray;
   methods[i++] = kernagic_cadence;
@@ -380,7 +382,8 @@ int ipsumat (int argc, char **argv);
 void parse_args (int argc, char **argv)
 {
   int no;
-  kerner_settings.method = methods[2];
+  kerner_settings.method = methods[3];
+
   for (no = 1; no < argc; no++)
     {
       if (!strcmp (argv[no], "--help") ||
@@ -508,7 +511,7 @@ KernagicMethod *kernagic_method_no (int no)
   return methods[no];
 }
 
-int             kernagic_find_method_no (KernagicMethod *method)
+int kernagic_find_method_no (KernagicMethod *method)
 {
   int i;
   for (i = 0; methods[i]; i++)

@@ -77,7 +77,7 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
   return advance_glyph (g, xo, yo, scale);
 }
 
-float place_glyphs (TextGlyph *glyphs, int num_glyphs, float opacity, float scale)
+void place_glyphs (TextGlyph *glyphs, int num_glyphs, float opacity, float scale)
 {
   int i;
   for (i = 0; i < num_glyphs; i ++)

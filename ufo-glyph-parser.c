@@ -66,7 +66,7 @@ parse_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "width"))
-            {};//glyph->advance = atoi (*a_v);
+            glyph->right_original = atoi (*a_v);
         }
     }
   else if (!strcmp (element_name, "unicode"))
@@ -350,10 +350,12 @@ load_ufo_glyph (Glyph *glyph)
   if (kernagic_strip_bearing)
     {
       glyph->offset_x = -glyph->ink_min_x;
+      glyph->left_original = glyph->ink_min_x;
+      glyph->right_original -= glyph->ink_max_x;
 
       glyph->ink_min_x   += glyph->offset_x;
       glyph->ink_max_x   += glyph->offset_x;
-      //glyph->advance += glyph->offset_x;
+
       glyph->left_bearing = 0;
       glyph->right_bearing = 0;
     }

@@ -1,6 +1,6 @@
 #include "kernagic.h"
 
-void bounds_each (Glyph *lg, GtkProgressBar *progress)
+static void bounds_each (Glyph *lg, GtkProgressBar *progress)
 {
   /*
     we don't need to do anything, since this is the default

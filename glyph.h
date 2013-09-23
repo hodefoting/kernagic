@@ -35,6 +35,9 @@ struct _Glyph {
   float         ink_width;   /* computed from ink_max_x - ink_min_x */
   float         ink_height;  /* computed from ink_max_y - ink_min_y */
 
+  float         left_original;
+  float         right_original;
+
   float         left_bearing;
   float         right_bearing; /* this should deprecate advance.. */
 

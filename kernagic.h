@@ -74,7 +74,7 @@ float n_distance (void);
 
 typedef struct _KernerSettings KernerSettings;
 
-#define KERNER_DEFAULT_MODE          0
+#define KERNER_DEFAULT_MODE          3
 #define KERNER_DEFAULT_MIN          15
 #define KERNER_DEFAULT_MAX          50
 #define KERNER_DEFAULT_DIVISOR      12
