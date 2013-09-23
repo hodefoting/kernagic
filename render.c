@@ -203,6 +203,9 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
   utf8 = ipsum;
   if (ipsum)
   {
+    TextGlyph text[2048];
+    int       text_count = 0;
+
     str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
     if (str2)
     {
@@ -254,7 +257,12 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               if (prev_g)
                 x += kernagic_kern_get (prev_g, g) * scale_factor;
 
-              x = place_glyph (g, x, y, 1.0, scale);
+              text[text_count].unicode = g->unicode;
+              text[text_count].x = x;
+              text[text_count++].y = y;
+
+              //x = place_glyph (g, x, y, 1.0, scale);
+              x = advance_glyph (g, x, y, scale);
               prev_g = g;
             }
           else if (str2[i] == ' ') /* we're only faking it if we have to  */
@@ -280,6 +288,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
       g_string_free (word, TRUE);
       g_free (str2);
+    
+      place_glyphs (text, text_count, 1.0, scale);
     }
   }
 
