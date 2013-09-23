@@ -184,6 +184,28 @@ static void draw_glyph_debug
     }
 }
 
+#if 0
+
+XXX: make oc do almost all of its work in 0.0 - 1.0 coordinates
+     pixels are of less relevance than layout. And perceived detail level -
+     which is different than actual pixel level due to things like ppi.
+
+layout pack
+  boxes[]
+  gap = 0 (for textlayout)
+
+  padding = 8
+  height = 
+  width = 
+
+#endif
+
+
+void draw_text (const char *string, float x, float y, float scale)
+{
+}
+
+
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel)
 {
   float period = kerner_settings.alpha_target;

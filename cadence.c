@@ -91,7 +91,7 @@ float right_most_center (Glyph *g)
 
 Cadence *glyph_get_cadence (Glyph *g)
 {
-  int i;
+  unsigned int i;
   for (i = 0; i < sizeof (cadence)/sizeof(cadence[0]) - 1; i++)
     {
       if (cadence[i].utf8[0] == g->unicode)

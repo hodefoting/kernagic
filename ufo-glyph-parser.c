@@ -220,6 +220,7 @@ glif_start_element (GMarkupParseContext *context,
           cx[cc] = x;
           cy[cc] = y;
           cc++;
+          /* too many points; wrong type of curve */
           assert (cc <= 2);
         }
       else

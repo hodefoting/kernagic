@@ -1,0 +1,12 @@
+Name "Kernagic"
+Outfile "kernagic-installer.exe"
+InstallDir "$PROGRAMFILES\Kernagic"
+DirText "This will install kernagic a font spacing tool (for font designers), choose location for kernagic's files"
+Section "";
+  SetOutPath $INSTDIR
+  File kernagic.exe
+  File README
+  File LICENSE
+  File AUTHORS
+  File dlls/*.dll
+SectionEnd
