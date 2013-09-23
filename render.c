@@ -49,6 +49,12 @@ float advance_glyph (Glyph *g, float xo, int yo, float scale)
   return xo + kernagic_get_advance (g) * scale_factor * scale;
 }
 
+typedef struct {
+  unsigned long unicode;
+  double x;
+  double y;
+} TextGlyph;
+
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
   int x, y;
@@ -69,6 +75,17 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
       }
 
   return advance_glyph (g, xo, yo, scale);
+}
+
+float place_glyphs (TextGlyph *glyphs, int num_glyphs, float opacity, float scale)
+{
+  int i;
+  for (i = 0; i < num_glyphs; i ++)
+    {
+      Glyph *glyph = kernagic_find_glyph_unicode (glyphs[i].unicode);
+      if (glyph)
+        place_glyph (glyph, glyphs[i].x, glyphs[i].y, opacity, scale);
+    }
 }
 
 static void draw_glyph_debug
@@ -131,7 +148,6 @@ static void draw_glyph_debug
                 y < PREVIEW_HEIGHT)
               kernagic_preview [y * PREVIEW_WIDTH + (int)(x + xo)] = 255;
           }
-
           if (g->rstem > 0)
           {
             x = g->rstem * scale_factor + g->left_bearing * scale_factor;
