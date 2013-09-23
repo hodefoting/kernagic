@@ -535,8 +535,6 @@ int ui_gtk (int argc, char **argv)
   GtkSizeGroup *labels;
   GtkSizeGroup *sliders;
 
-  if (!kernagic_preview)
-    kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
   if (!index_canvas)
     index_canvas = g_malloc0 (INDEX_WIDTH * INDEX_HEIGHT);
 
@@ -828,6 +826,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   trigger_reload ();
 
   ipsum = g_strdup ("the five boxing wizards jump quickly\n"
+      "onoo nnin ilnum\n"
       "lodger jets keller viewed breast catty magi eskimo sudden allay sitars glues snub quail myself criers parole hunts sync bulky nissan recede freud sculpt numbs arias doyens vector liming polyp yamaha boodle legree zigzag lusty babies unwind ginkgo\n"
       "shrub wisdom cipher causal sigh grubby ate gaffs hutch mapped levitt duluth peeks hyping halos shoed bog enable copra distil storm zuni besets trump quaver modem reap murals kurtis fazing pursed vaguer aisle tilt began gentry effect convoy crowds\n"
       "illegally roach unlimited variable costello downscale cloak walton radius rojas lemony nuke theses tipped skids sullen stael hopi toward highly croak purina croup rector pantie yeahs irks scuds egoism queen sags deity fenced taegu adams somali flaws swords dwarfs webern fronde cayuga pilaf roving verb hotel needy\n"

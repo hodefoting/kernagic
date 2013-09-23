@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #define SPECIMEN_SIZE 170
 
 KernerSettings kerner_settings = {
-  KERNER_DEFAULT_MODE,
+  0,
   KERNER_DEFAULT_MIN,
   KERNER_DEFAULT_MAX,
   KERNER_DEFAULT_DIVISOR,
@@ -371,6 +371,7 @@ void help (void)
           "       -o   offset, in number of periods from edge of glyph to stem\n"
           "\n"
           "   -O <output.ufo>  create a copy of the input font, this make kernagic run non-interactive\n"
+          "   -P <output.png>  just write the resulting canvas/render to a png.\n"
           "   -T <string>      sample string\n"
           "\n");
   exit (0);
@@ -481,7 +482,7 @@ void parse_args (int argc, char **argv)
         system (cmd);
         ufo_path = kernagic_output;
       }
-      else if (!strcmp (argv[no], "-p"))
+      else if (!strcmp (argv[no], "-P"))
       {
         EXPECT_ARG;
         kernagic_output_png = argv[++no];
@@ -525,10 +526,15 @@ int kernagic_active_method_no (void)
   return kernagic_find_method_no (kerner_settings.method);
 }
 
+extern uint8_t   *kernagic_preview;
+
 int main (int argc, char **argv)
 {
   if (!strcmp (basename(argv[0]), "ipsumat"))
     return ipsumat (argc, argv);
+
+  if (!kernagic_preview)
+    kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
 
   init_methods ();
   parse_args (argc, argv);
@@ -549,6 +555,21 @@ int main (int argc, char **argv)
   kernagic_compute (NULL);
   fprintf (stderr, "done fitting!\n");
   fprintf (stderr, "saving\n");
+
+  if (kernagic_output_png)
+    {
+      int i;
+      cairo_surface_t *surface =
+        cairo_image_surface_create_for_data (kernagic_preview,
+            CAIRO_FORMAT_A8, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_WIDTH);
+      redraw_test_text ("foo", kernagic_sample_text, 0, 0); 
+      for (i = 0; i < PREVIEW_WIDTH * PREVIEW_HEIGHT; i++)
+        kernagic_preview[i] = 255 - kernagic_preview[i];
+      cairo_surface_write_to_png (surface, kernagic_output_png);
+      fprintf (stderr, "should render and save png\n");
+      return 0;
+    }
+
   kernagic_save_kerning_info ();
   fprintf (stderr, "done saving!\n");
 

@@ -261,7 +261,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               text[text_count].x = x;
               text[text_count++].y = y;
 
-              //x = place_glyph (g, x, y, 1.0, scale);
               x = advance_glyph (g, x, y, scale);
               prev_g = g;
             }
@@ -289,6 +288,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       g_string_free (word, TRUE);
       g_free (str2);
     
+      /* we wait with the blast until here */
       place_glyphs (text, text_count, 1.0, scale);
     }
   }
