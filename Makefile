@@ -7,36 +7,38 @@ LD_FLAGS += -lm
 include .mm/magic
 include .mm/bin
 
-# Install mingw-w64 for your distro
-#
-# Download:
-# http://ftp.no.debian.org/pub/GNOME/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
-# and unpack it in a subdir called gtk+-bundle
+# Install mingw-w64 for your distro this should contain the
+# i686-w64-mingw32-gcc compiler which is used for mingw cross-compiling of
+# 32bit windows applications.
+# 
+# dependencies are downloaded automatically from files described at
+# http://www.gtk.org/download/win32.php
 
-gtk+-bundle_2.24.10-20120208_win32.zip:
-	wget http://ftp.no.debian.org/pub/GNOME/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
+gtk+-mingw-bundle/gtk+-bundle_2.24.10-20120208_win32.zip:
+	(cd gtk+-mingw-bundle/; wget http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip; )
 
-gtk+-bundle/unpacked.stamp: gtk+-bundle_2.24.10-20120208_win32.zip
-	(cd gtk+-bundle; unzip ../gtk+-bundle_2.24.10-20120208_win32.zip)
-	touch gtk+-bundle/unpacked.stamp
+gtk+-mingw-bundle/unpacked.stamp: gtk+-mingw-bundle/gtk+-bundle_2.24.10-20120208_win32.zip
+	(cd gtk+-mingw-bundle;\
+	 unzip gtk+-bundle_2.24.10-20120208_win32.zip;\
+	 touch unpacked.stamp)
 
-$(PROJECT_NAME).exe: *.c *.h Makefile gtk+-bundle/bin/libgtk-win32-2.0-0.dll
+$(PROJECT_NAME).exe: *.c *.h Makefile gtk+-mingw-bundle/unpacked.stamp
 	i686-w64-mingw32-gcc *.c -Wall -Wextra -Wno-unused-parameter \
-	-Ilib/glib-2.0/include  \
-	-Ilib/gtk-2.0/include  \
-	-Iinclude/glib-2.0/ \
-	-Iinclude/gtk-2.0/ \
-	-Iinclude/cairo/ \
-	-Iinclude/pango-1.0/ \
-	-Iinclude/gdk-pixbuf-2.0/ \
-	-Iinclude/atk-1.0/ \
-	-Llib \
+	-Igtk+-mingw-bundle/lib/glib-2.0/include  \
+	-Igtk+-mingw-bundle/lib/gtk-2.0/include  \
+	-Igtk+-mingw-bundle/include/glib-2.0/ \
+	-Igtk+-mingw-bundle/include/gtk-2.0/ \
+	-Igtk+-mingw-bundle/include/cairo/ \
+	-Igtk+-mingw-bundle/include/pango-1.0/ \
+	-Igtk+-mingw-bundle/include/gdk-pixbuf-2.0/ \
+	-Igtk+-mingw-bundle/include/atk-1.0/ \
+	\
+	-lm -O2 -std=c99 -mms-bitfields \
+	\
+	-Lgtk+-mingw-bundle/lib \
 	-lglib-2.0.dll -lgobject-2.0.dll \
 	-lgdk-win32-2.0.dll -lgtk-win32-2.0.dll -lcairo.dll \
-	-lm \
-	-O2 \
-	-std=c99 \
-	-mms-bitfields \
+	\
 	 -o $@ && echo
 	i686-w64-mingw32-strip $@
 
