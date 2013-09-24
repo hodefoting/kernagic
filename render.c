@@ -10,6 +10,11 @@ Glyph  *g_entries[MAX_BIG];
 int     x_entries[MAX_BIG];
 int     big = 0;
 
+typedef struct {
+  unsigned long unicode;
+  double x;
+  double y;
+} TextGlyph;
 
 #define MAX_WORDS    1000
 Word words[MAX_WORDS];
@@ -49,11 +54,6 @@ float advance_glyph (Glyph *g, float xo, int yo, float scale)
   return xo + kernagic_get_advance (g) * scale_factor * scale;
 }
 
-typedef struct {
-  unsigned long unicode;
-  double x;
-  double y;
-} TextGlyph;
 
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
@@ -205,6 +205,26 @@ void draw_text (const char *string, float x, float y, float scale)
 {
 }
 
+float measure_word_width (const gunichar *uword,int ulen, float scale)
+{
+  int j;
+  Glyph *g;
+  Glyph *prev_g = NULL;
+  float x = 0;
+  for (j = 0; j < ulen; j++)
+  {
+    g = kernagic_find_glyph_unicode (uword[j]);
+    if (!g)
+      continue;
+
+    if (prev_g)
+      x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+    x = advance_glyph (g, x, 0, scale);
+    prev_g = g;
+  }
+  return x;
+}
 
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel)
 {
@@ -212,8 +232,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
   const char *utf8;
   gunichar *str2;
   int i;
-  float x0 = 10;
-  float y0 = 10;
+  float x0 = PREVIEW_PADDING;
+  float y0 = PREVIEW_PADDING;
   float linestep = 512;
 
   float x = x0;
@@ -231,7 +251,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
     str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
     if (str2)
     {
-      Glyph *prev_g = NULL;
       float scale = 0.07;
       int n = 0;
 
@@ -248,6 +267,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
         }
       }
       GString *word = g_string_new ("");
+      gunichar uword[1024];
+      int ulen = 0;
       float startx = x;
 
       int j;
@@ -267,17 +288,106 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             {
               if (ipsum_no != 0 || y > 100)
                 break;
+
+              if (x + measure_word_width (uword, ulen, scale) > PREVIEW_WIDTH-PREVIEW_PADDING)
+              {
+                y += linestep;
+                x = x0;
+              }
+              Glyph *prev_g = NULL;
+
+              for (j = 0; j < ulen; j++)
+              {
+                Glyph *g;
+
+                g = kernagic_find_glyph_unicode (uword[j]);
+                if (g)
+                {
+                  if (prev_g)
+                    x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+                  text[text_count].unicode = g->unicode;
+                  text[text_count].x = x;
+                  text[text_count++].y = y;
+
+                  x = advance_glyph (g, x, y, scale);
+                  prev_g = g;
+                }
+              }
+
               y += linestep;
               x = x0;
               add_word (word->str, startx, y, x - startx, 40);
               startx = x;
               g_string_assign (word, "");
+              ulen = 0;
             }
           else if (g)
             {
               g_string_append_unichar (word, g->unicode);
+              uword[ulen++] = g->unicode;
+
+            }
+          else if (str2[i] == ' ') /* we're only faking it if we have to  */
+            {
+              Glyph *t = kernagic_find_glyph_unicode ('i');
+              int j;
+              Glyph *prev_g = NULL;
+              
+              if (x + measure_word_width (uword, ulen, scale) > PREVIEW_WIDTH-PREVIEW_PADDING)
+              {
+                y += linestep;
+                x = x0;
+
+              }
+
+              for (j = 0; j < ulen; j++)
+              {
+                Glyph *g;
+
+                g = kernagic_find_glyph_unicode (uword[j]);
+                if (g)
+                {
+                  if (prev_g)
+                    x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+                  text[text_count].unicode = g->unicode;
+                  text[text_count].x = x;
+                  text[text_count++].y = y;
+
+                  x = advance_glyph (g, x, y, scale);
+                  prev_g = g;
+                }
+              }
+
+              if (t)
+                x += kernagic_get_advance (t) * scale_factor * scale;
+
+              add_word (word->str, startx, y, x - startx, 40);
+              startx = x;
+              g_string_assign (word, "");
+              ulen = 0;
+            }
+        }
+
+      if (word->len)
+        {
+          if (x + measure_word_width (uword, ulen, scale) > PREVIEW_WIDTH-PREVIEW_PADDING)
+          {
+            y += linestep;
+            x = x0;
+          }
+          Glyph *prev_g = NULL;
+
+          for (j = 0; j < ulen; j++)
+          {
+            Glyph *g;
+
+            g = kernagic_find_glyph_unicode (uword[j]);
+            if (g)
+            {
               if (prev_g)
-                x += kernagic_kern_get (prev_g, g) * scale_factor;
+                x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
 
               text[text_count].unicode = g->unicode;
               text[text_count].x = x;
@@ -286,25 +396,9 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               x = advance_glyph (g, x, y, scale);
               prev_g = g;
             }
-          else if (str2[i] == ' ') /* we're only faking it if we have to  */
-            {
-              Glyph *t = kernagic_find_glyph_unicode ('i');
-              if (t)
-                x += kernagic_get_advance (t) * scale_factor * scale;
-              prev_g = NULL;
-              add_word (word->str, startx, y, x - startx, 40);
-              startx = x;
-              g_string_assign (word, "");
-            }
-          if (x > PREVIEW_WIDTH - 8)
-            {
-              y += linestep;
-              x = x0;
-            }
+          }
+          add_word (word->str, startx, y, x - startx, 40);
         }
-
-      if (word->len)
-        add_word (word->str, startx, y, x - startx, 40);
       startx = x;
 
       g_string_free (word, TRUE);

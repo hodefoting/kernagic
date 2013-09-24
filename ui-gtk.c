@@ -100,13 +100,6 @@ static gboolean delayed_trigger (gpointer foo)
   return FALSE;
 }
 
-static void trigger_divisor (void)
-{
-  float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
-      n_distance () / divisor);
-}
-
 
 static void trigger (void)
 {
@@ -117,6 +110,30 @@ static void trigger (void)
       delayed_updater = 0;
     }
   delayed_updater = g_timeout_add (100, delayed_trigger, NULL);
+}
+
+static void trigger_divisor (void)
+{
+  float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
+
+  g_object_freeze_notify (G_OBJECT (spin_gray_target));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
+      n_distance () / divisor);
+  g_object_thaw_notify (G_OBJECT (spin_gray_target));
+
+}
+
+
+static void trigger_cadence (void)
+{
+  float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+
+  g_object_freeze_notify (G_OBJECT (spin_divisor));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),
+      n_distance () / cadence);
+  g_object_thaw_notify (G_OBJECT (spin_divisor));
+
+  trigger ();
 }
 
 static void trigger_ipsum (void)
@@ -671,9 +688,9 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     1, "ink bounds");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2, "frank blokland rennaissance table");
+                                    2, "blokland rennaissance table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "n-stem-gapdivisor snapped, computed inter-glyph stem gap");
+                                    3, "en-divisor snapped stem gap");
     gtk_size_group_add_widget (sliders, spin_method);
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
@@ -804,7 +821,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger_cadence), NULL);
   g_signal_connect (spin_divisor,       "notify::value", G_CALLBACK (trigger_divisor), NULL);
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_offset,        "notify::value", G_CALLBACK (trigger), NULL);

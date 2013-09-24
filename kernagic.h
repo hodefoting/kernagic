@@ -68,9 +68,10 @@ const char *detect_word (int x, int y);
 float n_distance (void);
 
 #define DEBUG_START_Y 100
-#define PREVIEW_WIDTH  900
-#define PREVIEW_HEIGHT 600
 
+#define PREVIEW_PADDING   15
+#define PREVIEW_WIDTH    900
+#define PREVIEW_HEIGHT   500
 
 typedef struct _KernerSettings KernerSettings;
 
