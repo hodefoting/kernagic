@@ -8,5 +8,5 @@ Section "";
   File README
   File LICENSE
   File AUTHORS
-  File dlls/*.dll
+  File gtk+-bundle/bin/*.dll
 SectionEnd

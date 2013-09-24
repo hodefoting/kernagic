@@ -7,24 +7,20 @@ LD_FLAGS += -lm
 include .mm/magic
 include .mm/bin
 
-# Win32 cross-compilation catch-all gtk2 build, relies on the correct compiler
-# i686-w64-mingw32-gcc being in path, and dependencies' include and lib dirs
-# to exist as symlinks from the build location. 
-#
 # Install mingw-w64 for your distro
 #
-# fetch gtk+-bundle_2.24.10-20120208_win32.zip from the net
-#
-# To download the compiler and header files and dll stubs needed, follow
-# instructions in:
-#
-# http://wiki.gimp.org/index.php/Hacking:Building/Windows 
-#
-# note that you can trim away quite a few of the packages listed in the
-# grabstuff script, though some image format libraries are still needed by
-# gtk-pixbuf and gtk.
+# Download:
+# http://ftp.no.debian.org/pub/GNOME/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
+# and unpack it in a subdir called gtk+-bundle
 
-$(PROJECT_NAME).exe: *.c *.h Makefile
+gtk+-bundle_2.24.10-20120208_win32.zip:
+	wget http://ftp.no.debian.org/pub/GNOME/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
+
+gtk+-bundle/unpacked.stamp: gtk+-bundle_2.24.10-20120208_win32.zip
+	(cd gtk+-bundle; unzip ../gtk+-bundle_2.24.10-20120208_win32.zip)
+	touch gtk+-bundle/unpacked.stamp
+
+$(PROJECT_NAME).exe: *.c *.h Makefile gtk+-bundle/bin/libgtk-win32-2.0-0.dll
 	i686-w64-mingw32-gcc *.c -Wall -Wextra -Wno-unused-parameter \
 	-Ilib/glib-2.0/include  \
 	-Ilib/gtk-2.0/include  \
@@ -61,7 +57,7 @@ kernagic-installer.exe: kernagic.exe kernagic.nsis
 clean: clean-extra
 clean-extra:
 	rm -f *.exe kernagic
-	rf -f tests/output
+	rm -f tests/output/*
 
 sync:
 	cp tests/output/* tests/reference

@@ -371,7 +371,7 @@ void help (void)
           "       -o   offset, in number of periods from edge of glyph to stem\n"
           "\n"
           "   -O <output.ufo>  create a copy of the input font, this make kernagic run non-interactive\n"
-          "   -P <output.png>  just write the resulting canvas/render to a png.\n"
+          "   -P <output.png>  write the test string to a png, using options\n"
           "   -T <string>      sample string\n"
           "\n");
   exit (0);
