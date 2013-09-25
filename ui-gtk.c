@@ -357,7 +357,7 @@ preview_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
     {
       cairo_surface_t *surface =
         cairo_image_surface_create_for_data (kernagic_preview,
-            CAIRO_FORMAT_A8, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_WIDTH);
+            CAIRO_FORMAT_A8, canvas_width (), canvas_height (), canvas_width ());
       cairo_set_source_rgb (cr, 0,0,0);
       cairo_mask_surface (cr, surface, 0, 0);
       cairo_surface_destroy (surface);
@@ -574,7 +574,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 6);
 
   preview = gtk_drawing_area_new ();
-  gtk_widget_set_size_request (preview, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+  gtk_widget_set_size_request (preview, canvas_width(), canvas_height());
   gtk_container_add (GTK_CONTAINER (hbox), preview);
 
 #ifdef GTK2

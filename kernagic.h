@@ -69,9 +69,6 @@ float n_distance (void);
 
 #define DEBUG_START_Y 100
 
-#define PREVIEW_PADDING   15
-#define PREVIEW_WIDTH    900
-#define PREVIEW_HEIGHT   500
 
 typedef struct _KernerSettings KernerSettings;
 
@@ -100,5 +97,7 @@ void init_kerner (void);
 void kerner_debug_ui (void);
 
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
+int canvas_width ();
+int canvas_height ();
 
 #endif
