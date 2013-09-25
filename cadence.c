@@ -81,12 +81,30 @@ extern float scale_factor;
 
 float left_most_center (Glyph *g)
 {
+  /* we only look at a single scan-line in the middle of the x-height */
   return g->leftmost[(int)(kernagic_x_height() * 1.5 * scale_factor)] / scale_factor;
 }
 
 float right_most_center (Glyph *g)
 {
+  /* we only look at a single scan-line in the middle of the x-height */
   return g->rightmost[(int)(kernagic_x_height() * 1.5 * scale_factor)] / scale_factor;
+}
+
+static float left_extreme (Glyph *g)
+{
+  /* due to how our curve have been clipped eaelier; 0 left most pixel
+   * with ink in the whole glyph */
+  return 0.0;
+}
+
+static float right_extreme (Glyph *g)
+{
+  float max = 0;
+  for (int y = 0; y < kernagic_x_height () * 2 * scale_factor; y ++)
+    if (g->rightmost[y] > max)
+      max = g->rightmost[y];
+  return max / scale_factor;
 }
 
 Cadence *glyph_get_cadence (Glyph *g)
@@ -97,10 +115,18 @@ Cadence *glyph_get_cadence (Glyph *g)
       if (cadence[i].utf8[0] == g->unicode)
         return &cadence[i];
     }
+
+  /* this fallback is not very good.
+   *
+   * Non-found glyphs get the treatment of 'A' - other more automatic
+   * remappings could perhaps be done to improve the range of fonts this
+   * method can be applied to.
+   */
+
   return &cadence[0];
 }
 
-float n_width = 0;
+static float n_width = 0;
 
 static void cadence_init (void)
 {
@@ -121,15 +147,23 @@ static void cadence_each (Glyph *g, GtkProgressBar *progress)
   left = n_width * c->left;
   right = n_width * c->right;
 
-  if (c->flags & LEFT_EXTREME)
-    left -= g->ink_min_x;
-  else
-    left -= left_most_center(g);
+  {
+    if (c->flags & LEFT_EXTREME)
+      left -= left_extreme (g);
+    else if (c->flags & LEFT_STEM)
+      left -= left_most_center(g);
+    else
+      fprintf (stderr, "table problem\n");
+  }
 
-  if (c->flags & RIGHT_EXTREME)
-    right -= 0;
-  else
-    right -= (g->ink_max_x - right_most_center(g));
+  {
+    if (c->flags & RIGHT_EXTREME)
+      right -= (g->ink_max_x - right_extreme (g));
+    else if (c->flags & RIGHT_STEM)
+      right -= (g->ink_max_x - right_most_center(g));
+    else
+      fprintf (stderr, "table problem\n");
+  }
 
   kernagic_set_left_bearing (g,  left);
   kernagic_set_right_bearing (g, right);
