@@ -262,17 +262,18 @@ static void set_defaults_from_args (void)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
 
-static void do_save (void)
-{
-  kernagic_save_kerning_info ();
-}
-
 static void do_process (void)
 {
   kernagic_set_glyph_string (NULL);
   gtk_widget_show (progress);
   kernagic_compute (GTK_PROGRESS_BAR (progress));
   gtk_widget_hide (progress);
+  kernagic_save_kerning_info ();
+}
+
+static void do_save (void)
+{
+  do_process ();
   kernagic_save_kerning_info ();
 }
 
@@ -609,7 +610,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *hbox;
     /* XXX: add a button to remove all custom stems? */
     GtkWidget *defaults_button = gtk_button_new_with_label ("defaults");
-    GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
+    //GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
     GtkWidget *save_button     = gtk_button_new_with_label ("Save");
 
     gtk_widget_set_tooltip_text (save_button, "Ctrl + S");
@@ -617,14 +618,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     hbox = gtk_hbox_new (FALSE, 4);
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
+    //gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
 
-    //hbox = gtk_hbox_new (FALSE, 4);
-    //gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
 
     g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
-    g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
+    //g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
     g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
   }
   {
@@ -670,7 +669,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), hbox2);
   }
-
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Ipsum glyphs");
@@ -684,22 +682,16 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Text sample");
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     test_text = gtk_entry_new ();
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     gtk_size_group_add_widget (labels, label);
     gtk_size_group_add_widget (sliders, test_text);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_box_pack_start (GTK_BOX (vbox1), label, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (vbox1), test_text, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
   }
-
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Fitting");
-    gtk_size_group_add_widget (labels, label);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_method = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     0, "original");
@@ -709,21 +701,15 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
                                     2, "bearing table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "en-divisor snapped stem gap");
-    gtk_size_group_add_widget (sliders, spin_method);
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_method);
+    gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
 
   vbox_options_cadence = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_cadence, FALSE, FALSE, 2);
 
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("cadence table file");
-    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), hbox, FALSE, FALSE, 2);
-
     cadence_path = gtk_file_chooser_button_new ("cadence file", GTK_FILE_CHOOSER_ACTION_OPEN);
     if (ufo_path)
     {
@@ -733,8 +719,8 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
     gtk_size_group_add_widget (sliders, cadence_path);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), cadence_path);
+    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), label, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), cadence_path, FALSE, FALSE, 2);
   }
 
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
@@ -764,41 +750,28 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   vbox_options_rythm = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
 
-
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Divisor");
-    gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_divisor = gtk_hscale_new_with_range (0.0, 100.0, 1);
-    gtk_size_group_add_widget (sliders, spin_divisor);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_divisor);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
   }
 
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Cadence");
-    gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_gray_target = gtk_hscale_new_with_range (1, 100.0, 0.01);
-    gtk_size_group_add_widget (sliders, spin_gray_target);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_gray_target);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
   }
 
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Offset");
-    gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_offset = gtk_hscale_new_with_range (-5.0, 100.0, 0.1);
-    gtk_size_group_add_widget (sliders, spin_offset);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_offset);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
   }
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
