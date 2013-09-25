@@ -65,13 +65,13 @@ static void configure_kernagic (void)
   kerner_settings.minimum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
   kerner_settings.alpha_target =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+       gtk_range_get_value (GTK_RANGE (spin_gray_target));
   kerner_settings.divisor =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
+       gtk_range_get_value (GTK_RANGE (spin_divisor));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
   kerner_settings.offset =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_offset));
+       gtk_range_get_value (GTK_RANGE (spin_offset));
 
   toggle_measurement_lines = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check));
 }
@@ -117,10 +117,11 @@ static void trigger (void)
 
 static void trigger_divisor (void)
 {
-  float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
+  float divisor = gtk_range_get_value (GTK_RANGE (spin_divisor));
 
   g_object_freeze_notify (G_OBJECT (spin_gray_target));
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
+  /* XXX: !!! does freeze help? */
+  gtk_range_set_value (GTK_RANGE (spin_gray_target),
       n_distance () / divisor);
   g_object_thaw_notify (G_OBJECT (spin_gray_target));
 
@@ -134,10 +135,10 @@ static void trigger_cadence_path (void)
 
 static void trigger_cadence (void)
 {
-  float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  float cadence = gtk_range_get_value (GTK_RANGE (spin_gray_target));
 
   g_object_freeze_notify (G_OBJECT (spin_divisor));
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),
+  gtk_range_set_value (GTK_RANGE (spin_divisor),
       n_distance () / cadence);
   g_object_thaw_notify (G_OBJECT (spin_divisor));
 
@@ -159,7 +160,7 @@ static void trigger_ipsum (void)
   if (ipsum)
     g_free (ipsum);
   ipsum = g_strdup (ipsumat_generate (NULL, str->str,
-        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 23));
+        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 13));
   trigger ();
   g_string_free (str, TRUE);
 }
@@ -181,8 +182,8 @@ static gboolean delayed_reload_trigger (gpointer foo)
   delayed_trigger (foo);
   delayed_reload_updater = 0;
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
+  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR);
 
   return FALSE;
 }
@@ -232,9 +233,9 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
+  gtk_range_set_value (GTK_RANGE (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  gtk_range_set_value (GTK_RANGE (spin_offset),    KERNER_DEFAULT_OFFSET);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
@@ -252,10 +253,10 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
+  gtk_range_set_value (GTK_RANGE (spin_gray_target), kerner_settings.alpha_target);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
+  gtk_range_set_value (GTK_RANGE (spin_divisor), kerner_settings.divisor);
+  gtk_range_set_value (GTK_RANGE (spin_offset), kerner_settings.offset);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
@@ -769,7 +770,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *label = gtk_label_new ("Divisor");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_divisor = gtk_spin_button_new_with_range (0.0, 2000.0, 1);
+    spin_divisor = gtk_hscale_new_with_range (0.0, 100.0, 1);
     gtk_size_group_add_widget (sliders, spin_divisor);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -781,7 +782,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *label = gtk_label_new ("Cadence");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_gray_target = gtk_spin_button_new_with_range (0.0, 2000.0, 0.04);
+    spin_gray_target = gtk_hscale_new_with_range (1, 100.0, 0.01);
     gtk_size_group_add_widget (sliders, spin_gray_target);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -793,7 +794,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     GtkWidget *label = gtk_label_new ("Offset");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_offset = gtk_spin_button_new_with_range (-50.0, 600.0, 0.25);
+    spin_offset = gtk_hscale_new_with_range (-5.0, 100.0, 0.1);
     gtk_size_group_add_widget (sliders, spin_offset);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -860,10 +861,10 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target,   "notify::value", G_CALLBACK (trigger_cadence), NULL);
-  g_signal_connect (spin_divisor,       "notify::value", G_CALLBACK (trigger_divisor), NULL);
+  g_signal_connect (spin_gray_target,   "notify", G_CALLBACK (trigger_cadence), NULL);
+  g_signal_connect (spin_divisor,       "notify", G_CALLBACK (trigger_divisor), NULL);
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_offset,        "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
   g_signal_connect (ipsum_glyphs,          "notify::text",  G_CALLBACK (trigger_ipsum), NULL);
