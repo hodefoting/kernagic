@@ -109,6 +109,7 @@ static void cadence_add (const char *utf8,
 enum {
   S_E_CHAR = 0,
   S_IN_CHAR,
+  S_IN_COMMENT,
   S_E_LEFT_MODE,
   S_IN_LEFT_MODE,
   S_E_LEFT_VAL,
@@ -140,13 +141,18 @@ void kernagic_set_cadence (const char *cadence_path)
       {
         switch (*p)
           {
+            case '#':  /* bit of a hack; trying to be tolerant */
+              state = S_IN_COMMENT;
+            if (state <= S_IN_RIGHT_VAL)
+               break;
             case '\n':
               if (state == S_IN_RIGHT_VAL)
               { 
                 right = atof (tmp->str);
               }
 
-              cadence_add (utf8, left_mode, left, right_mode, right);
+              if (state >= S_E_RIGHT_VAL)
+                cadence_add (utf8, left_mode, left, right_mode, right);
 
               state = S_E_CHAR;
               g_string_assign (tmp, "");
@@ -154,6 +160,7 @@ void kernagic_set_cadence (const char *cadence_path)
             case ' ':
               switch (state)
                 {
+                  case S_IN_COMMENT:
                   case S_E_CHAR: 
                   case S_E_LEFT_MODE:
                   case S_E_LEFT_VAL:
