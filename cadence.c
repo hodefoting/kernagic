@@ -24,7 +24,7 @@ typedef struct Cadence
 /* cadence unit table; from Frank Bloklands image at lettermodel.org august
  * 2013, manually transcribed to code constants by Øyvind Kolås */
 Cadence cadence[MAX_GLYPHS]={
-{1,"A",1,BOTH_EXTREME},
+{2,"A",2,BOTH_EXTREME},
 {8,"B",3,LEFT_STEM | RIGHT_EXTREME},
 {3,"C",2,BOTH_EXTREME},
 {8,"D",3,LEFT_STEM | RIGHT_EXTREME},
@@ -79,17 +79,32 @@ Cadence cadence[MAX_GLYPHS]={
 {3,".",3,BOTH_EXTREME},
 {3,":",3,BOTH_EXTREME},
 {3,";",3,BOTH_EXTREME},
-{3,",",3,BOTH_EXTREME}};
+{3,",",3,BOTH_EXTREME}
+};
 
 int n_cadence = 56;
 
 static void cadence_add (const char *utf8,
-                         int lmode,
-                         int left,
-                         int rmode,
-                         int right)
+                         int left_stem,
+                         float left,
+                         int right_stem,
+                         float right)
 {
+  cadence[n_cadence].utf8 = g_strdup (utf8);
+  cadence[n_cadence].left = left;
+  cadence[n_cadence].right = right;
+  cadence[n_cadence].flags = 0;
+  if (left_stem)
+    cadence[n_cadence].flags |= LEFT_STEM;
+  else
+    cadence[n_cadence].flags |= LEFT_EXTREME;
+  if (right_stem)
+    cadence[n_cadence].flags |= RIGHT_STEM;
+  else
+    cadence[n_cadence].flags |= RIGHT_EXTREME;
+  n_cadence++;
 }
+
 
 enum {
   S_E_CHAR = 0,
@@ -108,7 +123,6 @@ enum {
 void kernagic_set_cadence (const char *cadence_path)
 {
   gchar * input;
-  fprintf (stderr, "set cadence not implemented\n");
   g_file_get_contents (cadence_path, &input, NULL, NULL);
   if (input)
   {
@@ -116,11 +130,12 @@ void kernagic_set_cadence (const char *cadence_path)
     GString *tmp = g_string_new ("");
 
     int state = S_E_CHAR;
-    gunichar unichar = 0;
+    char *utf8 = NULL;
     float left =0, right= 0;
-    int left_mode;
-    int right_mode;
+    int left_mode = 0;
+    int right_mode = 0;
 
+    n_cadence = 0;
     for (p = input; *p; p++)
       {
         switch (*p)
@@ -128,8 +143,11 @@ void kernagic_set_cadence (const char *cadence_path)
             case '\n':
               if (state == S_IN_RIGHT_VAL)
               { 
-                // XXX
+                right = atof (tmp->str);
               }
+
+              cadence_add (utf8, left_mode, left, right_mode, right);
+
               state = S_E_CHAR;
               g_string_assign (tmp, "");
               break;
@@ -145,14 +163,16 @@ void kernagic_set_cadence (const char *cadence_path)
 
                   case S_IN_CHAR:
                     {
-                      unichar = tmp->str[0];
+                      if (utf8)
+                        g_free (utf8);
+                      utf8 = g_strdup (tmp->str);
                       state = S_E_LEFT_MODE;
                       g_string_assign (tmp, "");
                       break;
                     }
                   case S_IN_LEFT_MODE:
                     {
-                      if (!strcmp (tmp->str, "foo"))
+                      if (!strcmp (tmp->str, "stem"))
                         left_mode = 1;
                       else
                         left_mode = 0;
@@ -169,7 +189,7 @@ void kernagic_set_cadence (const char *cadence_path)
                     }
                   case S_IN_RIGHT_MODE:
                     {
-                      if (!strcmp (tmp->str, "foo"))
+                      if (!strcmp (tmp->str, "stem"))
                         right_mode = 1;
                       else
                         right_mode = 0;
@@ -210,7 +230,6 @@ void kernagic_set_cadence (const char *cadence_path)
               g_string_append_c (tmp, *p);
           }
       }
-    n_cadence = 0;
     g_string_free (tmp, TRUE);
     g_free (input);
   }
@@ -252,7 +271,7 @@ static float right_extreme (Glyph *g)
 Cadence *glyph_get_cadence (Glyph *g)
 {
   unsigned int i;
-  for (i = 0; i < n_cadence-1; i++)
+  for (i = 0; i < n_cadence; i++)
     {
       if (cadence[i].utf8[0] == g->unicode)
         return &cadence[i];
@@ -270,12 +289,18 @@ Cadence *glyph_get_cadence (Glyph *g)
 
 static float n_width = 0;
 
+#define LEFT_EXTREME    (1<<0)
+#define RIGHT_EXTREME   (1<<1)
+#define RIGHT_STEM      (1<<2)
+#define LEFT_STEM       (1<<3)
+#define BOTH_EXTREME    (LEFT_EXTREME | RIGHT_EXTREME)
+#define BOTH_STEM       (LEFT_STEM | RIGHT_STEM)
+
 static void cadence_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
     return;
-
   n_width = (right_most_center (g) - left_most_center(g)) / 24.0;
 }
 

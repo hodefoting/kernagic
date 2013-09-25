@@ -694,7 +694,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
   }
 
-
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Fitting");
@@ -706,7 +705,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     1, "ink bounds");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2, "blokland rennaissance table");
+                                    2, "bearing table");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     3, "en-divisor snapped stem gap");
     gtk_size_group_add_widget (sliders, spin_method);
@@ -721,7 +720,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Cadence Table");
+    GtkWidget *label = gtk_label_new ("cadence table file");
     gtk_box_pack_start (GTK_BOX (vbox_options_cadence), hbox, FALSE, FALSE, 2);
 
     cadence_path = gtk_file_chooser_button_new ("cadence file", GTK_FILE_CHOOSER_ACTION_OPEN);
@@ -736,7 +735,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), cadence_path);
   }
-
 
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_gray, FALSE, FALSE, 2);

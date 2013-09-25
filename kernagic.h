@@ -75,9 +75,9 @@ typedef struct _KernerSettings KernerSettings;
 #define KERNER_DEFAULT_MODE          3
 #define KERNER_DEFAULT_MIN          15
 #define KERNER_DEFAULT_MAX          50
-#define KERNER_DEFAULT_DIVISOR      12
+#define KERNER_DEFAULT_DIVISOR      24
 #define KERNER_DEFAULT_TARGET_GRAY  50
-#define KERNER_DEFAULT_OFFSET        5
+#define KERNER_DEFAULT_OFFSET        9
 #define KERNER_DEFAULT_TRACKING    100
 
 struct _KernerSettings
