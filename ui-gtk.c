@@ -41,6 +41,10 @@ static GtkWidget *spin_tracking;
 static GtkWidget *spin_offset;
 GtkWidget *spin_ipsum_no;
 
+
+static GtkWidget *vbox_options_cadence;
+static GtkWidget *cadence_path;
+
 static GtkWidget *vbox_options_gray;
 static GtkWidget *vbox_options_rythm;
 
@@ -100,7 +104,6 @@ static gboolean delayed_trigger (gpointer foo)
   return FALSE;
 }
 
-
 static void trigger (void)
 {
 
@@ -123,6 +126,11 @@ static void trigger_divisor (void)
 
 }
 
+static void trigger_cadence_path (void)
+{
+  kernagic_set_cadence (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path)));
+  trigger ();
+}
 
 static void trigger_cadence (void)
 {
@@ -184,10 +192,13 @@ static void trigger_prop_show (void)
   KernagicMethod *method =
       kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_method)));
 
+  gtk_widget_hide (vbox_options_cadence);
   gtk_widget_hide (vbox_options_gray);
   gtk_widget_hide (vbox_options_rythm);
 
-  if (!strcmp (method->name, "gray"))
+  if (!strcmp (method->name, "cadence"))
+    gtk_widget_show (vbox_options_cadence);
+  else if (!strcmp (method->name, "gray"))
     gtk_widget_show (vbox_options_gray);
   else if (!strcmp (method->name, "rythm")||
            !strcmp (method->name, "gap"))
@@ -483,6 +494,7 @@ index_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
     }
 
   cairo_save (cr);
+  /* 0.93 is gtk default gray :d */
   cairo_set_source_rgb (cr, 0.93,0.93,0.93);
   cairo_paint (cr);
   {
@@ -704,6 +716,28 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox), spin_method);
   }
 
+  vbox_options_cadence = gtk_vbox_new (FALSE, 4);
+  gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_cadence, FALSE, FALSE, 2);
+
+  {
+    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *label = gtk_label_new ("Cadence Table");
+    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), hbox, FALSE, FALSE, 2);
+
+    cadence_path = gtk_file_chooser_button_new ("cadence file", GTK_FILE_CHOOSER_ACTION_OPEN);
+    if (ufo_path)
+    {
+      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
+    }
+      gtk_size_group_add_widget (labels, label);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+
+    gtk_size_group_add_widget (sliders, cadence_path);
+    gtk_container_add (GTK_CONTAINER (hbox), label);
+    gtk_container_add (GTK_CONTAINER (hbox), cadence_path);
+  }
+
+
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_gray, FALSE, FALSE, 2);
   {
@@ -817,6 +851,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   /************/
 
   /* when these change, we need to reinitialize from scratch */
+  g_signal_connect (cadence_path,       "file-set",      G_CALLBACK (trigger_cadence_path), NULL);
   g_signal_connect (font_path,          "file-set",      G_CALLBACK (trigger_reload), NULL);
   g_signal_connect (ipsum_path,         "file-set",      G_CALLBACK (ipsum_reload), NULL);
   /* and when these change, we should be able to do an incremental update */

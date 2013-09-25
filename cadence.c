@@ -17,6 +17,7 @@ typedef struct Cadence
 #define BOTH_EXTREME    (LEFT_EXTREME | RIGHT_EXTREME)
 #define BOTH_STEM       (LEFT_STEM | RIGHT_STEM)
 
+
 /* cadence unit table; from Frank Bloklands image at lettermodel.org august
  * 2013, manually transcribed to code constants by Øyvind Kolås */
 Cadence cadence[]={
@@ -76,6 +77,29 @@ Cadence cadence[]={
 {3,":",3,BOTH_EXTREME},
 {3,";",3,BOTH_EXTREME},
 {3,",",3,BOTH_EXTREME}};
+
+static void cadence_add (const char *utf8,
+                         int lmode,
+                         int left,
+                         int rmode,
+                         int right)
+{
+}
+
+
+void kernagic_set_cadence (const char *cadence_path)
+{
+  gchar * input;
+  fprintf (stderr, "set cadence not implemented\n");
+  g_file_get_contents (cadence_path, &input, NULL, NULL);
+  if (input)
+  {
+    g_free (input);
+  }
+  else
+  {
+  }
+}
 
 extern float scale_factor;
 

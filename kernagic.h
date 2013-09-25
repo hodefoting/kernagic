@@ -96,6 +96,8 @@ float kerner_kern (KernerSettings *settings, Glyph *left, Glyph *right);
 void init_kerner (void);
 void kerner_debug_ui (void);
 
+void kernagic_set_cadence (const char *cadence_path);
+
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
 int canvas_width ();
 int canvas_height ();
