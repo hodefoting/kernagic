@@ -1,5 +1,7 @@
 /* implementation of frank bloklands reinaissance spacing scheme */
 
+#include <string.h>
+#include <stdlib.h>
 #include "kernagic.h"
 
 typedef struct Cadence
@@ -17,10 +19,11 @@ typedef struct Cadence
 #define BOTH_EXTREME    (LEFT_EXTREME | RIGHT_EXTREME)
 #define BOTH_STEM       (LEFT_STEM | RIGHT_STEM)
 
+#define MAX_GLYPHS 4096
 
 /* cadence unit table; from Frank Bloklands image at lettermodel.org august
  * 2013, manually transcribed to code constants by Øyvind Kolås */
-Cadence cadence[]={
+Cadence cadence[MAX_GLYPHS]={
 {1,"A",1,BOTH_EXTREME},
 {8,"B",3,LEFT_STEM | RIGHT_EXTREME},
 {3,"C",2,BOTH_EXTREME},
@@ -78,6 +81,8 @@ Cadence cadence[]={
 {3,";",3,BOTH_EXTREME},
 {3,",",3,BOTH_EXTREME}};
 
+int n_cadence = 56;
+
 static void cadence_add (const char *utf8,
                          int lmode,
                          int left,
@@ -86,6 +91,19 @@ static void cadence_add (const char *utf8,
 {
 }
 
+enum {
+  S_E_CHAR = 0,
+  S_IN_CHAR,
+  S_E_LEFT_MODE,
+  S_IN_LEFT_MODE,
+  S_E_LEFT_VAL,
+  S_IN_LEFT_VAL,
+  S_E_RIGHT_MODE,
+  S_IN_RIGHT_MODE,
+  S_E_RIGHT_VAL,
+  S_IN_RIGHT_VAL,
+  S_DONE
+};
 
 void kernagic_set_cadence (const char *cadence_path)
 {
@@ -94,6 +112,106 @@ void kernagic_set_cadence (const char *cadence_path)
   g_file_get_contents (cadence_path, &input, NULL, NULL);
   if (input)
   {
+    gchar *p;
+    GString *tmp = g_string_new ("");
+
+    int state = S_E_CHAR;
+    gunichar unichar = 0;
+    float left =0, right= 0;
+    int left_mode;
+    int right_mode;
+
+    for (p = input; *p; p++)
+      {
+        switch (*p)
+          {
+            case '\n':
+              if (state == S_IN_RIGHT_VAL)
+              { 
+                // XXX
+              }
+              state = S_E_CHAR;
+              g_string_assign (tmp, "");
+              break;
+            case ' ':
+              switch (state)
+                {
+                  case S_E_CHAR: 
+                  case S_E_LEFT_MODE:
+                  case S_E_LEFT_VAL:
+                  case S_E_RIGHT_MODE:
+                  case S_E_RIGHT_VAL:
+                    break;
+
+                  case S_IN_CHAR:
+                    {
+                      unichar = tmp->str[0];
+                      state = S_E_LEFT_MODE;
+                      g_string_assign (tmp, "");
+                      break;
+                    }
+                  case S_IN_LEFT_MODE:
+                    {
+                      if (!strcmp (tmp->str, "foo"))
+                        left_mode = 1;
+                      else
+                        left_mode = 0;
+                      state = S_E_LEFT_VAL;
+                      g_string_assign (tmp, "");
+                      break;
+                    }
+                  case S_IN_LEFT_VAL:
+                    {
+                      left = atof (tmp->str);
+                      state = S_E_RIGHT_MODE;
+                      g_string_assign (tmp, "");
+                      break;
+                    }
+                  case S_IN_RIGHT_MODE:
+                    {
+                      if (!strcmp (tmp->str, "foo"))
+                        right_mode = 1;
+                      else
+                        right_mode = 0;
+                      state = S_E_RIGHT_VAL;
+                      g_string_assign (tmp, "");
+                      break;
+                    }
+                  case S_IN_RIGHT_VAL:
+                    {
+                      right = atof (tmp->str);
+                      state = S_DONE;
+                      g_string_assign (tmp, "");
+                      break;
+                    }
+                }
+              break;
+            default:
+              switch (state)
+                {
+                  case S_E_CHAR: 
+                    state = S_IN_CHAR;
+                    break;
+                  case S_E_LEFT_MODE:
+                    state = S_IN_LEFT_MODE;
+                    break;
+                  case S_E_LEFT_VAL:
+                    state = S_IN_LEFT_VAL;
+                    break;
+                  case S_E_RIGHT_MODE:
+                    state = S_IN_RIGHT_MODE;
+                    break;
+                  case S_E_RIGHT_VAL:
+                    state = S_IN_RIGHT_VAL;
+                    break;
+                  default:
+                    break;
+                }
+              g_string_append_c (tmp, *p);
+          }
+      }
+    n_cadence = 0;
+    g_string_free (tmp, TRUE);
     g_free (input);
   }
   else
@@ -134,7 +252,7 @@ static float right_extreme (Glyph *g)
 Cadence *glyph_get_cadence (Glyph *g)
 {
   unsigned int i;
-  for (i = 0; i < sizeof (cadence)/sizeof(cadence[0]) - 1; i++)
+  for (i = 0; i < n_cadence-1; i++)
     {
       if (cadence[i].utf8[0] == g->unicode)
         return &cadence[i];
