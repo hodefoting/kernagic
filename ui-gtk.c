@@ -515,12 +515,18 @@ kernagic_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
       gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),  
         gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no)) + 1);
       return TRUE;
-    case GDK_F1: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 0); break;
-    case GDK_F2: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 1); break;
-    case GDK_F3: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 2); break;
-    case GDK_F4: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 3); break;
-    case GDK_F5: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 4); break;
-    case GDK_F6: gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 5); break;
+    case GDK_F1:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 0); break;
+    case GDK_F2:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 1); break;
+    case GDK_F3:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 2); break;
+    case GDK_F4:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 3); break;
+    case GDK_F5:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 4); break;
+    case GDK_F6:
+      gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), 5); break;
     case GDK_s:
     case GDK_S:
       if (event->state & GDK_CONTROL_MASK)
@@ -569,7 +575,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   hbox = gtk_hbox_new (FALSE, 5);
   gtk_container_add (GTK_CONTAINER (window), hbox);
   vbox1 = gtk_vbox_new (FALSE, 5);
-  gtk_container_add (GTK_CONTAINER (hbox), vbox1);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox1, FALSE, FALSE, 2);
 
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 6);
 
