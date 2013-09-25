@@ -115,16 +115,18 @@ static void trigger (void)
   delayed_updater = g_timeout_add (100, delayed_trigger, NULL);
 }
 
+static int frozen = 0;
+
 static void trigger_divisor (void)
 {
   float divisor = gtk_range_get_value (GTK_RANGE (spin_divisor));
+  if (frozen)
+    return;
 
-  g_object_freeze_notify (G_OBJECT (spin_gray_target));
-  /* XXX: !!! does freeze help? */
+  frozen++;
   gtk_range_set_value (GTK_RANGE (spin_gray_target),
       n_distance () / divisor);
-  g_object_thaw_notify (G_OBJECT (spin_gray_target));
-
+  frozen--;
 }
 
 static void trigger_cadence_path (void)
@@ -136,11 +138,13 @@ static void trigger_cadence_path (void)
 static void trigger_cadence (void)
 {
   float cadence = gtk_range_get_value (GTK_RANGE (spin_gray_target));
+  if (frozen)
+    return;
 
-  g_object_freeze_notify (G_OBJECT (spin_divisor));
+  frozen++;
   gtk_range_set_value (GTK_RANGE (spin_divisor),
       n_distance () / cadence);
-  g_object_thaw_notify (G_OBJECT (spin_divisor));
+  frozen--;
 
   trigger ();
 }
@@ -834,9 +838,9 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target,   "notify", G_CALLBACK (trigger_cadence), NULL);
-  g_signal_connect (spin_divisor,       "notify", G_CALLBACK (trigger_divisor), NULL);
-  g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
+  g_signal_connect (spin_divisor,       "value-changed", G_CALLBACK (trigger_divisor), NULL);
+  g_signal_connect (spin_tracking,      "value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
