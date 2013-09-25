@@ -35,6 +35,8 @@ $(PROJECT_NAME).exe: *.c *.h Makefile gtk+-mingw-bundle/unpacked.stamp
 	\
 	-lm -O2 -std=c99 -mms-bitfields \
 	\
+	-mwindows -Wl,--subsystem,windows \
+	\
 	-Lgtk+-mingw-bundle/lib \
 	-lglib-2.0.dll -lgobject-2.0.dll \
 	-lgdk-win32-2.0.dll -lgtk-win32-2.0.dll -lcairo.dll \
