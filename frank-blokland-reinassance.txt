@@ -1,0 +1,61 @@
+  # this is a spacing table transcribed from an image on frank blokland's
+  # lettermodel.org thesis page, for each glyph the attachment point mode
+  # is specified and the number of 1/24ths of the spacing between the stems
+  # of the n glyph is added to the sides-creating sidebearings.
+
+A extreme 1 extreme 1 
+B stem 8 extreme 3 
+C extreme 3 extreme 2 
+D stem 8 extreme 3 
+E stem 8 extreme 2 
+F stem 8 extreme 2 
+G extreme 3 stem 6 
+H stem 8 stem 8 
+I stem 8 stem 8 
+J stem 6 stem 6 
+K stem 8 extreme 1 
+L stem 8 extreme 2 
+M stem 8 stem 8 
+N stem 8 stem 8 
+O extreme 3 extreme 3 
+P stem 8 extreme 2 
+Q extreme 3 extreme 3 
+R stem 8 extreme 1 
+S extreme 3 extreme 3 
+T extreme 1 extreme 1 
+U stem 6 stem 6 
+V extreme 1 extreme 1 
+W extreme 1 extreme 1 
+X extreme 1 extreme 1 
+Y extreme 1 extreme 1 
+Z extreme 2 extreme 2 
+a extreme 2 stem 6 
+b stem 5 extreme 2 
+c extreme 2 extreme 1 
+d extreme 2 stem 6 
+e extreme 2 extreme 2 
+f stem 6 extreme 1 
+g extreme 2 extreme 1 
+h stem 6 stem 6 
+i stem 6 stem 6 
+j stem 6 stem 5 
+k stem 6 extreme 1 
+l stem 6 stem 6 
+m stem 6 stem 6 
+n stem 6 stem 6 
+o extreme 2 extreme 2 
+p stem 6 extreme 2 
+q extreme 2 stem 5 
+r stem 6 extreme 1 
+s extreme 3 extreme 3 
+t stem 5 extreme 1 
+u stem 5 stem 5 
+v extreme 1 extreme 1 
+w extreme 1 extreme 1 
+x extreme 1 extreme 1 
+y extreme 1 extreme 1 
+z extreme 2 extreme 2 
+. extreme 3 extreme 3 
+: extreme 3 extreme 3 
+; extreme 3 extreme 3 
+, extreme 3 extreme 3 
