@@ -66,7 +66,7 @@ Cadence cadence[]={
 {6,"r",1,LEFT_STEM | RIGHT_EXTREME},
 {3,"s",3,BOTH_EXTREME},
 {5,"t",1,LEFT_STEM | RIGHT_EXTREME},
-{5,"u",5,BOTH_STEM},
+{5,"u",6,BOTH_STEM},
 {1,"v",1,BOTH_EXTREME},
 {1,"w",1,BOTH_EXTREME},
 {1,"x",1,BOTH_EXTREME},
