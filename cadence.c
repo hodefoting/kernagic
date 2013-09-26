@@ -33,7 +33,7 @@ Cadence cadence[MAX_GLYPHS]={
 {3,"G",6,LEFT_EXTREME | RIGHT_STEM},
 {8,"H",8,BOTH_STEM},
 {8,"I",8,BOTH_STEM},
-{6,"J",6,BOTH_STEM}, /* XXX: left side stem likely too lowe for ismple hit */
+{6,"J",6,BOTH_STEM},
 {8,"K",1,LEFT_STEM | RIGHT_EXTREME},
 {8,"L",2,LEFT_STEM | RIGHT_EXTREME},
 {8,"M",8,BOTH_STEM},
@@ -141,7 +141,10 @@ void kernagic_set_cadence (const char *cadence_path)
       {
         switch (*p)
           {
-            case '#':  /* bit of a hack; trying to be tolerant */
+            case '#':  /* bit of a hack; trying to be tolerant, means
+                          this char has to be encoded with U+ .. 
+                          instead of utf8 when parsing is extended 
+                          to also do such parsing */
               state = S_IN_COMMENT;
             if (state <= S_IN_RIGHT_VAL)
                break;
