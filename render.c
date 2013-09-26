@@ -1,7 +1,7 @@
 #include <string.h>
 #include "kernagic.h"
 
-#define PREVIEW_PADDING 10
+#define PREVIEW_PADDING 5
 
 /* This is the main rendering code of kernagic.. 
  */
@@ -65,20 +65,45 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
 
-  for (y = 0; y < g->r_height; y++)
-    for (x = 0; x < g->r_width; x++)
-      if (xo + (x + g->left_bearing * scale_factor)* scale >= 0 &&
-          xo + (x + g->left_bearing * scale_factor)* scale < canvas_w &&
-          yo + y* scale < canvas_h &&
-          yo + y* scale >= 0
-          )
+  for (y = 0; y < g->r_height * scale; y++)
+  for (x = 0; x < g->r_width  * scale; x++)
+    {
+      if (xo + x + (g->left_bearing * scale_factor) *scale >= 0 &&
+          xo + x + (g->left_bearing * scale_factor) *scale < canvas_w &&
+          yo + y < canvas_h &&
+          yo + y >= 0)
       {
-        int val = kernagic_preview [(int)(yo + ((y)* scale)) * canvas_w + (int)(xo + (x + g->left_bearing * scale_factor)* scale)]; 
+        int val = kernagic_preview [
+          (int)(yo + ((y))) * canvas_w + (int)(xo + x + (g->left_bearing * scale_factor)* scale)]; 
+        int raster = g->raster[(int)(y/scale) * g->r_width + (int)(x/scale)];
+        int u, v;
+        int c = 0;
 
-        if (g->raster[y * g->r_width + x] > val)
-          val = g->raster[y * g->r_width +x];
-        kernagic_preview [(int)(yo + ((y) * scale)) * canvas_w + (int)(xo + (x + g->left_bearing * scale_factor) * scale)] = val;
+        if (scale < 0.9)
+        {
+          raster = 0;
+          for (u = 0; u < (1/scale); u++)
+          for (v = 0; v < (1/scale); v++)
+          {
+            if (y/scale+v < g->r_height &&
+                x/scale+u < g->r_width)
+            {
+              raster += g->raster[(int)(y/scale + v) * g->r_width + (int)(x/scale) + u];
+              c++;
+            }
+          }
+          raster /= c;
+        }
+
+        if (raster > val)
+        {
+          val = raster;
+        }
+
+        kernagic_preview [
+          (int)(yo + ((y))) * canvas_w + (int)(xo + x + (g->left_bearing * scale_factor)* scale)] = val;
       }
+    }
 
   return advance_glyph (g, xo, yo, scale);
 }
@@ -244,10 +269,13 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
     if (str2)
     {
       float scale = 0.02;
+#define WATERFALL_SCALING 1.8
+#define WATERFALL_SPACING 0.6
+      int waterfall = 7;
+
       int n = 0;
 
       int w;
-      int waterfall = 9;
 
       for (w = 0; w < waterfall; w++)
       {
@@ -432,8 +460,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
         if (waterfall > 1)
           {
-            y0 += 512 * scale * 0.8;
-            scale = scale * 1.5;
+            y0 += 512 * scale * WATERFALL_SPACING;
+            scale = scale * WATERFALL_SCALING;
           }
         g_string_free (word, TRUE);
       }
@@ -451,8 +479,11 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       {
         int y;
         int x = (i + 0.5) * period * scale_factor * debug_scale;
-        float y0 = debug_start_y + 256 * debug_scale;
-        float y1 = debug_start_y + 512 * debug_scale;
+        float y0, y1;
+
+        y0 = debug_start_y;
+        y1 = debug_start_y + kernagic_x_height () * scale_factor * debug_scale;
+
         for (y = y0; y < y1; y++)
           {
             if (x >= 0 &&
@@ -463,6 +494,22 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               kernagic_preview[y* canvas_w + x] * 0.9 +
               255 * 0.1;
           }
+
+#if 0
+        y0 = debug_start_y + 256 * debug_scale;
+        y1 = debug_start_y + 512 * debug_scale;
+        for (y = y0; y < y1; y++)
+          {
+            if (x >= 0 &&
+                x < canvas_w &&
+                y >= 0 &&
+                y < canvas_h)
+            kernagic_preview[y* canvas_w + x] =
+              kernagic_preview[y* canvas_w + x] * 0.8 +
+              255 * 0.2;
+          }
+#endif
+
       }
   }
 }

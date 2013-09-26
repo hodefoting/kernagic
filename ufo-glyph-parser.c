@@ -373,7 +373,7 @@ void gen_debug (Glyph *glyph)
     int t;
     float x_height = kernagic_x_height ();
 
-    for (t = 1; t < 4; t ++)
+    for (t = 1; t < 2; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
@@ -395,7 +395,7 @@ void gen_debug (Glyph *glyph)
       }
     }
 
-    /* detect candidates; with confidence */
+    /* detect candidate stems/rythm points*/
     long sum = 0;
     long sum2 = 0;
 
@@ -442,35 +442,11 @@ void gen_debug (Glyph *glyph)
     glyph->stems[glyph->stem_count] = x / scale_factor;
     glyph->stem_weight[glyph->stem_count++] = 1;
 
-#if 0
-    for (t = 8; t < 256; t ++)
-    {
-      x = glyph->stems[0] * scale_factor;
-      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
-      x = glyph->stems[1] * scale_factor;
-      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
-    }
-#endif
-
-#if 0
-
-    for (t = 16; t < 32; t ++)
+    for (t = 1; t < 2; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
-      long sum = 0;
-      int y;
-      long c = 0;
-
-      for (y = x_height * 1.8 * scale_factor ;
-          y <  x_height * 2.0 * scale_factor;
-          y++)
-        {
-          sum += raster[glyph->r_width * y + x] * 16;
-          c+= 16;
-        }
-      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
+      raster [glyph->r_width * (glyph->r_height-t) + x] = 0;
     }
-#endif
 }
 
 void
@@ -592,7 +568,6 @@ rewrite_end_element (GMarkupParseContext *context,
             glyph->lstem, glyph->rstem);
       }
   }
-
 }
 
 static void
