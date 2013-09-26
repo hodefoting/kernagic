@@ -298,11 +298,11 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     return TRUE;
 
   x -= x_entries[i];
-  y -= debug_start_y;
+  y = (y-debug_start_y) / (kernagic_x_height() * scale_factor * debug_scale);
+
   g = g_entries[i];
 
-  x /= scale_factor;
-  y /= scale_factor;
+  x /= (scale_factor * debug_scale);
 
   if (!g)
     return TRUE;
@@ -324,14 +324,16 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     }
   }
 
+  fprintf (stderr, "%f\n", x / advance);
+
   if (y < 0)
   {}
-  else if (y < kernagic_x_height () * 1.5)
+  else if (y < 0.5)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
   }
-  else if (y > kernagic_x_height () * 2.5)
+  else if (y > 2.0)
   {
     g->rstem = 0;
     g->lstem = 0;

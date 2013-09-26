@@ -127,13 +127,16 @@ static void draw_glyph_debug
   int canvas_h = canvas_height ();
 
   float y0 = yo;
-  float y1 = y0 + 512 * scale * 0.8;
+  float y1 = y0 + 512 * scale * 0.8; /* XXX: should be based on xheight */
+
+  scale *= scale_factor;
 
   if (toggle_measurement_lines)
     {
+      /* glyph-block edges */
       for (y = y0; y < y1; y++)
       {
-        int xs[] = {0, kernagic_get_advance (g) * scale_factor * scale};
+        int xs[] = {0, kernagic_get_advance (g) * scale};
         int i;
         for (i = 0; i < sizeof(xs)/sizeof(xs[0]); i++)
         {
@@ -148,54 +151,32 @@ static void draw_glyph_debug
         }
       }
 
-      for (y = y0 * 0.75 + y1 * 0.25; y < y1 * 0.75 + y0 * 0.25; y++)
+      for (y = y0 * 0.9 + y1 * 0.1; y < y1 * 0.9 + y0 * 0.1; y++)
         {
-#if 1
+          /* automatic stems */
           if (g->stem_count >=1)
             {
-            x = g->stems[0] * scale_factor + g->left_bearing * scale_factor * scale;
+            x = g->stems[0] * scale + g->left_bearing * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
                 y < canvas_h)
               kernagic_preview [y * canvas_w + (int)(x + xo)] = 64;
             }
-
           if (g->stem_count > 1)
           {
-            x = g->stems[g->stem_count-1] * scale_factor * scale + g->left_bearing * scale_factor * scale;
+            x = g->stems[g->stem_count-1] * scale + g->left_bearing * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
                 y < canvas_h)
               kernagic_preview [y * canvas_w + (int)(x + xo)] = 64;
           }
-#endif
-          if (g->lstem > 0)
-          {
-            x = g->lstem * scale_factor + g->left_bearing * scale_factor * scale;
-            if (x + xo >= 0 &&
-                x + xo < canvas_w &&
-                y >= 0 &&
-                y < canvas_h)
-              kernagic_preview [y * canvas_w + (int)(x + xo)] = 255;
-          }
-          if (g->rstem > 0)
-          {
-            x = g->rstem * scale_factor + g->left_bearing * scale_factor * scale;
-            if (x + xo >= 0 &&
-                x + xo < canvas_w &&
-                y >= 0 &&
-                y < canvas_h)
-              kernagic_preview [y * canvas_w + (int)(x + xo)] = 255;
-          }
-        }
 
-      for (y = y0 * 0.75 + y1 * 0.25; y < y1 * 0.75 + y0 * 0.25; y++)
-        {
+          /* manual stems */
           if (g->lstem > 0)
           {
-            x = g->lstem * scale_factor + g->left_bearing * scale_factor * scale;
+            x = g->lstem * scale + g->left_bearing * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -204,7 +185,7 @@ static void draw_glyph_debug
           }
           if (g->rstem > 0)
           {
-            x = g->rstem * scale_factor + g->left_bearing * scale_factor * scale;
+            x = g->rstem * scale + g->left_bearing * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -462,6 +443,9 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
           {
             y0 += 512 * scale * WATERFALL_SPACING;
             scale = scale * WATERFALL_SCALING;
+
+            //if (w == waterfall -2)
+            //  scale = 1.0;
           }
         g_string_free (word, TRUE);
       }
@@ -481,8 +465,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
         int x = (i + 0.5) * period * scale_factor * debug_scale;
         float y0, y1;
 
-        y0 = debug_start_y;
-        y1 = debug_start_y + kernagic_x_height () * scale_factor * debug_scale;
+        y0 = debug_start_y + kernagic_x_height () * scale_factor * debug_scale * 0.8;
+        y1 = debug_start_y + kernagic_x_height () * scale_factor * debug_scale * 2.2;
 
         for (y = y0; y < y1; y++)
           {
@@ -494,22 +478,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               kernagic_preview[y* canvas_w + x] * 0.9 +
               255 * 0.1;
           }
-
-#if 0
-        y0 = debug_start_y + 256 * debug_scale;
-        y1 = debug_start_y + 512 * debug_scale;
-        for (y = y0; y < y1; y++)
-          {
-            if (x >= 0 &&
-                x < canvas_w &&
-                y >= 0 &&
-                y < canvas_h)
-            kernagic_preview[y* canvas_w + x] =
-              kernagic_preview[y* canvas_w + x] * 0.8 +
-              255 * 0.2;
-          }
-#endif
-
       }
   }
 }
