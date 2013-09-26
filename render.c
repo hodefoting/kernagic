@@ -5,6 +5,9 @@
 
 /* This is the main rendering code of kernagic.. 
  */
+int debug_start_y = 0;
+float debug_scale = 1.0;
+
 uint8_t *kernagic_preview = NULL;
 #define MAX_BIG       1024
 
@@ -56,7 +59,6 @@ float advance_glyph (Glyph *g, float xo, int yo, float scale)
   return xo + kernagic_get_advance (g) * scale_factor * scale;
 }
 
-
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
   int x, y;
@@ -72,9 +74,9 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
           )
       {
         int val = kernagic_preview [(int)(yo + ((y)* scale)) * canvas_w + (int)(xo + (x + g->left_bearing * scale_factor)* scale)]; 
-        val += g->raster[y * g->r_width + x] * opacity * scale * scale;
-        if (val > 255)
-          val = 255;
+
+        if (g->raster[y * g->r_width + x] > val)
+          val = g->raster[y * g->r_width +x];
         kernagic_preview [(int)(yo + ((y) * scale)) * canvas_w + (int)(xo + (x + g->left_bearing * scale_factor) * scale)] = val;
       }
 
@@ -99,12 +101,12 @@ static void draw_glyph_debug
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
 
-  float yline = DEBUG_START_Y + kernagic_x_height () * scale_factor * 2.5 - 10;
+  float y0 = yo;
+  float y1 = y0 + 512 * scale * 0.8;
 
   if (toggle_measurement_lines)
     {
-      int radius = 196;
-      for (y = yline - radius; y < yline + radius; y++)
+      for (y = y0; y < y1; y++)
       {
         int xs[] = {0, kernagic_get_advance (g) * scale_factor * scale};
         int i;
@@ -121,13 +123,12 @@ static void draw_glyph_debug
         }
       }
 
-      radius = 32;
-      for (y = yline - radius; y < yline + radius; y++)
+      for (y = y0 * 0.75 + y1 * 0.25; y < y1 * 0.75 + y0 * 0.25; y++)
         {
 #if 1
           if (g->stem_count >=1)
             {
-            x = g->stems[0] * scale_factor + g->left_bearing * scale_factor;
+            x = g->stems[0] * scale_factor + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -137,7 +138,7 @@ static void draw_glyph_debug
 
           if (g->stem_count > 1)
           {
-            x = g->stems[g->stem_count-1] * scale_factor + g->left_bearing * scale_factor;
+            x = g->stems[g->stem_count-1] * scale_factor * scale + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -147,7 +148,7 @@ static void draw_glyph_debug
 #endif
           if (g->lstem > 0)
           {
-            x = g->lstem * scale_factor + g->left_bearing * scale_factor;
+            x = g->lstem * scale_factor + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -156,7 +157,7 @@ static void draw_glyph_debug
           }
           if (g->rstem > 0)
           {
-            x = g->rstem * scale_factor + g->left_bearing * scale_factor;
+            x = g->rstem * scale_factor + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -165,12 +166,11 @@ static void draw_glyph_debug
           }
         }
 
-      radius = 32;
-      for (y = yline - radius; y < yline + radius; y++)
+      for (y = y0 * 0.75 + y1 * 0.25; y < y1 * 0.75 + y0 * 0.25; y++)
         {
           if (g->lstem > 0)
           {
-            x = g->lstem * scale_factor + g->left_bearing * scale_factor;
+            x = g->lstem * scale_factor + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -179,7 +179,7 @@ static void draw_glyph_debug
           }
           if (g->rstem > 0)
           {
-            x = g->rstem * scale_factor + g->left_bearing * scale_factor;
+            x = g->rstem * scale_factor + g->left_bearing * scale_factor * scale;
             if (x + xo >= 0 &&
                 x + xo < canvas_w &&
                 y >= 0 &&
@@ -189,23 +189,6 @@ static void draw_glyph_debug
         }
     }
 }
-
-#if 0
-
-XXX: make oc do almost all of its work in 0.0 - 1.0 coordinates
-     pixels are of less relevance than layout. And perceived detail level -
-     which is different than actual pixel level due to things like ppi.
-
-layout pack
-  boxes[]
-  gap = 0 (for textlayout)
-
-  padding = 8
-  height = 
-  width = 
-
-#endif
-
 
 void draw_text (const char *string, float x, float y, float scale)
 {
@@ -251,7 +234,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
   memset (kernagic_preview, 0, canvas_w * canvas_h);
 
   big = 0;
-  utf8 = ipsum;
+  utf8 = intext;
   if (ipsum)
   {
     TextGlyph text[2048];
@@ -260,224 +243,217 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
     str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
     if (str2)
     {
-      float scale = 0.07;
+      float scale = 0.02;
       int n = 0;
 
-      linestep = 512 * scale;
+      int w;
+      int waterfall = 9;
 
-      i = 0;
-      if (ipsum_no)
+      for (w = 0; w < waterfall; w++)
       {
-        while (n < (ipsum_no-1) && str2[i])
+        linestep = 512 * scale;
+
+        text_count = 0;
+
+        y = y0;
+        x = x0;
+
+        i = 0;
+        if (ipsum_no)
         {
-          if (str2[i] == '\n')
-            n++;
-          i++;
+          while (n < (ipsum_no-1) && str2[i])
+          {
+            if (str2[i] == '\n')
+              n++;
+            i++;
+          }
         }
+        GString *word = g_string_new ("");
+        gunichar uword[1024];
+        int ulen = 0;
+        float startx = x;
+        int wrap = 0;
+
+        int j;
+        for (j = 0; j < n_words; j++)
+          if (words[j].utf8)
+            {
+              g_free (words[j].utf8);
+              words[j].utf8 = NULL;
+            }
+        n_words = 0;
+
+        if (w == waterfall - 1)
+          {
+            debug_start_y = y;
+            debug_scale = scale;
+          }
+
+        for (; str2[i]; i++)
+          {
+            Glyph *g = kernagic_find_glyph_unicode (str2[i]);
+
+            if (str2[i] == '\n')
+              {
+                if (ipsum_no != 0 || y > 100)
+                  break;
+
+                if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
+                {
+                  y += linestep;
+                  x = x0;
+                }
+                Glyph *prev_g = NULL;
+
+                for (j = 0; j < ulen; j++)
+                {
+                  Glyph *g;
+
+                  g = kernagic_find_glyph_unicode (uword[j]);
+                  if (g)
+                  {
+                    if (prev_g)
+                      x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+                    text[text_count].unicode = g->unicode;
+                    text[text_count].x = x;
+                    text[text_count++].y = y;
+
+                    x = advance_glyph (g, x, y, scale);
+                    prev_g = g;
+                  }
+                }
+
+                if (wrap)
+                {
+                  y += linestep;
+                  x = x0;
+                }
+                add_word (word->str, startx, y, x - startx, 40);
+                startx = x;
+                g_string_assign (word, "");
+                ulen = 0;
+              }
+            else if (g)
+              {
+                g_string_append_unichar (word, g->unicode);
+                uword[ulen++] = g->unicode;
+
+              }
+            else if (str2[i] == ' ') /* we're only faking it if we have to  */
+              {
+                Glyph *t = kernagic_find_glyph_unicode ('i');
+                int j;
+                Glyph *prev_g = NULL;
+                
+                if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
+                {
+                  y += linestep;
+                  x = x0;
+
+                }
+
+                for (j = 0; j < ulen; j++)
+                {
+                  Glyph *g;
+
+                  g = kernagic_find_glyph_unicode (uword[j]);
+                  if (g)
+                  {
+                    if (prev_g)
+                      x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+                    text[text_count].unicode = g->unicode;
+                    text[text_count].x = x;
+                    text[text_count++].y = y;
+
+                    if (w == waterfall-1)
+                    {
+                      g_entries[big] = g;
+                      x_entries[big++] = x;
+                      draw_glyph_debug (g, x, y, 1.0, scale, debuglevel);
+                    }
+
+                    x = advance_glyph (g, x, y, scale);
+                    prev_g = g;
+                  }
+                }
+
+                if (t)
+                  x += kernagic_get_advance (t) * scale_factor * scale;
+
+                add_word (word->str, startx, y, x - startx, 40);
+                startx = x;
+                g_string_assign (word, "");
+                ulen = 0;
+              }
+          }
+
+        if (word->len)
+          {
+            if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
+            {
+              y += linestep;
+              x = x0;
+            }
+            Glyph *prev_g = NULL;
+
+            for (j = 0; j < ulen; j++)
+            {
+              Glyph *g;
+
+              g = kernagic_find_glyph_unicode (uword[j]);
+              if (g)
+              {
+                if (prev_g)
+                  x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
+
+                if (w == waterfall-1)
+                {
+                  g_entries[big] = g;
+                  x_entries[big++] = x;
+                  draw_glyph_debug (g, x, y, 1.0, scale, debuglevel);
+                }
+
+                text[text_count].unicode = g->unicode;
+                text[text_count].x = x;
+                text[text_count++].y = y;
+
+                x = advance_glyph (g, x, y, scale);
+                prev_g = g;
+              }
+            }
+            add_word (word->str, startx, y, x - startx, 40);
+          }
+        startx = x;
+      
+        /* we wait with the blast until here */
+        place_glyphs (text, text_count, 1.0, scale);
+
+        if (waterfall > 1)
+          {
+            y0 += 512 * scale * 0.8;
+            scale = scale * 1.5;
+          }
+        g_string_free (word, TRUE);
       }
-      GString *word = g_string_new ("");
-      gunichar uword[1024];
-      int ulen = 0;
-      float startx = x;
-      int wrap = 0;
-
-      int j;
-      for (j = 0; j < n_words; j++)
-        if (words[j].utf8)
-          {
-            g_free (words[j].utf8);
-            words[j].utf8 = NULL;
-          }
-      n_words = 0;
-
-      for (; str2[i]; i++)
-        {
-          Glyph *g = kernagic_find_glyph_unicode (str2[i]);
-
-          if (str2[i] == '\n')
-            {
-              if (ipsum_no != 0 || y > 100)
-                break;
-
-              if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
-              {
-                y += linestep;
-                x = x0;
-              }
-              Glyph *prev_g = NULL;
-
-              for (j = 0; j < ulen; j++)
-              {
-                Glyph *g;
-
-                g = kernagic_find_glyph_unicode (uword[j]);
-                if (g)
-                {
-                  if (prev_g)
-                    x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
-
-                  text[text_count].unicode = g->unicode;
-                  text[text_count].x = x;
-                  text[text_count++].y = y;
-
-                  x = advance_glyph (g, x, y, scale);
-                  prev_g = g;
-                }
-              }
-
-              if (wrap)
-              {
-                y += linestep;
-                x = x0;
-              }
-              add_word (word->str, startx, y, x - startx, 40);
-              startx = x;
-              g_string_assign (word, "");
-              ulen = 0;
-            }
-          else if (g)
-            {
-              g_string_append_unichar (word, g->unicode);
-              uword[ulen++] = g->unicode;
-
-            }
-          else if (str2[i] == ' ') /* we're only faking it if we have to  */
-            {
-              Glyph *t = kernagic_find_glyph_unicode ('i');
-              int j;
-              Glyph *prev_g = NULL;
-              
-              if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
-              {
-                y += linestep;
-                x = x0;
-
-              }
-
-              for (j = 0; j < ulen; j++)
-              {
-                Glyph *g;
-
-                g = kernagic_find_glyph_unicode (uword[j]);
-                if (g)
-                {
-                  if (prev_g)
-                    x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
-
-                  text[text_count].unicode = g->unicode;
-                  text[text_count].x = x;
-                  text[text_count++].y = y;
-
-                  x = advance_glyph (g, x, y, scale);
-                  prev_g = g;
-                }
-              }
-
-              if (t)
-                x += kernagic_get_advance (t) * scale_factor * scale;
-
-              add_word (word->str, startx, y, x - startx, 40);
-              startx = x;
-              g_string_assign (word, "");
-              ulen = 0;
-            }
-        }
-
-      if (word->len)
-        {
-          if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
-          {
-            y += linestep;
-            x = x0;
-          }
-          Glyph *prev_g = NULL;
-
-          for (j = 0; j < ulen; j++)
-          {
-            Glyph *g;
-
-            g = kernagic_find_glyph_unicode (uword[j]);
-            if (g)
-            {
-              if (prev_g)
-                x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
-
-              text[text_count].unicode = g->unicode;
-              text[text_count].x = x;
-              text[text_count++].y = y;
-
-              x = advance_glyph (g, x, y, scale);
-              prev_g = g;
-            }
-          }
-          add_word (word->str, startx, y, x - startx, 40);
-        }
-      startx = x;
-
-      g_string_free (word, TRUE);
-      g_free (str2);
-    
-      /* we wait with the blast until here */
-      place_glyphs (text, text_count, 1.0, scale);
+     g_free (str2);
     }
   }
 
   /**********************************/
 
-  x0 = 0;
-  y0 = 100;
-
-  x = x0;
-  y = y0;
-  linestep = 512;
-  big = 0;
-  utf8 = intext;
-  str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
-  if (str2)
-  {
-    Glyph *prev_g = NULL;
-  for (i = 0; str2[i]; i++)
-    {
-      Glyph *g = kernagic_find_glyph_unicode (str2[i]);
-      if (g)
-        {
-          if (prev_g)
-            x += kernagic_kern_get (prev_g, g) * scale_factor;
-
-            g_entries[big] = g;
-            x_entries[big++] = x;
-
-          draw_glyph_debug (g, x, y, 1.0, 1.0, debuglevel);
-          x = place_glyph (g, x, y, 1.0, 1.0);
-          prev_g = g;
-        }
-      else if (str2[i] == ' ') /* we're only faking it if we have to  */
-        {
-          Glyph *t = kernagic_find_glyph_unicode ('i');
-          if (t)
-            x += kernagic_get_advance (t) * scale_factor;
-          prev_g = NULL;
-        }
-      if (x > 8192)
-        {
-          y += linestep;
-          x = x0;
-        }
-    }
-    g_free (str2);
-  }
-
   /* should be based on n_width for table method */
   if (toggle_measurement_lines)
   {
     int i;
-    for (i = 0; i * period * scale_factor < canvas_w - period * scale_factor; i++)
+    for (i = 0; i * period * scale_factor  * debug_scale < canvas_w - period * scale_factor * debug_scale; i++)
       {
         int y;
-        int x = (i + 0.5) * period * scale_factor;
-        float yline = DEBUG_START_Y + kernagic_x_height () * scale_factor * 2.5 - 10;
-        int radius = kernagic_x_height () * scale_factor * 1.5;
-        for (y = yline - radius; y < yline + radius; y++)
+        int x = (i + 0.5) * period * scale_factor * debug_scale;
+        float y0 = debug_start_y + 256 * debug_scale;
+        float y1 = debug_start_y + 512 * debug_scale;
+        for (y = y0; y < y1; y++)
           {
             if (x >= 0 &&
                 x < canvas_w &&
@@ -487,18 +463,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               kernagic_preview[y* canvas_w + x] * 0.9 +
               255 * 0.1;
           }
-#if 0
-        radius = 4;
-        for (y = yline - radius; y < yline + radius; y++)
-          {
-            if (x >= 0 &&
-                x < canvas_w &&
-                y >= 0 &&
-                y < PREVIEW_HEIGHT)
-            kernagic_preview[y* canvas_w + x] =
-              (kernagic_preview[y* canvas_w + x] + 96) / 2;
-          }
-#endif
       }
   }
 }

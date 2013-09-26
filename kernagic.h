@@ -67,7 +67,7 @@ struct _Word
 const char *detect_word (int x, int y);
 float n_distance (void);
 
-#define DEBUG_START_Y 100
+extern int debug_start_y;
 
 
 typedef struct _KernerSettings KernerSettings;
@@ -101,5 +101,6 @@ void kernagic_set_cadence (const char *cadence_path);
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
 int canvas_width ();
 int canvas_height ();
+extern float debug_scale;
 
 #endif

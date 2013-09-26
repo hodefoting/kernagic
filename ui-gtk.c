@@ -298,6 +298,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     return TRUE;
 
   x -= x_entries[i];
+  y -= debug_start_y;
   g = g_entries[i];
 
   x /= scale_factor;
@@ -314,7 +315,6 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
    */
   {
     const char *word;
-    /* it is ugly to have to do this */
     word = detect_word (event->button.x, event->button.y);
     if (word)
     {
@@ -706,13 +706,13 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   {
     spin_method = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    0, "original");
+                                    0, "original (F1)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    1, "ink bounds");
+                                    1, "ink bounds (F2)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2, "bearing table");
+                                    2, "bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "en-divisor snapped stem gap");
+                                    3, "en-divisor snapped stem gap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
