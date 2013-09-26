@@ -279,6 +279,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
       gunichar uword[1024];
       int ulen = 0;
       float startx = x;
+      int wrap = 0;
 
       int j;
       for (j = 0; j < n_words; j++)
@@ -298,7 +299,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               if (ipsum_no != 0 || y > 100)
                 break;
 
-              if (x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
+              if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
               {
                 y += linestep;
                 x = x0;
@@ -324,8 +325,11 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
                 }
               }
 
-              y += linestep;
-              x = x0;
+              if (wrap)
+              {
+                y += linestep;
+                x = x0;
+              }
               add_word (word->str, startx, y, x - startx, 40);
               startx = x;
               g_string_assign (word, "");
@@ -343,7 +347,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               int j;
               Glyph *prev_g = NULL;
               
-              if (x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
+              if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
               {
                 y += linestep;
                 x = x0;
@@ -381,7 +385,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
       if (word->len)
         {
-          if (x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
+          if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w-PREVIEW_PADDING)
           {
             y += linestep;
             x = x0;

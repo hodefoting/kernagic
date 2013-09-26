@@ -138,8 +138,8 @@ static void trigger_cadence_path (void)
 static void trigger_cadence (void)
 {
   float cadence = gtk_range_get_value (GTK_RANGE (spin_gray_target));
-  if (frozen)
-    return;
+  //if (frozen)
+  //  return;
 
   frozen++;
   gtk_range_set_value (GTK_RANGE (spin_divisor),
@@ -571,6 +571,7 @@ int ui_gtk (int argc, char **argv)
 {
   GtkWidget    *window;
   GtkWidget    *hbox;
+  GtkWidget    *vbox2;
   GtkWidget    *vbox1;
 
   GtkSizeGroup *labels;
@@ -599,7 +600,10 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   preview = gtk_drawing_area_new ();
   gtk_widget_set_size_request (preview, canvas_width(), canvas_height());
-  gtk_container_add (GTK_CONTAINER (hbox), preview);
+
+  vbox2 = gtk_vbox_new (FALSE, 5);
+  gtk_box_pack_end (GTK_BOX (vbox2), preview, TRUE, TRUE, 2);
+  gtk_container_add (GTK_CONTAINER (hbox), vbox2);
 
 #ifdef GTK2
   g_signal_connect (preview, "expose-event", G_CALLBACK (preview_draw_cb), NULL);
@@ -686,14 +690,18 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkWidget *label = gtk_label_new ("Text sample");
+    //GtkWidget *label = gtk_label_new ("Text sample");
     test_text = gtk_entry_new ();
+#if 0
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     gtk_size_group_add_widget (labels, label);
     gtk_size_group_add_widget (sliders, test_text);
     gtk_box_pack_start (GTK_BOX (vbox1), label, FALSE, FALSE, 2);
     gtk_box_pack_start (GTK_BOX (vbox1), test_text, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
+#endif
+
+    gtk_box_pack_start (GTK_BOX (vbox2), test_text, FALSE, FALSE, 2);
   }
   {
     spin_method = gtk_combo_box_text_new ();
@@ -840,7 +848,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
   g_signal_connect (spin_divisor,       "value-changed", G_CALLBACK (trigger_divisor), NULL);
-  g_signal_connect (spin_tracking,      "value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
 
