@@ -233,8 +233,10 @@ static void ipsum_reload (void)
       case 2:
         ipsum = "yelping gluier soggily logbook baton adagios uncorks icecaps hydrant news prevue whelked towered quest except enrolls tried suppers goading journal cupolas drummer quests";
         break;
-      case 3:
-        ipsum = "This is where I place the kernagic documentation :]";
+
+      case 3: ipsum = "Click a small ipsum word to replace the position in the sample text being focused on. In the work area, clicking below the baseline removes custom stems, within the x-height left and right rythm point are set, above the x-height single rythm instance is specified.";
+
+        break;
 
       default:
         ipsum = "Kernagic - 2013 © Øyvind Kolås - Released under AGPL";
@@ -744,7 +746,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Ipsum");
+    GtkWidget *label = gtk_label_new ("Ipsum file");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
 
@@ -800,7 +802,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2, "bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "en-divisor snapped stem gap (F4)");
+                                    3, "snapped rythm-point gap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
@@ -878,7 +880,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Tracking");
+    GtkWidget *label = gtk_label_new ("Scale bearings");
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_tracking = gtk_spin_button_new_with_range (0.0, 300.0, 0.5);
@@ -915,13 +917,14 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_widget_add_events (index, GDK_BUTTON_PRESS_MASK);
 #endif
 
-
+#if 0
   {
     GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom stems, within the x-height left and right stems are set, above the x-height single stem overrides are set.\n\nThe short lines are stem-lines, weak ones auto-detected and dark ones manual overrides.");
     gtk_label_set_line_wrap (GTK_LABEL (help), TRUE);
     gtk_misc_set_alignment (GTK_MISC (help), 0.0, 0.0);
     gtk_box_pack_start (GTK_BOX (vbox1), help, FALSE, FALSE, 2);
   }
+#endif
 
   /************/
 
@@ -935,6 +938,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
   g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (ipsum_reload), NULL);
+  g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
@@ -957,16 +961,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   trigger_reload ();
 
-  ipsum = g_strdup ("the five boxing wizards jump quickly\n"
-      "onoo nnin ilnum\n"
-      "lodger jets keller viewed breast catty magi eskimo sudden allay sitars glues snub quail myself criers parole hunts sync bulky nissan recede freud sculpt numbs arias doyens vector liming polyp yamaha boodle legree zigzag lusty babies unwind ginkgo\n"
-      "shrub wisdom cipher causal sigh grubby ate gaffs hutch mapped levitt duluth peeks hyping halos shoed bog enable copra distil storm zuni besets trump quaver modem reap murals kurtis fazing pursed vaguer aisle tilt began gentry effect convoy crowds\n"
-      "illegally roach unlimited variable costello downscale cloak walton radius rojas lemony nuke theses tipped skids sullen stael hopi toward highly croak purina croup rector pantie yeahs irks scuds egoism queen sags deity fenced taegu adams somali flaws swords dwarfs webern fronde cayuga pilaf roving verb hotel needy\n"
-      "abcdefghijklmnopqrstuvwxyz\n"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
-      "0123456789 -=+_ ,.:;'\" ()[]{} *&^%$#?@! <>~`/|\\ \n"
-      "kernagic is free software distributed under the AGPL\n"
-      "Øyvind Kolås pippin@gimp.org\n");
+  ipsum = g_strdup ("foo");
 
   gtk_main ();
   return 0;
