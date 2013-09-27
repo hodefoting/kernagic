@@ -220,28 +220,34 @@ float measure_word_width (const gunichar *uword,int ulen, float scale)
 }
 
 float waterfall_offset = 0.0;
+extern int desired_pos;
 
-void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel)
+void redraw_test_text (const char *intext, int debuglevel)
 {
   float period = kerner_settings.alpha_target;
   const char *utf8;
   gunichar *str2;
   int i;
-  float x0 = PREVIEW_PADDING;
-  float y0 = PREVIEW_PADDING;
+  float x0;
+  float y0;
   float linestep = 512;
-
-  float x = x0;
-  float y = y0;
+  float x, y;
 
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
+again:
+  x0 = PREVIEW_PADDING;
+  y0 = PREVIEW_PADDING;
+  x = x0;
+  y = y0;
 
   memset (kernagic_preview, 0, canvas_w * canvas_h);
+  debug_start_y = canvas_h/2;
+  debug_scale = 1.0;
 
   big = 0;
   utf8 = intext;
-  if (ipsum)
+  if (utf8)
   {
     TextGlyph text[2048];
     int       text_count = 0;
@@ -252,8 +258,6 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
       float scale = WATERFALL_START;
       int waterfall = WATERFALL_LEVELS;
-
-      int n = 0;
 
       int w;
 
@@ -268,18 +272,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
         x = x - waterfall_offset * scale * scale_factor + canvas_w/2;
 
-
-
         i = 0;
-        if (ipsum_no)
-        {
-          while (n < (ipsum_no-1) && str2[i])
-          {
-            if (str2[i] == '\n')
-              n++;
-            i++;
-          }
-        }
         GString *word = g_string_new ("");
         gunichar uword[1024];
         int ulen = 0;
@@ -307,7 +300,7 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
             if (str2[i] == '\n')
               {
-                if (ipsum_no != 0 || y > 100)
+                if (y > 120)
                   break;
 
                 if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
@@ -381,6 +374,14 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
                     if (w == waterfall-1)
                     {
+
+                      if (desired_pos != -1 && desired_pos <= i)
+                      {
+                        waterfall_offset = (x + waterfall_offset * scale * scale_factor - canvas_w/2)/scale/scale_factor;
+                        desired_pos = -1;
+                        goto again;
+                      }
+
                       g_entries[big] = g;
                       x_entries[big++] = x;
                       draw_glyph_debug (g, x, y, 1.0, scale, debuglevel);
@@ -388,6 +389,11 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
                     x = advance_glyph (g, x, y, scale);
                     prev_g = g;
+                  }
+                  else
+                  {
+                    g_entries[big] = kernagic_find_glyph_unicode ('i');
+                    x_entries[big++] = x + waterfall_offset;
                   }
                 }
 
@@ -424,6 +430,14 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
                 {
                   g_entries[big] = g;
                   x_entries[big++] = x;
+
+                  if (desired_pos != -1 && desired_pos <= i)
+                  {
+                    waterfall_offset = (x + waterfall_offset * scale * scale_factor - canvas_w/2)/scale/scale_factor;
+                    desired_pos = -1;
+                    goto again;
+                  }
+
                   draw_glyph_debug (g, x, y, 1.0, scale, debuglevel);
                 }
 
@@ -433,6 +447,11 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
                 x = advance_glyph (g, x, y, scale);
                 prev_g = g;
+              }
+              else
+              {
+                g_entries[big] = kernagic_find_glyph_unicode ('i');
+                x_entries[big++] = x + waterfall_offset;
               }
             }
             add_word (word->str, startx, y, x - startx, 40);
@@ -451,14 +470,17 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
               scale = 1.0;
           }
         g_string_free (word, TRUE);
+        if (w == waterfall-1 && desired_pos != -1)
+        {
+          waterfall_offset = (x + waterfall_offset * scale * scale_factor - canvas_w/2)/scale/scale_factor;
+          desired_pos = -1;
+          goto again;
+        }
       }
      g_free (str2);
     }
   }
 
-  /**********************************/
-
-  /* should be based on n_width for table method */
   if (toggle_measurement_lines)
   {
     int i;

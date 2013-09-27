@@ -7,8 +7,6 @@
 
 static char *ipsum = NULL;
 
-void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel);
-
 #define INDEX_WIDTH    256
 #define INDEX_HEIGHT   256
 
@@ -90,10 +88,7 @@ static gboolean delayed_trigger (gpointer foo)
   g_string_free (str, TRUE);
   kernagic_compute (NULL);
 
-  redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)), ipsum, 
-      
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no))
-      ,toggle_measurement_lines);
+  redraw_test_text ( gtk_entry_get_text (GTK_ENTRY (test_text)),toggle_measurement_lines);
 
   gtk_widget_queue_draw (preview);
 
@@ -212,12 +207,45 @@ static void trigger_prop_show (void)
 
 static void ipsum_reload (void)
 {
+  int ipsum_no = 0;
+  const char *path;
   if (ipsum)
     g_free (ipsum);
-  g_file_get_contents (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (ipsum_path)),
-      &ipsum, NULL, NULL);
-  trigger ();
+  ipsum = NULL;
 
+  path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (ipsum_path));
+  if (!path)
+  {
+    /* XXX: place to hook int default ipsum strings */
+    return;
+  }
+
+  g_file_get_contents (path, &ipsum, NULL, NULL);
+  if (ipsum)
+  {
+    GString *str;
+    char *p;
+    int lineno = 1;
+    ipsum_no = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no));
+    str = g_string_new ("");
+    for (p = ipsum; *p; p++)
+      {
+        if (*p == '\n')
+        {
+          lineno++;
+        }
+        else
+        {
+          if (lineno == ipsum_no)
+            {
+              g_string_append_c (str, *p);
+            }
+        }
+      }
+    gtk_entry_set_text (GTK_ENTRY (test_text), str->str);
+    g_string_free (str, TRUE);
+    trigger ();
+  }
 }
 
 static void trigger_reload (void)
@@ -283,6 +311,18 @@ static void do_save (void)
 
 extern float waterfall_offset;
 
+int desired_pos = -1;
+
+static gboolean
+cursor_position_changed_cb (GtkWidget *widget)
+{
+  gint foo;
+  g_object_get (widget, "cursor-position", &foo, NULL);
+  desired_pos = foo;
+  return FALSE;
+}
+
+
 static gboolean
 preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -296,7 +336,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   for (i = 0; i+1 < big && x_entries[i+1] < event->button.x; i++);
   
   if (i + 1 >= big)
-    return TRUE;
+    i = big-1;
 
   x -= x_entries[i];
   y = (y-debug_start_y) / (kernagic_x_height() * scale_factor * debug_scale);
@@ -305,8 +345,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 
   x /= (scale_factor * debug_scale);
 
-  if (!g)
-    return TRUE;
+  if (g)
   advance = kernagic_get_advance (g);
 
   /* should be adjusted according to an y-offset */
@@ -336,6 +375,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     {
       if (y < y0)
         {
+          desired_pos = -1;
           waterfall_offset = 
             waterfall_offset + ((event->button.x - canvas_width()/2) / pscale / scale_factor);
           trigger ();
@@ -346,17 +386,17 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
       scale = scale * WATERFALL_SCALING;
     }
   }
-  else if (y < 0.5)
+  else if (g && y < 0.5)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
   }
-  else if (y > 2.0)
+  else if (g && y > 2.0)
   {
     g->rstem = 0;
     g->lstem = 0;
   }
-  else
+  else if (g)
   {
     if (x / advance < 0.5)
     {
@@ -366,6 +406,10 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     {
       g->rstem = x - g->left_bearing;
     }
+  }
+  else
+  {
+    fprintf (stderr, "unhandled\n");
   }
 
   trigger ();
@@ -688,7 +732,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
-    spin_ipsum_no = gtk_spin_button_new_with_range (0, 100, 1);
+    spin_ipsum_no = gtk_spin_button_new_with_range (1, 100, 1);
     gtk_widget_set_tooltip_text (spin_ipsum_no, "PgUp / PgDn");
     gtk_container_add (GTK_CONTAINER (hbox2), ipsum_path);
     gtk_container_add (GTK_CONTAINER (hbox2), spin_ipsum_no);
@@ -863,13 +907,14 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger), NULL);
 
   g_signal_connect (spin_method,        "notify::active", G_CALLBACK (trigger_prop_show), NULL);
-  g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_ipsum_no,      "notify::value", G_CALLBACK (ipsum_reload), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
   g_signal_connect (spin_divisor,       "value-changed", G_CALLBACK (trigger_divisor), NULL);
   g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
+  g_signal_connect (test_text,          "notify::cursor-position",  G_CALLBACK (cursor_position_changed_cb), NULL);
 
   g_signal_connect (ipsum_glyphs,          "notify::text",  G_CALLBACK (trigger_ipsum), NULL);
 

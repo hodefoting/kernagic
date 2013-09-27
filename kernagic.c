@@ -573,7 +573,7 @@ int main (int argc, char **argv)
       cairo_surface_t *surface =
         cairo_image_surface_create_for_data (kernagic_preview,
             CAIRO_FORMAT_A8, canvas_width (), canvas_height (), canvas_width());
-      redraw_test_text (kernagic_sample_text, "", 0, 0); 
+      redraw_test_text (kernagic_sample_text, 0); 
       for (i = 0; i < len; i++)
         kernagic_preview[i] = 255 - kernagic_preview[i];
       cairo_surface_write_to_png (surface, kernagic_output_png);
