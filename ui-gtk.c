@@ -43,6 +43,7 @@ GtkWidget *spin_ipsum_no;
 static GtkWidget *vbox_options_cadence;
 static GtkWidget *cadence_path;
 
+static GtkWidget *vbox_options_original;
 static GtkWidget *vbox_options_gray;
 static GtkWidget *vbox_options_rythm;
 
@@ -194,9 +195,12 @@ static void trigger_prop_show (void)
 
   gtk_widget_hide (vbox_options_cadence);
   gtk_widget_hide (vbox_options_gray);
+  gtk_widget_hide (vbox_options_original);
   gtk_widget_hide (vbox_options_rythm);
 
-  if (!strcmp (method->name, "cadence"))
+  if (!strcmp (method->name, "original"))
+    gtk_widget_show (vbox_options_original);
+  else if (!strcmp (method->name, "cadence"))
     gtk_widget_show (vbox_options_cadence);
   else if (!strcmp (method->name, "gray"))
     gtk_widget_show (vbox_options_gray);
@@ -679,37 +683,13 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_widget_add_events (preview, GDK_BUTTON_PRESS_MASK);
 
   {
-    GtkWidget *hbox;
-    /* XXX: add a button to remove all custom stems? */
-    GtkWidget *defaults_button = gtk_button_new_with_label ("defaults");
-    //GtkWidget *process_button  = gtk_button_new_with_label ("Respace all");
-    GtkWidget *save_button     = gtk_button_new_with_label ("Save");
-
-    gtk_widget_set_tooltip_text (save_button, "Ctrl + S");
-
-    hbox = gtk_hbox_new (FALSE, 4);
-    gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (hbox), defaults_button, TRUE, TRUE, 2);
-    //gtk_box_pack_start (GTK_BOX (hbox), process_button, TRUE, TRUE, 2);
-
-    gtk_box_pack_start (GTK_BOX (hbox), save_button, TRUE, TRUE, 2);
-
-    g_signal_connect (defaults_button,"clicked", G_CALLBACK (set_defaults), NULL);
-    //g_signal_connect (process_button, "clicked", G_CALLBACK (do_process), NULL);
-    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
-  }
-  {
-    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
-    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
-  }
-
-
-  {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Font");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
 
     font_path = gtk_file_chooser_button_new ("font", GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+
     if (ufo_path)
     {
       gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
@@ -717,9 +697,18 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
       gtk_size_group_add_widget (labels, label);
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
 
-    gtk_size_group_add_widget (sliders, font_path);
+    gtk_size_group_add_widget (sliders, hbox2);
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), font_path);
+    gtk_container_add (GTK_CONTAINER (hbox), hbox2);
+    gtk_container_add (GTK_CONTAINER (hbox2), font_path);
+
+  {
+    GtkWidget *save_button     = gtk_button_new_with_label ("Save");
+    gtk_widget_set_tooltip_text (save_button, "Ctrl + S");
+    gtk_box_pack_end (GTK_BOX (hbox2), save_button, TRUE, TRUE, 2);
+    g_signal_connect (save_button,  "clicked",  G_CALLBACK (do_save), NULL);
+  }
+
   }
 
   {
@@ -752,6 +741,11 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), ipsum_glyphs);
   }
+  {
+    toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
+    gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
+  }
+
 
   {
     //GtkWidget *label = gtk_label_new ("Text sample");
@@ -799,6 +793,9 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_box_pack_start (GTK_BOX (vbox_options_cadence), cadence_path, FALSE, FALSE, 2);
   }
 
+  vbox_options_original = gtk_vbox_new (FALSE, 4);
+  gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_original, FALSE, FALSE, 2);
+
   vbox_options_gray = gtk_vbox_new (FALSE, 4);
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_gray, FALSE, FALSE, 2);
   {
@@ -828,7 +825,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *label = gtk_label_new ("Divisor");
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_divisor = gtk_hscale_new_with_range (0.0, 100.0, 1);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
@@ -836,7 +833,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *label = gtk_label_new ("Cadence");
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_gray_target = gtk_hscale_new_with_range (1, 100.0, 0.01);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
@@ -844,7 +841,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkWidget *label = gtk_label_new ("Offset");
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_offset = gtk_hscale_new_with_range (-5.0, 100.0, 0.1);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
@@ -856,7 +853,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     spin_tracking = gtk_spin_button_new_with_range (0.0, 300.0, 0.5);
     gtk_size_group_add_widget (sliders, spin_tracking);
-    //gtk_container_add (GTK_CONTAINER (vbox_options_rythm), hbox);
+    gtk_container_add (GTK_CONTAINER (vbox_options_original), hbox);
     gtk_container_add (GTK_CONTAINER (hbox), label);
     gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
   }
