@@ -1,8 +1,6 @@
 #include <string.h>
 #include "kernagic.h"
 
-#define PREVIEW_PADDING 5
-
 /* This is the main rendering code of kernagic.. 
  */
 int debug_start_y = 0;
@@ -221,6 +219,8 @@ float measure_word_width (const gunichar *uword,int ulen, float scale)
   return x;
 }
 
+float waterfall_offset = 0.0;
+
 void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int debuglevel)
 {
   float period = kerner_settings.alpha_target;
@@ -249,10 +249,9 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
     str2 = g_utf8_to_ucs4 (utf8, -1, NULL, NULL, NULL);
     if (str2)
     {
-      float scale = 0.02;
-#define WATERFALL_SCALING 1.8
-#define WATERFALL_SPACING 0.6
-      int waterfall = 7;
+
+      float scale = WATERFALL_START;
+      int waterfall = WATERFALL_LEVELS;
 
       int n = 0;
 
@@ -266,6 +265,10 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
 
         y = y0;
         x = x0;
+
+        x = x - waterfall_offset * scale * scale_factor + canvas_w/2;
+
+
 
         i = 0;
         if (ipsum_no)
@@ -444,8 +447,8 @@ void redraw_test_text (const char *intext, const char *ipsum, int ipsum_no, int 
             y0 += 512 * scale * WATERFALL_SPACING;
             scale = scale * WATERFALL_SCALING;
 
-            //if (w == waterfall -2)
-            //  scale = 1.0;
+            if (w == waterfall -2) /* snap last level to full size */
+              scale = 1.0;
           }
         g_string_free (word, TRUE);
       }

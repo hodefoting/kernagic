@@ -281,6 +281,7 @@ static void do_save (void)
   kernagic_save_kerning_info ();
 }
 
+extern float waterfall_offset;
 
 static gboolean
 preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
@@ -313,7 +314,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
-  {
+ if(0) {
     const char *word;
     word = detect_word (event->button.x, event->button.y);
     if (word)
@@ -324,10 +325,27 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     }
   }
 
-  fprintf (stderr, "%f\n", x / advance);
-
   if (y < 0)
-  {}
+  {
+    int w;
+    float y0= PREVIEW_PADDING;
+    float scale = WATERFALL_START;
+    float pscale = scale;
+    y = event->button.y;
+    for (w = 0; w < WATERFALL_LEVELS; w++)
+    {
+      if (y < y0)
+        {
+          waterfall_offset = 
+            waterfall_offset + ((event->button.x - canvas_width()/2) / pscale / scale_factor);
+          trigger ();
+          return TRUE;
+        }
+      y0 += 512 * scale * WATERFALL_SPACING;
+      pscale = scale;
+      scale = scale * WATERFALL_SCALING;
+    }
+  }
   else if (y < 0.5)
   {
     g->rstem = x - g->left_bearing;

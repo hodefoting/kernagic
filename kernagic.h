@@ -103,4 +103,11 @@ int canvas_width ();
 int canvas_height ();
 extern float debug_scale;
 
+
+#define WATERFALL_START   0.02
+#define WATERFALL_SCALING 1.4
+#define WATERFALL_SPACING 0.6
+#define WATERFALL_LEVELS    9
+#define PREVIEW_PADDING 5
+
 #endif
