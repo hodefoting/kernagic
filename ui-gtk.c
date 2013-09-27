@@ -175,6 +175,9 @@ static gboolean delayed_reload_trigger (gpointer foo)
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
   kernagic_strip_left_bearing = TRUE;
 
+  if (!ufo_path)
+    return FALSE;
+
   kernagic_load_ufo (ufo_path, kernagic_strip_left_bearing);
   g_free (ufo_path);
   if (delayed_updater)
