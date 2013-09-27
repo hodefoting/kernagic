@@ -104,10 +104,12 @@ int canvas_height ();
 extern float debug_scale;
 
 
-#define WATERFALL_START   0.04
+#define WATERFALL_START   0.05
 #define WATERFALL_SCALING 1.2
 #define WATERFALL_SPACING 0.6
-#define WATERFALL_LEVELS    7
+#define WATERFALL_LEVELS    8
 #define PREVIEW_PADDING 5
+
+#define IPSUM0 "ooonnnono frtjkxv abcdefghijklmnopqrstuvwxyz 1234567890=2 +-/(8)[8],./;*&^%$#@!_-?:\"{}\\|~`  Kernagic 2013 © Øyvind Kolås - pippin.gimp.org"
 
 #endif

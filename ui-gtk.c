@@ -144,6 +144,7 @@ static void trigger_cadence (void)
 
   trigger ();
 }
+extern float waterfall_offset;
 
 static void trigger_ipsum (void)
 {
@@ -160,7 +161,9 @@ static void trigger_ipsum (void)
   if (ipsum)
     g_free (ipsum);
   ipsum = g_strdup (ipsumat_generate (NULL, str->str,
-        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 13));
+        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 23));
+  gtk_entry_set_text (GTK_ENTRY (test_text), ipsum);
+  waterfall_offset = 48784;
   trigger ();
   g_string_free (str, TRUE);
 }
@@ -217,9 +220,32 @@ static void ipsum_reload (void)
     g_free (ipsum);
   ipsum = NULL;
 
+  ipsum_no = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no));
   path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (ipsum_path));
   if (!path)
   {
+    const char *ipsum = NULL;
+    switch (ipsum_no)
+    {
+      case 1:
+        ipsum = IPSUM0;
+        break;
+      case 2:
+        ipsum = "yelping gluier soggily logbook baton adagios uncorks icecaps hydrant news prevue whelked towered quest except enrolls tried suppers goading journal cupolas drummer quests";
+        break;
+      case 3:
+        ipsum = "This is where I place the kernagic documentation :]";
+
+      default:
+        ipsum = "Kernagic - 2013 © Øyvind Kolås - Released under AGPL";
+        break;
+    }
+    if (ipsum)
+    {
+      gtk_entry_set_text (GTK_ENTRY (test_text), ipsum);
+      waterfall_offset = 48784;
+      trigger ();
+    }
     /* XXX: place to hook int default ipsum strings */
     return;
   }
@@ -230,7 +256,6 @@ static void ipsum_reload (void)
     GString *str;
     char *p;
     int lineno = 1;
-    ipsum_no = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_ipsum_no));
     str = g_string_new ("");
     for (p = ipsum; *p; p++)
       {
@@ -247,6 +272,7 @@ static void ipsum_reload (void)
         }
       }
     gtk_entry_set_text (GTK_ENTRY (test_text), str->str);
+    waterfall_offset = 48784;
     g_string_free (str, TRUE);
     trigger ();
   }
@@ -278,11 +304,15 @@ static void set_defaults (void)
 
 static void set_defaults_from_args (void)
 {
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
+
   if (kernagic_sample_text)
   gtk_entry_set_text (GTK_ENTRY (test_text), kernagic_sample_text);
   else
-  gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
+  {
+    gtk_entry_set_text (GTK_ENTRY (test_text), IPSUM0);
+  }
+  waterfall_offset = 48784;
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no()); 
 
@@ -313,7 +343,6 @@ static void do_save (void)
   kernagic_save_kerning_info ();
 }
 
-extern float waterfall_offset;
 
 int desired_pos = -1;
 
@@ -382,6 +411,8 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
           desired_pos = -1;
           waterfall_offset = 
             waterfall_offset + ((event->button.x - canvas_width()/2) / pscale / scale_factor);
+
+          fprintf (stderr, "%f\n", waterfall_offset);
           trigger ();
           return TRUE;
         }
@@ -745,7 +776,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
     gtk_box_pack_start (GTK_BOX (vbox1), toggle_measurement_lines_check, FALSE, FALSE, 2);
   }
-
 
   {
     //GtkWidget *label = gtk_label_new ("Text sample");

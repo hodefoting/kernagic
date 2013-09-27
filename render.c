@@ -1,6 +1,8 @@
 #include <string.h>
 #include "kernagic.h"
 
+#include <cairo.h>
+
 /* This is the main rendering code of kernagic.. 
  */
 int debug_start_y = 0;
@@ -300,7 +302,7 @@ again:
 
             if (str2[i] == '\n')
               {
-                if (y > 120)
+                if (y > 150)
                   break;
 
                 if (wrap && x + measure_word_width (uword, ulen, scale) > canvas_w -PREVIEW_PADDING)
