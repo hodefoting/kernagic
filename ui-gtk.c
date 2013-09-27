@@ -828,7 +828,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
 #if 1
   index = gtk_drawing_area_new ();
-  gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT);
+  gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT/2);
   gtk_box_pack_start (GTK_BOX (vbox1), index, FALSE, FALSE, 2);
 
   //g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);

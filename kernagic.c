@@ -29,9 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 
 #define SPECIMEN_SIZE 170
 
-#define PREVIEW_PADDING   15
 #define PREVIEW_WIDTH    900
-#define PREVIEW_HEIGHT   600
+#define PREVIEW_HEIGHT   670
 
 int canvas_width ()
 {
