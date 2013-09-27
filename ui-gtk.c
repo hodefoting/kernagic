@@ -293,6 +293,7 @@ static void trigger_reload (void)
   delayed_reload_updater = g_timeout_add (250, delayed_reload_trigger, NULL);
 }
 
+#if 0
 static void set_defaults (void)
 {
   gtk_entry_set_text (GTK_ENTRY (test_text), "Kern Me Tight");
@@ -306,6 +307,7 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
+#endif
 
 static void set_defaults_from_args (void)
 {
@@ -905,7 +907,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 #if 1
   index = gtk_drawing_area_new ();
   gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT/2);
-  gtk_box_pack_start (GTK_BOX (vbox1), index, FALSE, FALSE, 2);
+  gtk_box_pack_end (GTK_BOX (vbox1), index, FALSE, FALSE, 2);
 
   //g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
   g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
