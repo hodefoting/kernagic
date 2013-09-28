@@ -1,7 +1,8 @@
 Kernagic
 ========
 
-Kernagic is a tool for spacing and kerning fonts. It provides a selection of methods that can be previewed and tuned interactively. 
+Kernagic is a tool for spacing fonts. It provides a selection of methods that
+can be previewed and tuned interactively. 
 
 To fit into a diverse set of workflows, Kernagic uses UFO fonts for input. UFO can act as a superset of other formats, and tools like [Fontforge](http://github.com/fontforge/fontforge/) can be used for converting to and from it.
 
@@ -19,28 +20,27 @@ These are the various spacing methods implemented in Kernagic to date. The appli
 Inkbounds
 --------------
 
-A simple fallback spacing method.
-
-This calculates an even 'grey value' between each letter pair. 
-
-Currently this only produces kerning, not metrics.
+A simple method, included for debugging only; no side-bearings.
 
 Renaissance Cadence Table
 -------------------------
 
 A predefined spacing table method. 
 
-This table encodes knowledge of glyph morphologies, found in Frank Blokland's excellent [Letter Model](http://lettermodel.org). 
+This table encodes knowledge of glyph morphologies, found in Frank Blokland's
+excellent [Letter Model](http://lettermodel.org). This table is also provided
+as an external text file; other files following the same format can be used
+for detailed control over this method.
 
 It assumes your typeface is a traditional renaissance design, with classic glyph proportions, and automatically prepares a fitting.
 
 Currently this only produces metrics, not kerning.
 
-Gap Cadence Discovery
--------------------------
+Fixed and snapped iter glyph rythm gap distance
+-----------------------------------------------
 
-`left bearing = gap * (offset + 0.5) - left stem width`
-
-The gap method allows specifying the gap to use between stems in neighbouring glyphs. (The resulting advance is snapped to a multiple of the gap.)
+This method allows specifying a desired snapping cadence (all glyph advances
+ends up on a multiple of this value.) And a desired target distance between
+rythm points of neighbouring glyphs.
 
 Currently this only produces metrics, not kerning.

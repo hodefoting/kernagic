@@ -1,5 +1,5 @@
                                                                             /*
-Kernagic a libre auto spacer and kerner for Unified Font Objects.
+Kernagic a libre spacing tool for Unified Font Objects.
 Copyright (C) 2013 Øyvind Kolås
 
 This program is free software: you can redistribute it and/or modify
@@ -51,7 +51,6 @@ KernerSettings kerner_settings = {
   KERNER_DEFAULT_OFFSET,
   KERNER_DEFAULT_TRACKING
 };
-
 
 
 char *kernagic_sample_text = NULL;
