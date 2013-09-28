@@ -104,6 +104,7 @@ void redraw_test_text (const char *intext, int debuglevel);
 int canvas_width ();
 int canvas_height ();
 extern float debug_scale;
+extern float waterfall_offset;
 
 
 #define WATERFALL_START   0.05

@@ -148,7 +148,6 @@ static void trigger_cadence (void)
 
   trigger ();
 }
-extern float waterfall_offset;
 
 static void trigger_ipsum (void)
 {
