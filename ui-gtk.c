@@ -664,6 +664,15 @@ kernagic_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         return TRUE;
       }
       break;
+
+    case GDK_i:
+    case GDK_I:
+      if (event->state & GDK_CONTROL_MASK)
+      {
+        trigger_ipsum ();
+        return TRUE;
+      }
+      break;
     case GDK_q:
     case GDK_Q:
       if (event->state & GDK_CONTROL_MASK)
@@ -775,14 +784,24 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+    GtkWidget *hbox2 = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Ipsum glyphs");
     gtk_box_pack_start (GTK_BOX (vbox1), hbox, FALSE, FALSE, 2);
     ipsum_glyphs = gtk_entry_new ();
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
     gtk_size_group_add_widget (labels, label);
-    gtk_size_group_add_widget (sliders, ipsum_glyphs);
+    gtk_size_group_add_widget (sliders, hbox2);
     gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), ipsum_glyphs);
+    gtk_container_add (GTK_CONTAINER (hbox), hbox2);
+    gtk_container_add (GTK_CONTAINER (hbox2), ipsum_glyphs);
+
+  {
+    GtkWidget *button     = gtk_button_new_with_label ("generate");
+    gtk_widget_set_tooltip_text (button, "Ctrl + I");
+    gtk_box_pack_end (GTK_BOX (hbox2), button, TRUE, TRUE, 2);
+    g_signal_connect (button,  "clicked",  G_CALLBACK (trigger_ipsum), NULL);
+  }
+
   }
   {
     toggle_measurement_lines_check = gtk_check_button_new_with_label ("Measurement lines");
