@@ -78,6 +78,7 @@ typedef struct _KernerSettings KernerSettings;
 #define KERNER_DEFAULT_DIVISOR      24
 #define KERNER_DEFAULT_TARGET_GRAY  50
 #define KERNER_DEFAULT_OFFSET        9
+#define KERNER_DEFAULT_FNORD         1
 #define KERNER_DEFAULT_TRACKING    100
 
 struct _KernerSettings
@@ -88,6 +89,7 @@ struct _KernerSettings
   float divisor;
   float alpha_target;
   float offset;
+  float big_glyph_scaling;
   float tracking;
 };
 extern KernerSettings kerner_settings;
@@ -110,6 +112,6 @@ extern float debug_scale;
 #define WATERFALL_LEVELS    8
 #define PREVIEW_PADDING 5
 
-#define IPSUM0 "ooonnnono frtjkxv abcdefghijklmnopqrstuvwxyz 1234567890=2 +-/(8)[8],./;*&^%$#@!_-?:\"{}\\|~` Press Page Down - Kernagic 2013 © Øyvind Kolås - pippin.gimp.org"
+#define IPSUM0 "ooonnnono frtjkxv abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890=2 +-/(8)[8],./;*&^%$#@!_-?:\"{}\\|~` Press Page Down - Kernagic 2013 © Øyvind Kolås - pippin.gimp.org" 
 
 #endif

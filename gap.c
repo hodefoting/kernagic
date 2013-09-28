@@ -1,4 +1,5 @@
 #include <math.h>
+#include <ctype.h>
 #include "kernagic.h"
 
 extern float scale_factor;
@@ -45,6 +46,12 @@ static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
 
   lstem = g->stems[0];
   rstem = g->stems[g->stem_count-1];
+
+  if (!islower (g->unicode))
+    {
+      if (g->ink_height >= kernagic_x_height () * 1.1)
+        offset *= kerner_settings.big_glyph_scaling;
+    }
 
   /* if manual overrides are set, use them */
   if (g->lstem > 0.0)

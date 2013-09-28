@@ -37,6 +37,7 @@ static GtkWidget *spin_gray_target;
 static GtkWidget *spin_divisor;
 static GtkWidget *spin_tracking;
 static GtkWidget *spin_offset;
+static GtkWidget *spin_big_glyph_scaling;
 GtkWidget *spin_ipsum_no;
 
 
@@ -71,6 +72,8 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
   kerner_settings.offset =
        gtk_range_get_value (GTK_RANGE (spin_offset));
+  kerner_settings.big_glyph_scaling =
+       gtk_range_get_value (GTK_RANGE (spin_big_glyph_scaling));
 
   toggle_measurement_lines = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check));
 }
@@ -108,7 +111,7 @@ static void trigger (void)
       g_source_remove (delayed_updater);
       delayed_updater = 0;
     }
-  delayed_updater = g_timeout_add (100, delayed_trigger, NULL);
+  delayed_updater = g_timeout_add (200, delayed_trigger, NULL);
 }
 
 static int frozen = 0;
@@ -330,6 +333,7 @@ static void set_defaults_from_args (void)
 
   gtk_range_set_value (GTK_RANGE (spin_divisor), kerner_settings.divisor);
   gtk_range_set_value (GTK_RANGE (spin_offset), kerner_settings.offset);
+  gtk_range_set_value (GTK_RANGE (spin_big_glyph_scaling), kerner_settings.big_glyph_scaling);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
@@ -884,6 +888,13 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
   }
   {
+    GtkWidget *label = gtk_label_new ("Tall glyph offset scaling");
+    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+    spin_big_glyph_scaling = gtk_hscale_new_with_range (0.0, 4.0, 0.01);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_big_glyph_scaling);
+  }
+  {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
     GtkWidget *label = gtk_label_new ("Scale bearings");
     gtk_size_group_add_widget (labels, label);
@@ -949,6 +960,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
   g_signal_connect (spin_divisor,       "value-changed", G_CALLBACK (trigger_divisor), NULL);
   g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_big_glyph_scaling,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::cursor-position",  G_CALLBACK (cursor_position_changed_cb), NULL);
 
