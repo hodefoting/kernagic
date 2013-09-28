@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "kernagic.h"
+#include "gimpspinscale.h"
 
 static char *ipsum = NULL;
 
@@ -65,15 +66,15 @@ static void configure_kernagic (void)
   kerner_settings.minimum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
   kerner_settings.alpha_target =
-       gtk_range_get_value (GTK_RANGE (spin_gray_target));
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
   kerner_settings.divisor =
-       gtk_range_get_value (GTK_RANGE (spin_divisor));
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
   kerner_settings.offset =
-       gtk_range_get_value (GTK_RANGE (spin_offset));
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_offset));
   kerner_settings.big_glyph_scaling =
-       gtk_range_get_value (GTK_RANGE (spin_big_glyph_scaling));
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_big_glyph_scaling));
 
   toggle_measurement_lines = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check));
 }
@@ -118,12 +119,12 @@ static int frozen = 0;
 
 static void trigger_divisor (void)
 {
-  float divisor = gtk_range_get_value (GTK_RANGE (spin_divisor));
+  float divisor = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
   if (frozen)
     return;
 
   frozen++;
-  gtk_range_set_value (GTK_RANGE (spin_gray_target),
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
       n_distance () / divisor);
   frozen--;
 }
@@ -136,12 +137,12 @@ static void trigger_cadence_path (void)
 
 static void trigger_cadence (void)
 {
-  float cadence = gtk_range_get_value (GTK_RANGE (spin_gray_target));
+  float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
   //if (frozen)
   //  return;
 
   frozen++;
-  gtk_range_set_value (GTK_RANGE (spin_divisor),
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),
       n_distance () / cadence);
   frozen--;
 
@@ -191,8 +192,8 @@ static gboolean delayed_reload_trigger (gpointer foo)
   delayed_trigger (foo);
   delayed_reload_updater = 0;
 
-  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
-  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
 
   return FALSE;
 }
@@ -304,9 +305,9 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
-  gtk_range_set_value (GTK_RANGE (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
-  gtk_range_set_value (GTK_RANGE (spin_divisor),   KERNER_DEFAULT_DIVISOR);
-  gtk_range_set_value (GTK_RANGE (spin_offset),    KERNER_DEFAULT_OFFSET);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
@@ -329,11 +330,11 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
-  gtk_range_set_value (GTK_RANGE (spin_gray_target), kerner_settings.alpha_target);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
 
-  gtk_range_set_value (GTK_RANGE (spin_divisor), kerner_settings.divisor);
-  gtk_range_set_value (GTK_RANGE (spin_offset), kerner_settings.offset);
-  gtk_range_set_value (GTK_RANGE (spin_big_glyph_scaling), kerner_settings.big_glyph_scaling);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_big_glyph_scaling), kerner_settings.big_glyph_scaling);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
@@ -865,45 +866,34 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
 
   {
-    GtkWidget *label = gtk_label_new ("Divisor");
-    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_divisor = gtk_hscale_new_with_range (0.0, 100.0, 1);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    GtkObject *adj = gtk_adjustment_new (12.0, 0, 100.0, 1, 1, 0);
+    spin_divisor = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Divisor",  0);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
   }
 
   {
-    GtkWidget *label = gtk_label_new ("Cadence");
-    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_gray_target = gtk_hscale_new_with_range (1, 100.0, 0.01);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 200.0, 0.01, 1.0, 0);
+    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Cadence",  2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
   }
 
   {
-    GtkWidget *label = gtk_label_new ("Offset");
-    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_offset = gtk_hscale_new_with_range (-5.0, 100.0, 0.1);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    GtkObject *adj = gtk_adjustment_new (1.0, -5.0, 200.0, 0.01, 1.0, 0);
+    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Offset",  1);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
   }
+
   {
-    GtkWidget *label = gtk_label_new ("Tall glyph offset scaling");
-    //gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_big_glyph_scaling = gtk_hscale_new_with_range (0.0, 4.0, 0.01);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), label);
+    GtkObject *adj = gtk_adjustment_new (1.0, 0.0, 4.0, 0.01, 0.1, 0);
+    spin_big_glyph_scaling = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Tall glyph offset scale",  3);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_big_glyph_scaling);
   }
+
+
   {
-    GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
-    GtkWidget *label = gtk_label_new ("Scale bearings");
-    gtk_size_group_add_widget (labels, label);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-    spin_tracking = gtk_spin_button_new_with_range (0.0, 300.0, 0.5);
-    gtk_size_group_add_widget (sliders, spin_tracking);
-    gtk_container_add (GTK_CONTAINER (vbox_options_original), hbox);
-    gtk_container_add (GTK_CONTAINER (hbox), label);
-    gtk_container_add (GTK_CONTAINER (hbox), spin_tracking);
+    GtkObject *adj = gtk_adjustment_new (1.0, 0.0, 300.0, 0.1, 1.0, 0);
+    spin_tracking = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "scale bearings",  1);
+    gtk_container_add (GTK_CONTAINER (vbox_options_original), spin_tracking);
   }
 
   {
