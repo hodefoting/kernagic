@@ -891,14 +891,14 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 200.0, 0.01, 1.0, 0);
+    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 500.0, 0.01, 1.0, 0);
     spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Cadence",  2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
   }
 
   {
-    GtkObject *adj = gtk_adjustment_new (1.0, -5.0, 200.0, 0.01, 1.0, 0);
-    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Offset",  1);
+    GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
+    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Offset",  2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
   }
 
