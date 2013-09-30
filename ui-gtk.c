@@ -423,7 +423,6 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
           waterfall_offset = 
             waterfall_offset + ((event->button.x - canvas_width()/2) / pscale / scale_factor);
 
-          fprintf (stderr, "%f\n", waterfall_offset);
           trigger ();
           return TRUE;
         }
