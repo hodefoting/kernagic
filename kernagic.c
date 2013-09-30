@@ -257,6 +257,24 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
     }
   }
 
+  {
+    GList *l;
+    /* first load all glyphs that are not using components.. */
+    for (l = glyphs; l; l=l->next)
+      {
+        Glyph *g = l->data;
+        if (!strstr (g->xml, "<component"))
+          load_ufo_glyph (g);
+      }
+
+    for (l = glyphs; l; l=l->next)
+      {
+        Glyph *g = l->data;
+        if (strstr (g->xml, "<component"))
+          load_ufo_glyph (g);
+      }
+  }
+
   scale_factor = SPECIMEN_SIZE / kernagic_x_height ();
 
   for (l = glyphs; l; l = l->next)
@@ -630,6 +648,7 @@ void kernagic_compute (GtkProgressBar *progress)
         width = desired_width - i->ink_width;
         space->right_bearing = 0;
         space->left_bearing = width;
+        space->ink_width = 0;
         fprintf (stderr, "!!!!\n");
       }
   }

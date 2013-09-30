@@ -56,6 +56,9 @@ struct _Glyph {
 
   float         lstem;
   float         rstem;
+
+  int           needs_ink_extent_detection;
+  int           loaded;
 };
 
 float  kernagic_kern_get          (Glyph *a, Glyph *b);

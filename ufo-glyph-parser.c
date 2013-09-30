@@ -36,6 +36,44 @@ extern gboolean kernagic_strip_bearing; /* XXX: global and passed out of bounds.
 static int pinlib = 0;
 static int pinself = 0;
 
+static void 
+parse_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
+{
+  Glyph *component_glyph = kernagic_find_glyph (base);
+  if (component_glyph)
+  {
+    int x, y;
+    y = component_glyph->ink_min_y;
+    x = component_glyph->ink_min_x + component_glyph->left_original;
+
+    x -= xoffset;
+    y -= yoffset;
+    if (x > glyph->ink_max_x)
+      glyph->ink_max_x = x;
+    if (y > glyph->ink_max_y)
+      glyph->ink_max_y = y;
+    if (x < glyph->ink_min_x)
+      glyph->ink_min_x = x;
+    if (y < glyph->ink_min_y)
+      glyph->ink_min_y = y;
+
+    y = component_glyph->ink_max_y;
+    x = component_glyph->ink_max_x + component_glyph->left_original;
+    x -= xoffset;
+    y -= yoffset;
+    if (x > glyph->ink_max_x)
+      glyph->ink_max_x = x;
+    if (y > glyph->ink_max_y)
+      glyph->ink_max_y = y;
+    if (x < glyph->ink_min_x)
+      glyph->ink_min_x = x;
+    if (y < glyph->ink_min_y)
+      glyph->ink_min_y = y;
+  }
+  else
+    fprintf (stderr, "Problems importing '%s' maybe the component %s is using components\n", glyph->name, base);
+}
+
 static void
 parse_start_element (GMarkupParseContext *context,
                      const gchar         *element_name,
@@ -104,7 +142,7 @@ parse_start_element (GMarkupParseContext *context,
     }
   else if (!strcmp (element_name, "component"))
     {
-#if 0
+      glyph->needs_ink_extent_detection++;
       const char *base = "";
       float xoffset = 0;
       float yoffset = 0;
@@ -116,8 +154,7 @@ parse_start_element (GMarkupParseContext *context,
           else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
           else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
         }
-#endif
-      /* XXX: needs incorporation into ink-bounds */
+      parse_component (glyph, base, xoffset, yoffset);
     }
   else if (!strcmp (element_name, "lib"))
     {
@@ -174,7 +211,7 @@ render_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
   Glyph *cglyph = NULL;
   cairo_t *cr = glyph->cr;
   cglyph = kernagic_find_glyph (base);
-  fprintf (stderr, "Component %s  %f,%f %p\n", base, xoffset, yoffset, cglyph);
+  //fprintf (stderr, "Component %s  %f,%f %p\n", base, xoffset, yoffset, cglyph);
   cairo_save (cr);
   cairo_translate (cr, xoffset, yoffset);
   cglyph->cr = cr;
@@ -341,7 +378,13 @@ void render_glyph (Glyph *glyph)
 void
 load_ufo_glyph (Glyph *glyph)
 {
-  GMarkupParseContext *ctx = g_markup_parse_context_new (&glif_parse, 0, glyph, NULL);
+  GMarkupParseContext *ctx;
+
+  if (glyph->loaded)
+    return;
+  glyph->loaded = 1;
+  
+  ctx = g_markup_parse_context_new (&glif_parse, 0, glyph, NULL);
   g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
   g_markup_parse_context_free (ctx);
 

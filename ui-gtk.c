@@ -902,7 +902,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkObject *adj = gtk_adjustment_new (1.0, 0.0, 4.0, 0.01, 0.1, 0);
+    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 4.0, 0.01, 0.1, 0);
     spin_big_glyph_scaling = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Tall glyph offset scale",  3);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_big_glyph_scaling);
   }

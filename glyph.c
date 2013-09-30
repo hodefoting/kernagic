@@ -75,31 +75,16 @@ void glyph_free (Glyph *glyph)
   g_free (glyph);
 }
 
-void load_ufo_glyph (Glyph *glyph);
 
 Glyph *kernagic_glyph_new (const char *path)
 {
   Glyph *glyph = g_malloc0 (sizeof (Glyph));
   g_file_get_contents (path, &glyph->xml, NULL, NULL);
 
-  if (glyph->xml)
-    {
-      load_ufo_glyph (glyph);
-    }
-  else
+  if (!glyph->xml)
     {
       g_free (glyph);
       glyph = NULL;
-    }
-
-  if (glyph)
-    {
-      /* skipping some glyphs */
-      if (!glyph->name || glyph->unicode == ' ')
-        {
-          g_free (glyph);
-          glyph = NULL;
-        }
     }
 
   if (glyph)
@@ -132,11 +117,14 @@ void kernagic_glyph_free (Glyph *glyph)
   g_free (glyph);
 }
 
-void   kernagic_set_left_bearing  (Glyph *g, float left_bearing)
+void
+kernagic_set_left_bearing (Glyph *g, float left_bearing)
 {
   g->left_bearing = left_bearing;
 }
-void   kernagic_set_right_bearing (Glyph *g, float right_bearing)
+
+void
+kernagic_set_right_bearing (Glyph *g, float right_bearing)
 {
   g->right_bearing = right_bearing;
 }
