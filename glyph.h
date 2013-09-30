@@ -57,7 +57,6 @@ struct _Glyph {
   float         lstem;
   float         rstem;
 
-  int           needs_ink_extent_detection;
   int           loaded;
 };
 

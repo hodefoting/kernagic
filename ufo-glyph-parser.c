@@ -142,7 +142,6 @@ parse_start_element (GMarkupParseContext *context,
     }
   else if (!strcmp (element_name, "component"))
     {
-      glyph->needs_ink_extent_detection++;
       const char *base = "";
       float xoffset = 0;
       float yoffset = 0;
