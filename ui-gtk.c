@@ -373,7 +373,7 @@ static float startx = 0;
 static float prevx = 0;
 
 static gboolean
-preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+new_preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   trigger ();
   pressed = event->button.button;
@@ -409,7 +409,7 @@ preview_release_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 }
 
 static gboolean
-old_preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   int i = 0;
   float x, y;
