@@ -444,7 +444,6 @@ static int interactive = 1;
 
 gboolean kernagic_strip_left_bearing = KERNAGIC_DEFAULT_STRIP_LEFT_BEARING;
 char *kernagic_output = NULL;
-char *kernagic_sample_string = NULL;
 char *kernagic_output_png = NULL;
 
 void help (void)
@@ -452,14 +451,14 @@ void help (void)
   printf ("kernagic [options] <font.ufo>\n"
           "\n"
           "Options:\n"
-          "   -m <method>   specify method, one of gray, period and rythmic "
-          "   suboptions influencing gap method:\n"
-          "       -p   period of rythm, in fonts units\n"
-          "       -o   offset, in number of periods from edge of glyph to stem\n"
+          "   -m <method>   specify method, specify an invalid one for list of valid ones.\n"
+          "       -g gap\n"
+          "       -d divisor\n"
+          "       -c cadence\n"
           "\n"
-          "   -O <output.ufo>  create a copy of the input font, this make kernagic run non-interactive\n"
-          "   -P <output.png>  write the test string to a png, using options\n"
-          "   -T <string>      sample string\n"
+          "   -s <string>      sample string for PNG and UI\n"
+          "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
+          "   -p <output.png>  write the test string to a png, using the given parameters.\n"
           "\n");
   exit (0);
 }
@@ -493,7 +492,7 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.maximum_distance = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-o"))
+      else if (!strcmp (argv[no], "-g"))
         {
           EXPECT_ARG;
           kerner_settings.offset = atof (argv[++no]);
@@ -503,7 +502,7 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.tracking = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-p"))
+      else if (!strcmp (argv[no], "-c"))
         {
           EXPECT_ARG;
           kerner_settings.alpha_target = atof (argv[++no]);
@@ -536,20 +535,12 @@ void parse_args (int argc, char **argv)
               exit (-1);
             }
         }
-      else if (!strcmp (argv[no], "-l"))
-        {
-          kernagic_strip_left_bearing = 0;
-        }
-      else if (!strcmp (argv[no], "-L"))
-        {
-          kernagic_strip_left_bearing = 1;
-        }
-      else if (!strcmp (argv[no], "-T"))
+      else if (!strcmp (argv[no], "-s"))
       {
         EXPECT_ARG;
         kernagic_sample_text = argv[++no];
       }
-      else if (!strcmp (argv[no], "-O"))
+      else if (!strcmp (argv[no], "-o"))
       {
         EXPECT_ARG;
         kernagic_output = argv[++no];
@@ -569,16 +560,11 @@ void parse_args (int argc, char **argv)
         system (cmd);
         ufo_path = kernagic_output;
       }
-      else if (!strcmp (argv[no], "-P"))
+      else if (!strcmp (argv[no], "-p"))
       {
         EXPECT_ARG;
         kernagic_output_png = argv[++no];
         interactive = 0;
-      }
-      else if (!strcmp (argv[no], "-s"))
-      {
-        EXPECT_ARG;
-        kernagic_sample_string = argv[++no];
       }
       else if (argv[no][0] == '-')
         {
@@ -628,6 +614,7 @@ int main (int argc, char **argv)
 
   if (interactive)
     return ui_gtk (argc, argv);
+  g_type_init ();
 
   if (!ufo_path)
     {

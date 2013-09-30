@@ -4,7 +4,7 @@ ipsum=exalted packets ampuls flipped zaniest rump whose fiscal tank billowy blam
 
 tests:
 	rm -rf output/*
-	../kernagic input/SansGuiltDB.ufo -m original -T '$(ipsum)' -P output/original.png
-	../kernagic input/SansGuiltDB.ufo -m cadence  -T '$(ipsum)' -P output/cadence.png
-	../kernagic input/SansGuiltDB.ufo -m gap -p 10.93  -T '$(ipsum)' -P output/gap.png
-	../kernagic input/SansGuiltDB.ufo -m bounds   -T '$(ipsum)' -P output/bounds.png
+	../kernagic input/SansGuiltDB.ufo -m original -s '$(ipsum)' -p output/original.png
+	../kernagic input/SansGuiltDB.ufo -m cadence  -s '$(ipsum)' -p output/cadence.png
+	../kernagic input/SansGuiltDB.ufo -m gap -c 10.93  -s '$(ipsum)' -p output/gap.png
+	../kernagic input/SansGuiltDB.ufo -m bounds   -s '$(ipsum)' -p output/bounds.png
