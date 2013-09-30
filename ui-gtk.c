@@ -368,16 +368,57 @@ cursor_position_changed_cb (GtkWidget *widget)
   return FALSE;
 }
 
+static int pressed = 0;
+static float startx = 0;
+static float prevx = 0;
+
 static gboolean
 preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  trigger ();
+  pressed = event->button.button;
+  prevx = startx = event->button.x;
+  return TRUE;
+}
+
+static gboolean
+preview_motion_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  float x, y;
+  x = event->motion.x;
+  y = event->motion.y;
+  if (pressed == 2)
+    {
+      //printf ("%f %f\n", x, y);
+      waterfall_offset += (prevx-x) / scale_factor;
+      trigger ();
+    }
+
+  prevx = x;
+  return TRUE;
+}
+
+
+
+static gboolean
+preview_release_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  pressed = 0;
+  trigger ();
+  return TRUE;
+}
+
+static gboolean
+old_preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   int i = 0;
   float x, y;
   Glyph *g;
   float advance;
-
   x = event->button.x;
   y = event->button.y;
+
+
   for (i = 0; i+1 < big && x_entries[i+1] < event->button.x; i++);
   
   if (i + 1 >= big)
@@ -731,7 +772,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 #endif
 
   g_signal_connect (preview, "button-press-event", G_CALLBACK (preview_press_cb), NULL);
+
+  g_signal_connect (preview, "button-release-event", G_CALLBACK (preview_release_cb), NULL);
+  g_signal_connect (preview, "motion-notify-event", G_CALLBACK (preview_motion_cb), NULL);
   gtk_widget_add_events (preview, GDK_BUTTON_PRESS_MASK);
+  gtk_widget_add_events (preview, GDK_BUTTON_RELEASE_MASK);
+  gtk_widget_add_events (preview, GDK_POINTER_MOTION_MASK);
 
   {
     GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
