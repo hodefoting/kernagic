@@ -35,7 +35,6 @@ void render_glyph (Glyph *glyph);
 
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
-  int x, y;
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
   cairo_t *cr;

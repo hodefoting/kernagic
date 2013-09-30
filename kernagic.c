@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.       */
 #include <libgen.h>
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gio/gio.h>
 #include <assert.h>
 #include <math.h>
 #include "kernagic.h"
@@ -56,7 +57,7 @@ KernerSettings kerner_settings = {
 
 char *kernagic_sample_text = NULL;
 
-static char *loaded_ufo_path = NULL;
+char *loaded_ufo_path = NULL;
 static GList *glyphs = NULL;
 float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
@@ -152,6 +153,9 @@ recompute_right_bearings ()
     }
 }
 
+void remove_monitors (void);
+void add_monitors (const char *font_path);
+
 void kernagic_save_kerning_info (void)
 {
   GString *str = g_string_new (
@@ -160,6 +164,8 @@ void kernagic_save_kerning_info (void)
 "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
 "<plist version=\"1.0\">\n"
 "  <dict>\n");
+
+  remove_monitors ();
 
   GList *left, *right;
 
@@ -207,13 +213,61 @@ void kernagic_save_kerning_info (void)
       Glyph *glyph = l->data;
       rewrite_ufo_glyph (glyph);
     }
+
+  add_monitors (loaded_ufo_path);
 }
 
 void render_ufo_glyph (Glyph *glyph);
 
+GList *monitors = NULL;
+
+void remove_monitors (void)
+{
+  for (GList *l = monitors; l ;l = monitors)
+    {
+      g_object_unref (G_OBJECT (l->data));
+      monitors = g_list_remove (monitors, l->data);
+    }
+}
+
+void trigger_reload (void);
+
+void add_monitors (const char *font_path)
+{
+  remove_monitors ();
+  {
+    GFileMonitor *monitor;
+    monitor = g_file_monitor (
+        g_file_new_for_commandline_arg (font_path),
+        G_FILE_MONITOR_NONE,
+        NULL, NULL);
+    if (monitor)
+      {
+        g_signal_connect (monitor, "changed", G_CALLBACK (trigger_reload), NULL);
+        monitors = g_list_append (monitors, monitor);
+      }
+    {
+    GString *str = g_string_new ("");
+    g_string_append_printf (str, "%s/glyphs", font_path);
+    monitor = g_file_monitor (
+        g_file_new_for_commandline_arg (str->str),
+        G_FILE_MONITOR_NONE,
+        NULL, NULL);
+    g_string_free (str, TRUE);
+    }
+    if (monitor)
+      {
+        g_signal_connect (monitor, "changed", G_CALLBACK (trigger_reload), NULL);
+        monitors = g_list_append (monitors, monitor);
+      }
+  }
+}
+
+
 void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
 {
   char path[4095];
+
 
   kernagic_strip_bearing = strip_left_bearing;
 
@@ -222,6 +276,8 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   loaded_ufo_path = g_strdup (font_path);
   if (loaded_ufo_path [strlen(loaded_ufo_path)] == '/')
     loaded_ufo_path [strlen(loaded_ufo_path)] = '\0';
+
+  add_monitors (loaded_ufo_path);
 
   GList *l;
   for (l = glyphs; l; l = l->next)

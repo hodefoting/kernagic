@@ -105,6 +105,7 @@ int canvas_width ();
 int canvas_height ();
 extern float debug_scale;
 extern float waterfall_offset;
+extern char *loaded_ufo_path;
 
 
 #define WATERFALL_START   0.02

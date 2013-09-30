@@ -289,7 +289,7 @@ static void ipsum_reload (void)
   }
 }
 
-static void trigger_reload (void)
+void trigger_reload (void)
 {
   if (delayed_reload_updater)
     {
