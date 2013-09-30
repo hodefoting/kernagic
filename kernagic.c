@@ -76,9 +76,7 @@ static void init_methods (void)
   int i = 0;
   methods[i++] = kernagic_original;
   methods[i++] = kernagic_bounds;
-  //methods[i++] = kernagic_gray;
   methods[i++] = kernagic_cadence;
-  //methods[i++] = kernagic_rythm;
   methods[i++] = kernagic_gap;
   methods[i] = NULL;
 };
@@ -112,7 +110,6 @@ static int add_glyph(const char *fpath)
 
   if (glyph)
     glyphs = g_list_insert_sorted (glyphs, glyph, unicode_sort);
-    //glyphs = g_list_prepend (glyphs, glyph);
   return 0;
 }
 
@@ -183,11 +180,14 @@ void kernagic_save_kerning_info (void)
           {
             if (!found)
               {
-    g_string_append_printf (str, "    <key>%s</key>\n    <dict>\n", lg->name);
-    found = 1;
+                g_string_append_printf (str,
+                     "    <key>%s</key>\n    <dict>\n", lg->name);
+                found = 1;
               }
       
-            g_string_append_printf (str, "      <key>%s</key><integer>%d</integer>\n", rg->name, (int)kerning);
+            g_string_append_printf (str,
+                     "      <key>%s</key><integer>%d</integer>\n",
+                     rg->name, (int)kerning);
 
           }
       }
@@ -243,7 +243,8 @@ void add_monitors (const char *font_path)
         NULL, NULL);
     if (monitor)
       {
-        g_signal_connect (monitor, "changed", G_CALLBACK (trigger_reload), NULL);
+        g_signal_connect (monitor, "changed",
+                          G_CALLBACK (trigger_reload), NULL);
         monitors = g_list_append (monitors, monitor);
       }
     {
@@ -257,7 +258,8 @@ void add_monitors (const char *font_path)
     }
     if (monitor)
       {
-        g_signal_connect (monitor, "changed", G_CALLBACK (trigger_reload), NULL);
+        g_signal_connect (monitor, "changed",
+                          G_CALLBACK (trigger_reload), NULL);
         monitors = g_list_append (monitors, monitor);
       }
   }
@@ -448,18 +450,19 @@ char *kernagic_output_png = NULL;
 
 void help (void)
 {
-  printf ("kernagic [options] <font.ufo>\n"
-          "\n"
-          "Options:\n"
-          "   -m <method>   specify method, specify an invalid one for list of valid ones.\n"
-          "       -g gap\n"
-          "       -d divisor\n"
-          "       -c cadence\n"
-          "\n"
-          "   -s <string>      sample string for PNG and UI\n"
-          "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
-          "   -p <output.png>  write the test string to a png, using the given parameters.\n"
-          "\n");
+  printf (
+"kernagic [options] <font.ufo>\n"
+"\n"
+"Options:\n"
+"   -m <method>   specify method, specify an invalid one for list of valid ones.\n"
+"       -g gap\n"
+"       -d divisor\n"
+"       -c cadence\n"
+"\n"
+"   -s <string>      sample string for PNG and UI\n"
+"   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
+"   -p <output.png>  write the test string to a png, using the given parameters.\n"
+"\n");
   exit (0);
 }
 
@@ -483,7 +486,6 @@ void parse_args (int argc, char **argv)
       else if (!strcmp (argv[no], "-d"))
         {
 #define EXPECT_ARG if (!argv[no+1]) {fprintf (stderr, "expected argument after %s\n", argv[no]);exit(-1);}
-
           EXPECT_ARG;
           kerner_settings.minimum_distance = atof (argv[++no]);
         }

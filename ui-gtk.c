@@ -257,7 +257,6 @@ static void ipsum_reload (void)
       RESET_WATERFALL;
       trigger ();
     }
-    /* XXX: place to hook int default ipsum strings */
     return;
   }
 
