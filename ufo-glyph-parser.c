@@ -561,28 +561,55 @@ rewrite_start_element (GMarkupParseContext *context,
       inlib ++;
     }
 
-  for (a_n = attribute_names,
-       a_v = attribute_values; *a_n; a_n++, a_v++)
-     {
-       if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
-         {
-           char str[512];
-           int value = atoi (*a_v);
-           value = value + glyph->offset_x + glyph->left_bearing;
-           sprintf (str, "%d", value);
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
-         }
-       else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
-         {
-           char str[512];
-           sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
-         }
-       else
-         {
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, *a_v);
-         }
-     }
+  if (!strcmp (element_name, "component"))
+  {
+    const char *base = "";
+    float xoffset = 0;
+    float yoffset = 0;
+    const char **a_n, **a_v;
+    for (a_n = attribute_names,
+         a_v = attribute_values; *a_n; a_n++, a_v++)
+      {
+        if (!strcmp (*a_n, "base")) base = *a_v;
+        else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+        else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+      }
+
+      xoffset = xoffset + glyph->offset_x + glyph->left_bearing;
+
+      Glyph *component_glyph = kernagic_find_glyph (base);
+      if (component_glyph)
+      {
+        xoffset += (component_glyph->offset_x + component_glyph->left_bearing);
+      }
+
+      g_string_append_printf (ts, " base=\"%s\" xOffset=\"%f\" yOffset=\"%f\" ", base, xoffset, yoffset);
+  }
+  else
+  {
+    for (a_n = attribute_names,
+         a_v = attribute_values; *a_n; a_n++, a_v++)
+       {
+         if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
+           {
+             char str[512];
+             int value = atoi (*a_v);
+             value = value + glyph->offset_x + glyph->left_bearing;
+             sprintf (str, "%d", value);
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
+           }
+         else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
+           {
+             char str[512];
+             sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
+           }
+         else
+           {
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, *a_v);
+           }
+       }
+  }
   g_string_append_printf (ts, ">");
 }
 
