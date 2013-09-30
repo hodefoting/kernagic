@@ -441,7 +441,7 @@ again:
     }
   }
 
-  if (toggle_measurement_lines)
+  if (toggle_measurement_lines && period * scale_factor * debug_scale > 2)
   {
     int i;
     for (i = 0; i * period * scale_factor  * debug_scale < canvas_w - period * scale_factor * debug_scale; i++)
