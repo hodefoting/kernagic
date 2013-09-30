@@ -109,7 +109,7 @@ extern float waterfall_offset;
 
 #define WATERFALL_START   0.05
 #define WATERFALL_SCALING 1.2
-#define WATERFALL_SPACING 0.6
+#define WATERFALL_SPACING 0.7
 #define WATERFALL_LEVELS    8
 #define PREVIEW_PADDING 5
 
