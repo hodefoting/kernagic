@@ -21,34 +21,6 @@ typedef struct {
   double y;
 } TextGlyph;
 
-#define MAX_WORDS    1000
-Word words[MAX_WORDS];
-int n_words = 0;
-
-void add_word (const char *utf8, int x, int y, int width, int height)
-{
-  words[n_words].utf8 = g_strdup (utf8);
-  words[n_words].x = x;
-  words[n_words].y = y;
-  words[n_words].width = width;
-  words[n_words].height = height;
-  n_words++;
-}
-
-const char *detect_word (int x, int y)
-{
-  int i;
-  for (i = 0; i < n_words; i++)
-    if (x >= words[i].x &&
-        x <  words[i].x + words[i].width &&
-        y >= words[i].y &&
-        y <  words[i].y + words[i].height)
-      {
-        return words[i].utf8;
-      }
-  return NULL;
-}
-
 extern float  scale_factor;
 
 gboolean toggle_measurement_lines = FALSE;
@@ -278,17 +250,9 @@ again:
         GString *word = g_string_new ("");
         gunichar uword[1024];
         int ulen = 0;
-        float startx = x;
         int wrap = 0;
 
         int j;
-        for (j = 0; j < n_words; j++)
-          if (words[j].utf8)
-            {
-              g_free (words[j].utf8);
-              words[j].utf8 = NULL;
-            }
-        n_words = 0;
 
         if (w == waterfall - 1)
           {
@@ -336,8 +300,6 @@ again:
                   y += linestep;
                   x = x0;
                 }
-                add_word (word->str, startx, y, x - startx, 40);
-                startx = x;
                 g_string_assign (word, "");
                 ulen = 0;
               }
@@ -402,8 +364,6 @@ again:
                 if (t)
                   x += kernagic_get_advance (t) * scale_factor * scale;
 
-                add_word (word->str, startx, y, x - startx, 40);
-                startx = x;
                 g_string_assign (word, "");
                 ulen = 0;
               }
@@ -456,9 +416,7 @@ again:
                 x_entries[big++] = x + waterfall_offset;
               }
             }
-            add_word (word->str, startx, y, x - startx, 40);
           }
-        startx = x;
       
         /* we wait with the blast until here */
         place_glyphs (text, text_count, 1.0, scale);
