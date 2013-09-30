@@ -8,4 +8,3 @@ tests:
 	../kernagic input/SansGuiltDB.ufo -m cadence  -T '$(ipsum)' -P output/cadence.png
 	../kernagic input/SansGuiltDB.ufo -m gap -p 10.93  -T '$(ipsum)' -P output/gap.png
 	../kernagic input/SansGuiltDB.ufo -m bounds   -T '$(ipsum)' -P output/bounds.png
-

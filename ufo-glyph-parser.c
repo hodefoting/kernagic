@@ -584,7 +584,7 @@ rewrite_start_element (GMarkupParseContext *context,
       Glyph *component_glyph = kernagic_find_glyph (base);
       if (component_glyph)
       {
-        xoffset += (component_glyph->offset_x + component_glyph->left_bearing);
+        xoffset -= (component_glyph->offset_x + component_glyph->left_bearing);
       }
 
       g_string_append_printf (ts, " base=\"%s\" xOffset=\"%f\" yOffset=\"%f\" ", base, xoffset, yoffset);
