@@ -115,7 +115,7 @@ static void trigger (void)
       g_source_remove (delayed_updater);
       delayed_updater = 0;
     }
-  delayed_updater = g_timeout_add (50, delayed_trigger, NULL);
+  delayed_updater = g_idle_add (delayed_trigger, NULL);
 }
 
 static int frozen = 0;
