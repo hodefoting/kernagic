@@ -773,8 +773,8 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
     spin_ipsum_no = gtk_spin_button_new_with_range (1, 100, 1);
     gtk_widget_set_tooltip_text (spin_ipsum_no, "PgUp / PgDn");
-    gtk_container_add (GTK_CONTAINER (hbox2), ipsum_path);
-    gtk_container_add (GTK_CONTAINER (hbox2), spin_ipsum_no);
+    gtk_box_pack_start (GTK_BOX (hbox2), ipsum_path, TRUE, TRUE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox2), spin_ipsum_no, FALSE, FALSE, 2);
     gtk_size_group_add_widget (sliders, hbox2);
 
     gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -829,7 +829,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2, "bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "snapped rythm-point gap (F4)");
+                                    3, "neighbour glyph stem gap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
