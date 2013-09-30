@@ -31,8 +31,44 @@ float advance_glyph (Glyph *g, float xo, int yo, float scale)
   return xo + kernagic_get_advance (g) * scale_factor * scale;
 }
 
+void render_glyph (Glyph *glyph);
+
 float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
 {
+  int x, y;
+  int canvas_w = canvas_width ();
+  int canvas_h = canvas_height ();
+  cairo_t *cr;
+  cairo_surface_t *surface =
+    cairo_image_surface_create_for_data (kernagic_preview,
+            CAIRO_FORMAT_A8, canvas_w, canvas_h, canvas_w);
+  cr = cairo_create (surface);
+
+  g->cr = cr;
+
+  xo += (g->left_bearing) * scale * scale_factor;
+
+  /* do transforms so that the original coordinates in the unmodified parsed
+   * file is correct cairo-side
+   */
+  cairo_translate (cr, xo, yo + 2*kernagic_x_height () * scale * scale_factor);
+  cairo_scale (cr, scale * scale_factor, scale * scale_factor * -1.0);
+
+  /* render glyph, renders glyphs with ink_bounds cut off */
+  render_glyph (g);
+
+  cairo_destroy (cr);
+  cairo_surface_destroy (surface);
+  return advance_glyph (g, xo, yo, scale);
+}
+
+float old_place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
+{
+  /* this internal bitmap version suffer some quantization, possibly similar
+   * to what some font rendering engines would do - the cairo version is
+   * better as it provides the correct geometric result - and is much
+   * faster.
+   */
   int x, y;
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
@@ -40,8 +76,8 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
   for (y = 0; y < g->r_height * scale; y++)
   for (x = 0; x < g->r_width  * scale; x++)
     {
-      if (xo + x + (g->left_bearing * scale_factor) *scale >= 0 &&
-          xo + x + (g->left_bearing * scale_factor) *scale < canvas_w &&
+      if (xo + x + g->left_bearing * scale_factor *scale >= 0 &&
+          xo + x + g->left_bearing * scale_factor *scale < canvas_w &&
           yo + y < canvas_h &&
           yo + y >= 0)
       {

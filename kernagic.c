@@ -596,6 +596,7 @@ int main (int argc, char **argv)
       for (i = 0; i < len; i++)
         kernagic_preview[i] = 255 - kernagic_preview[i];
       cairo_surface_write_to_png (surface, kernagic_output_png);
+      cairo_surface_destroy (surface);
       return 0;
     }
   kernagic_save_kerning_info ();

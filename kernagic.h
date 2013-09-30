@@ -107,10 +107,10 @@ extern float debug_scale;
 extern float waterfall_offset;
 
 
-#define WATERFALL_START   0.05
-#define WATERFALL_SCALING 1.2
+#define WATERFALL_START   0.02
+#define WATERFALL_SCALING 1.33
 #define WATERFALL_SPACING 0.7
-#define WATERFALL_LEVELS    8
+#define WATERFALL_LEVELS   10
 #define PREVIEW_PADDING 5
 
 #define IPSUM0 "ooonnnono frtjckxv abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890=2 +-/(8)[8],./;*&^%$#@!_-?:\"{}\\|~` Press Page Down - Kernagic 2013 © Øyvind Kolås - pippin.gimp.org" 

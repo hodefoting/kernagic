@@ -20,6 +20,9 @@ static char *ipsum = NULL;
 #define gtk_vbox_new(a,n)  gtk_box_new (GTK_ORIENTATION_VERTICAL, n)
 #endif
 
+#define RESET_WATERFALL  waterfall_offset = 0
+  //waterfall_offset = 48784;
+
 extern Glyph     *g_entries[];
 extern int        x_entries[];
 extern int        big;
@@ -112,7 +115,7 @@ static void trigger (void)
       g_source_remove (delayed_updater);
       delayed_updater = 0;
     }
-  delayed_updater = g_timeout_add (200, delayed_trigger, NULL);
+  delayed_updater = g_timeout_add (50, delayed_trigger, NULL);
 }
 
 static int frozen = 0;
@@ -166,7 +169,7 @@ static void trigger_ipsum (void)
   ipsum = g_strdup (ipsumat_generate (NULL, str->str,
         gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 23));
   gtk_entry_set_text (GTK_ENTRY (test_text), ipsum);
-  waterfall_offset = 48784;
+  RESET_WATERFALL;
   trigger ();
   g_string_free (str, TRUE);
 }
@@ -251,7 +254,7 @@ static void ipsum_reload (void)
     if (ipsum)
     {
       gtk_entry_set_text (GTK_ENTRY (test_text), ipsum);
-      waterfall_offset = 48784;
+      RESET_WATERFALL;
       trigger ();
     }
     /* XXX: place to hook int default ipsum strings */
@@ -280,7 +283,7 @@ static void ipsum_reload (void)
         }
       }
     gtk_entry_set_text (GTK_ENTRY (test_text), str->str);
-    waterfall_offset = 48784;
+    RESET_WATERFALL;
     g_string_free (str, TRUE);
     trigger ();
   }
@@ -322,7 +325,7 @@ static void set_defaults_from_args (void)
   {
     gtk_entry_set_text (GTK_ENTRY (test_text), IPSUM0);
   }
-  waterfall_offset = 48784;
+  RESET_WATERFALL;
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (spin_method), kernagic_active_method_no()); 
 
@@ -365,7 +368,6 @@ cursor_position_changed_cb (GtkWidget *widget)
   desired_pos = foo;
   return FALSE;
 }
-
 
 static gboolean
 preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
