@@ -213,7 +213,11 @@ render_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
   cglyph = kernagic_find_glyph (base);
   //fprintf (stderr, "Component %s  %f,%f %p\n", base, xoffset, yoffset, cglyph);
   cairo_save (cr);
+
+  xoffset -= cglyph->offset_x;
+
   cairo_translate (cr, xoffset, yoffset);
+
   cglyph->cr = cr;
   render_glyph (cglyph);
   cairo_restore (cr);

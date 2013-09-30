@@ -883,6 +883,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
 
   {
+    GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
+    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Gap size",  2);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
+  }
+
+  {
     GtkObject *adj = gtk_adjustment_new (12.0, 0, 100.0, 1, 1, 0);
     spin_divisor = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Divisor",  0);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
@@ -895,14 +901,8 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
-    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Offset",  2);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
-  }
-
-  {
     GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 4.0, 0.01, 0.1, 0);
-    spin_big_glyph_scaling = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Tall glyph offset scale",  3);
+    spin_big_glyph_scaling = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Tall glyph gap scaling",  3);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_big_glyph_scaling);
   }
 

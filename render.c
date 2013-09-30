@@ -79,7 +79,7 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
         int u, v;
         int c = 0;
 
-        if (scale < 0.9)
+        if (scale < 0.5)
         {
           raster = 0;
           for (u = 0; u < (1/scale); u++)
