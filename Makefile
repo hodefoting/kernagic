@@ -37,8 +37,8 @@ $(PROJECT_NAME).exe: *.c *.h Makefile gtk+-mingw-bundle/unpacked.stamp
 	\
 	-mwindows -Wl,--subsystem,windows \
 	\
-	-Lgtk+-mingw-bundle/lib \
-	-lglib-2.0.dll -lgobject-2.0.dll \
+	-Lgtk+-mingw-bundle/lib -lgio-2.0.dll \
+	-lglib-2.0.dll -lgobject-2.0.dll -lpango-1.0.dll -lpangocairo-1.0.dll \
 	-lgdk-win32-2.0.dll -lgtk-win32-2.0.dll -lcairo.dll \
 	\
 	 -o $@ && echo
