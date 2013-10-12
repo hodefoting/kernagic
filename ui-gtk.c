@@ -165,7 +165,7 @@ static void trigger_ipsum (void)
   if (ipsum)
     g_free (ipsum);
   ipsum = g_strdup (ipsumat_generate (NULL, str->str,
-        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 23));
+        gtk_entry_get_text (GTK_ENTRY (ipsum_glyphs)), 7, 11));
   gtk_entry_set_text (GTK_ENTRY (test_text), ipsum);
   RESET_WATERFALL;
   trigger ();

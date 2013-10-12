@@ -114,6 +114,6 @@ extern char *loaded_ufo_path;
 #define WATERFALL_LEVELS   10
 #define PREVIEW_PADDING 5
 
-#define IPSUM0 "ooonnnono frtjckxv abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890=2 +-/(8)[8],./;*&^%$#@!_-?:\"{}\\|~` Press Page Down - Kernagic 2013 © Øyvind Kolås - pippin.gimp.org" 
+#define IPSUM0 "ooonnnono frtjckxiv Page Down - " 
 
 #endif
