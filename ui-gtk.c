@@ -58,7 +58,6 @@ static GtkWidget *font_path;
 static GtkWidget *ipsum_path;
 static uint8_t *index_canvas = NULL;
 
-
 static void configure_kernagic (void)
 {
   kerner_settings.method =
@@ -109,7 +108,6 @@ static gboolean delayed_trigger (gpointer foo)
 
 static void trigger (void)
 {
-
   if (delayed_updater)
     {
       g_source_remove (delayed_updater);
@@ -378,6 +376,7 @@ new_preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   trigger ();
   pressed = event->button.button;
   prevx = startx = event->button.x;
+
   return TRUE;
 }
 
@@ -840,7 +839,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_container_add (GTK_CONTAINER (hbox2), ipsum_glyphs);
 
   {
-    GtkWidget *button     = gtk_button_new_with_label ("generate");
+    GtkWidget *button     = gtk_button_new_with_label ("Generate");
     gtk_widget_set_tooltip_text (button, "Ctrl + I");
     gtk_box_pack_end (GTK_BOX (hbox2), button, TRUE, TRUE, 2);
     g_signal_connect (button,  "clicked",  G_CALLBACK (trigger_ipsum), NULL);
@@ -868,13 +867,13 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   {
     spin_method = gtk_combo_box_text_new ();
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    0, "original (F1)");
+                                    0, "Original (F1)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    1, "ink bounds (F2)");
+                                    1, "Ink bounds (F2)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2, "bearing table (F3)");
+                                    2, "Bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "gridded gap (F4)");
+                                    3, "Gridded gap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
@@ -928,6 +927,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_rythm, FALSE, FALSE, 2);
 
   {
+    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 500.0, 0.01, 1.0, 0);
+    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Snap grid",  2);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
+  }
+
+  {
     GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
     spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Gap size",  2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
@@ -939,11 +944,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 //    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
   }
 
-  {
-    GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 500.0, 0.01, 1.0, 0);
-    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Snap grid",  2);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
-  }
 
   {
     GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 4.0, 0.01, 0.1, 0);
@@ -954,7 +954,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkObject *adj = gtk_adjustment_new (1.0, 0.0, 300.0, 0.1, 1.0, 0);
-    spin_tracking = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "scale bearings",  1);
+    spin_tracking = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Scale bearings",  1);
     gtk_container_add (GTK_CONTAINER (vbox_options_original), spin_tracking);
   }
 

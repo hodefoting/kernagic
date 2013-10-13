@@ -61,60 +61,6 @@ float place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
   return advance_glyph (g, xo, yo, scale);
 }
 
-float old_place_glyph (Glyph *g, float xo, int yo, float opacity, float scale)
-{
-  /* this internal bitmap version suffer some quantization, possibly similar
-   * to what some font rendering engines would do - the cairo version is
-   * better as it provides the correct geometric result - and is much
-   * faster.
-   */
-  int x, y;
-  int canvas_w = canvas_width ();
-  int canvas_h = canvas_height ();
-
-  for (y = 0; y < g->r_height * scale; y++)
-  for (x = 0; x < g->r_width  * scale; x++)
-    {
-      if (xo + x + g->left_bearing * scale_factor *scale >= 0 &&
-          xo + x + g->left_bearing * scale_factor *scale < canvas_w &&
-          yo + y < canvas_h &&
-          yo + y >= 0)
-      {
-        int val = kernagic_preview [
-          (int)(yo + ((y))) * canvas_w + (int)(xo + x + (g->left_bearing * scale_factor)* scale)]; 
-        int raster = g->raster[(int)(y/scale) * g->r_width + (int)(x/scale)];
-        int u, v;
-        int c = 0;
-
-        if (scale < 0.5)
-        {
-          raster = 0;
-          for (u = 0; u < (1/scale); u++)
-          for (v = 0; v < (1/scale); v++)
-          {
-            if (y/scale+v < g->r_height &&
-                x/scale+u < g->r_width)
-            {
-              raster += g->raster[(int)(y/scale + v) * g->r_width + (int)(x/scale) + u];
-              c++;
-            }
-          }
-          raster /= c;
-        }
-
-        if (raster > val)
-        {
-          val = raster;
-        }
-
-        kernagic_preview [
-          (int)(yo + ((y))) * canvas_w + (int)(xo + x + (g->left_bearing * scale_factor)* scale)] = val;
-      }
-    }
-
-  return advance_glyph (g, xo, yo, scale);
-}
-
 void place_glyphs (TextGlyph *glyphs, int num_glyphs, float opacity, float scale)
 {
   int i;
