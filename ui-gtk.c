@@ -740,7 +740,6 @@ int ui_gtk (int argc, char **argv)
   if (!index_canvas)
     index_canvas = g_malloc0 (INDEX_WIDTH * INDEX_HEIGHT);
 
-
   gtk_init (&argc, &argv);
 
   labels  = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
@@ -864,7 +863,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_box_pack_start (GTK_BOX (vbox1), test_text, FALSE, FALSE, 2);
     gtk_container_add (GTK_CONTAINER (hbox), test_text);
 #endif
-
     gtk_box_pack_start (GTK_BOX (vbox2), test_text, FALSE, FALSE, 2);
   }
   {
@@ -876,7 +874,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2, "bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "neighbour glyph stem gap (F4)");
+                                    3, "gridded gap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
@@ -938,12 +936,12 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   {
     GtkObject *adj = gtk_adjustment_new (12.0, 0, 100.0, 1, 1, 0);
     spin_divisor = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Divisor",  0);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
+//    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
   }
 
   {
     GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 500.0, 0.01, 1.0, 0);
-    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Cadence",  2);
+    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Snap grid",  2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
   }
 
