@@ -241,7 +241,7 @@ static void ipsum_reload (void)
         ipsum = "yelping gluier soggily logbook baton adagios uncorks icecaps hydrant news prevue whelked towered quest except enrolls tried suppers goading journal cupolas drummer quests";
         break;
 
-      case 3: ipsum = "Click a small ipsum word to replace the position in the sample text being focused on. In the work area, clicking below the baseline removes custom stems, within the x-height left and right rythm point are set, above the x-height single rythm instance is specified.";
+      case 3: ipsum = "Click a small ipsum word to replace the position in the sample text being focused on. In the work area, clicking below the baseline removes custom rythm points, within the x-height left and right rythm point are set, above the x-height single rythm instance is specified.";
 
         break;
 
@@ -987,7 +987,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
 #if 0
   {
-    GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom stems, within the x-height left and right stems are set, above the x-height single stem overrides are set.\n\nThe short lines are stem-lines, weak ones auto-detected and dark ones manual overrides.");
+    GtkWidget *help = gtk_label_new ("Click a small ipsum word to replace the word being worked on,\nclicking below the baseline removes custom rythm points, within the x-height left and right rythm points are set, above the x-height single rythm point overrides are set.\n\nThe short lines are rythm point-lines, weak ones auto-detected and dark ones manual overrides.");
     gtk_label_set_line_wrap (GTK_LABEL (help), TRUE);
     gtk_misc_set_alignment (GTK_MISC (help), 0.0, 0.0);
     gtk_box_pack_start (GTK_BOX (vbox1), help, FALSE, FALSE, 2);
