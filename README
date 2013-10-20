@@ -6,7 +6,7 @@ can be previewed and tuned interactively.
 
 To fit into a diverse set of workflows, Kernagic uses UFO fonts for input. UFO can act as a superset of other formats, and tools like [Fontforge](http://github.com/fontforge/fontforge/) can be used for converting to and from it.
 
-Some methods relies on automatically detected stems, if the stem detection works poorly with your font, or you want to override spacing decisions, you can insert your own stems by clicking in the preview; stem overrides are saved in the UFO's private `lib.plist`.
+Some methods relies on automatically detected stems, if the stem detection works poorly with your font, or you want to override spacing decisions, you can insert your own stems by clicking in the preview; stem overrides are saved in the individual glyph files.
 
 If metrics are determined, they can be saved back into the UFO (shifting the x co-ordinates of all points in all glyphs to change the left bearings, and setting a new advance width to set the right bearings.)
 
