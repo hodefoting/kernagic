@@ -176,6 +176,7 @@ static void trigger_ipsum (void)
 static guint delayed_reload_updater = 0;
 static gboolean delayed_reload_trigger (gpointer foo)
 {
+  char path[4096];
   char *ufo_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (font_path));
   kernagic_strip_left_bearing = TRUE;
 
@@ -192,8 +193,21 @@ static gboolean delayed_reload_trigger (gpointer foo)
   delayed_trigger (foo);
   delayed_reload_updater = 0;
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+
+  /* override defaults with settings for file for snap/gap method */
+  sprintf (path, "%s/lib.plist", loaded_ufo_path);
+  if (kernagic_libplist_read (path))
+  {
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
+        kerner_settings.alpha_target);
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),
+        kerner_settings.offset);
+  }
+  else
+  {
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  }
 
   return FALSE;
 }

@@ -214,6 +214,9 @@ void kernagic_save_kerning_info (void)
       rewrite_ufo_glyph (glyph);
     }
 
+  sprintf (path, "%s/lib.plist", loaded_ufo_path);
+  kernagic_libplist_rewrite (path);
+
   add_monitors (loaded_ufo_path);
 }
 
@@ -361,6 +364,8 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
       }
     }
   init_kernagic ();
+  sprintf (path, "%s/lib.plist", loaded_ufo_path);
+  kernagic_libplist_read (path);
 }
 
 void kernagic_kern_clear_all (void)
@@ -602,6 +607,8 @@ int kernagic_active_method_no (void)
 }
 
 extern uint8_t   *kernagic_preview;
+
+int kernagic_libplist (int argc, char **argv);
 
 int main (int argc, char **argv)
 {
