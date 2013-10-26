@@ -367,28 +367,14 @@ cursor_position_changed_cb (GtkWidget *widget)
 }
 
 static int pressed = 0;
-static float startx = 0;
 static float prevx = 0;
-
-static gboolean
-new_preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-  trigger ();
-  pressed = event->button.button;
-  prevx = startx = event->button.x;
-
-  return TRUE;
-}
 
 static gboolean
 preview_motion_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-  float x, y;
-  x = event->motion.x;
-  y = event->motion.y;
+  float x = event->motion.x;
   if (pressed == 2)
     {
-      //printf ("%f %f\n", x, y);
       waterfall_offset += (prevx-x) / scale_factor;
       trigger ();
     }
