@@ -1,20 +1,22 @@
 Kernagic
 ========
 
-Kernagic is a tool for spacing fonts. It provides a selection of methods that
-can be previewed and tuned interactively. 
+Kernagic is a semi-automatic tool for spacing fonts. It provides ways to
+interactively preview global and local changes to the glyphs in a UFO font -
+these changes can act as a starting point for further manual fine tuning.
 
-To fit into a diverse set of workflows, Kernagic uses UFO fonts for input. UFO
-can act as a superset of other formats, and tools like
-[Fontforge](http://github.com/fontforge/fontforge/) can be used for converting
-to and from it.
+To fit into a diverse set of workflows, Kernagic uses UFO fonts for input.
+UFO can act as a superset of other formats, and tools like
+[Fontforge](http://github.com/fontforge/fontforge/) can be used for
+converting to and from it.
 
-Some methods relies on automatically detected rythm points, if the rythm point
-detection works poorly with your font, or you want to override spacing
-decisions, you can insert your own rythm points by clicking in the preview;
-rythm point overrides are saved in the individual glyph files. Clicking below
-the x-height of a glyph removes custom overrides; clicking above it inserts a
-single rythm point to be used for both left and right sides of the glyphs.
+The snap gap method relies on automatically detected rythm points, if the
+rythm point detection works poorly with your font, or you want to override
+spacing decisions, you can insert your own rythm points by clicking within
+the x-height of the glyph to change in the preview; rythm point overrides are
+saved in the individual glyph files.  Clicking below the x-height of a glyph
+removes custom overrides; clicking above it inserts a single rythm point to
+be used for both left and right sides of the glyphs.
 
 If metrics are determined, they can be saved back into the UFO (shifting the x
 co-ordinates of all points in all glyphs to change the left bearings, and
@@ -24,31 +26,23 @@ For help about the commandline interface, `kernagic --help` provides further
 documentation.
 
 Spacing Methods
-===================
+===============
 
 These are the various spacing methods implemented in Kernagic to date. The
 application is intended to be modular, so any programmer familiar with C and
-GTK+ can explore their own methods:
+a minimum of GTK+ can explore their own methods, the internals of kernagic
+can express kerning but the currently implemented methods only produces
+metrics.
 
-Inkbounds
---------------
+Original
+--------
 
-A simple method, included for debugging only; no side-bearings.
+Show the original font, (included to be able to quickly switch between the
+original font and the resulting spacing, pressing F1, F2, F3, .. switches
+between the different methods.)
 
-Renaissance Cadence Table
--------------------------
-
-A predefined spacing table method. 
-
-This table encodes knowledge of glyph morphologies, found in Frank Blokland's
-excellent [Letter Model](http://lettermodel.org). This table is also provided
-as an external text file; other files following the same format can be used
-for detailed control over this method.
-
-It assumes your typeface is a traditional renaissance design, with classic
-glyph proportions, and automatically prepares a fitting.
-
-Currently this only produces metrics, not kerning.
+An additional option is available here to proportionally scale the existing
+bearings.
 
 Snap gap
 --------
@@ -57,4 +51,16 @@ This methods permits specifying a desired gap between left and right rythm
 points of glyphs. The bearings indicated by the gap is also snapped to grid in
 such a manner that the advance of the glyphs is a multiple of the snap value.
 
-Currently this only produces metrics, not kerning.
+Classic proportions
+-------------------
+
+Provide a fitting that assumes your typeface is a traditional renaissance
+design, with classic glyph proportions.
+
+This method encodes knowledge of glyph morphologies, found in Frank
+Blokland's excellent [Letter Model](http://lettermodel.org). The bearings to
+use for each glyph; and how it relates to the shape of the glyph is encoded
+in a table. An internal table is provided that is used by default; this table
+is also provided with kernagic as a text file, using a text-editor the glyph
+morphology knowledge can be adapted and extended.
+

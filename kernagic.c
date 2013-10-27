@@ -75,9 +75,9 @@ static void init_methods (void)
 {
   int i = 0;
   methods[i++] = kernagic_original;
-  methods[i++] = kernagic_bounds;
-  methods[i++] = kernagic_cadence;
   methods[i++] = kernagic_gap;
+  methods[i++] = kernagic_cadence;
+  methods[i++] = kernagic_bounds;
   methods[i] = NULL;
 };
 
@@ -477,7 +477,7 @@ int ipsumat (int argc, char **argv);
 void parse_args (int argc, char **argv)
 {
   int no;
-  kerner_settings.method = methods[3];
+  kerner_settings.method = methods[1];
 
   for (no = 1; no < argc; no++)
     {
