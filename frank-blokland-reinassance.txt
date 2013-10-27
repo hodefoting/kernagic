@@ -3,9 +3,6 @@
   # is specified and the number of 1/24ths of the spacing between the stems
   # of the n glyph is added to the sides-creating sidebearings.
 
-  # XXX: todo could probably encode the divisor of the N used, and set that
-  #      within kernagic
-
 A extreme 1 extreme 1 
 B stem 8 extreme 3 
 C extreme 3 extreme 2 
@@ -62,7 +59,3 @@ z extreme 2 extreme 2
 : extreme 3 extreme 3 
 ; extreme 3 extreme 3 
 , extreme 3 extreme 3 
-
-  # XXX: the format should be extended with Å = A like pairs, permitting to
-  # create a list of aliases for other characters that have equivalent
-  # criteria as the given glyph.

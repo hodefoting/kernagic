@@ -48,9 +48,9 @@ KernerSettings kerner_settings = {
   KERNER_DEFAULT_MIN,
   KERNER_DEFAULT_MAX,
   KERNER_DEFAULT_DIVISOR,
-  KERNER_DEFAULT_TARGET_GRAY,
-  KERNER_DEFAULT_OFFSET,
-  KERNER_DEFAULT_FNORD,
+  KERNER_DEFAULT_SNAP,
+  KERNER_DEFAULT_GAP,
+  KERNER_DEFAULT_BIG_GLYPH_SCALING,
   KERNER_DEFAULT_TRACKING
 };
 
@@ -502,7 +502,7 @@ void parse_args (int argc, char **argv)
       else if (!strcmp (argv[no], "-g"))
         {
           EXPECT_ARG;
-          kerner_settings.offset = atof (argv[++no]);
+          kerner_settings.gap = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-t"))
         {
@@ -512,7 +512,7 @@ void parse_args (int argc, char **argv)
       else if (!strcmp (argv[no], "-c"))
         {
           EXPECT_ARG;
-          kerner_settings.alpha_target = atof (argv[++no]);
+          kerner_settings.snap = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-m"))
         {

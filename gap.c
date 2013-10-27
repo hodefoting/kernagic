@@ -38,8 +38,8 @@ float n_distance (void)
 
 static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
 {
-  float period = kerner_settings.alpha_target;
-  float offset = kerner_settings.offset * kernagic_x_height ();
+  float period = kerner_settings.snap;
+  float gap = kerner_settings.gap * kernagic_x_height ();
   float left, right;
   float lstem;
   float rstem;
@@ -50,7 +50,7 @@ static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
   if (!islower (g->unicode))
     {
       if (g->ink_height >= kernagic_x_height () * 1.1)
-        offset *= kerner_settings.big_glyph_scaling;
+        gap *= kerner_settings.big_glyph_scaling;
     }
 
   /* if manual overrides are set, use them */
@@ -59,11 +59,11 @@ static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
   if (g->rstem > 0.0)
     rstem = g->rstem;
 
-  left = offset + period * (0.5) - lstem;
+  left = gap + period * (0.5) - lstem;
 
   /* can we come up with something better than ink_width here?.. */
 
-  right = left + rstem + (offset) + period;
+  right = left + rstem + (gap) + period;
   right = ((int)(right/period))*period;
   right = right - (left + g->ink_width);
     

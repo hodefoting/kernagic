@@ -37,10 +37,10 @@ static GtkWidget *ipsum_glyphs;
 static GtkWidget *spin_method;
 static GtkWidget *spin_min_dist;
 static GtkWidget *spin_max_dist;
-static GtkWidget *spin_gray_target;
+static GtkWidget *spin_snap;
 static GtkWidget *spin_divisor;
 static GtkWidget *spin_tracking;
-static GtkWidget *spin_offset;
+static GtkWidget *spin_gap;
 static GtkWidget *spin_big_glyph_scaling;
 GtkWidget *spin_ipsum_no;
 
@@ -67,14 +67,14 @@ static void configure_kernagic (void)
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_max_dist));
   kerner_settings.minimum_distance =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_min_dist));
-  kerner_settings.alpha_target =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  kerner_settings.snap =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_snap));
   kerner_settings.divisor =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_divisor));
   kerner_settings.tracking =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_tracking));
-  kerner_settings.offset =
-       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_offset));
+  kerner_settings.gap =
+       gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gap));
   kerner_settings.big_glyph_scaling =
        gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_big_glyph_scaling));
 
@@ -125,7 +125,7 @@ static void trigger_divisor (void)
     return;
 
   frozen++;
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_snap),
       n_distance () / divisor);
   frozen--;
 }
@@ -138,7 +138,7 @@ static void trigger_cadence_path (void)
 
 static void trigger_cadence (void)
 {
-  float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_gray_target));
+  float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_snap));
   //if (frozen)
   //  return;
 
@@ -198,10 +198,10 @@ static gboolean delayed_reload_trigger (gpointer foo)
   sprintf (path, "%s/lib.plist", loaded_ufo_path);
   if (kernagic_libplist_read (path))
   {
-    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),
-        kerner_settings.alpha_target);
-    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),
-        kerner_settings.offset);
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_snap),
+        kerner_settings.snap);
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gap),
+        kerner_settings.gap);
   }
   else
   {
@@ -318,9 +318,9 @@ static void set_defaults (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_ipsum_no),      1);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist),      KERNER_DEFAULT_MIN);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist),      KERNER_DEFAULT_MAX);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target),   KERNER_DEFAULT_TARGET_GRAY);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_snap),   KERNER_DEFAULT_TARGET_GRAY);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset),    KERNER_DEFAULT_OFFSET);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gap),    KERNER_DEFAULT_GAP);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking),      KERNER_DEFAULT_TRACKING);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle_measurement_lines_check), TRUE);
 }
@@ -343,10 +343,10 @@ static void set_defaults_from_args (void)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_min_dist), kerner_settings.minimum_distance);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_max_dist), kerner_settings.maximum_distance);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gray_target), kerner_settings.alpha_target);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_snap), kerner_settings.snap);
 
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor), kerner_settings.divisor);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_offset), kerner_settings.offset);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gap), kerner_settings.gap);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_big_glyph_scaling), kerner_settings.big_glyph_scaling);
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_tracking), kerner_settings.tracking);
 
@@ -873,7 +873,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     2, "Bearing table (F3)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "Gridded gap (F4)");
+                                    3, "gap snap (F4)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
   }
@@ -928,19 +928,19 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
 
   {
     GtkObject *adj = gtk_adjustment_new (1.0, 1.0, 500.0, 0.01, 1.0, 0);
-    spin_gray_target = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Snap grid",  2);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gray_target);
+    spin_snap = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Snap",  2);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_snap);
   }
 
   {
     GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
-    spin_offset = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Gap size",  2);
-    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_offset);
+    spin_gap = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Gap", 2);
+    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gap);
   }
 
   {
     GtkObject *adj = gtk_adjustment_new (12.0, 0, 100.0, 1, 1, 0);
-    spin_divisor = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Divisor",  0);
+    spin_divisor = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Divisor", 0);
 //    gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_divisor);
   }
 
@@ -1009,9 +1009,9 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   g_signal_connect (spin_tracking,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_min_dist,      "notify::value", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_max_dist,      "notify::value", G_CALLBACK (trigger), NULL);
-  g_signal_connect (spin_gray_target,   "value-changed", G_CALLBACK (trigger_cadence), NULL);
+  g_signal_connect (spin_snap,          "value-changed", G_CALLBACK (trigger_cadence), NULL);
   g_signal_connect (spin_divisor,       "value-changed", G_CALLBACK (trigger_divisor), NULL);
-  g_signal_connect (spin_offset,        "value-changed", G_CALLBACK (trigger), NULL);
+  g_signal_connect (spin_gap,           "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (spin_big_glyph_scaling,        "value-changed", G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::text",  G_CALLBACK (trigger), NULL);
   g_signal_connect (test_text,          "notify::cursor-position",  G_CALLBACK (cursor_position_changed_cb), NULL);

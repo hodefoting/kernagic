@@ -289,7 +289,7 @@ float kerner_kern (KernerSettings *settings,
         //place_glyphs (left, right, s);
         beta = compute_negative_area_ratio (left, right, s);
 
-        float alphadiff = fabs (alpha - settings->alpha_target / 100.0);
+        float alphadiff = fabs (alpha - settings->snap / 100.0);
         //float betadiff  = fabs (beta  - settings->beta_target / 100.0);
         float sumdiff;
 

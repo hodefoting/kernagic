@@ -179,7 +179,7 @@ extern int desired_pos;
 
 void redraw_test_text (const char *intext, int debuglevel)
 {
-  float period = kerner_settings.alpha_target;
+  float period = kerner_settings.snap;
   const char *utf8;
   gunichar *str2;
   int i;

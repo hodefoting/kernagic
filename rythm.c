@@ -17,8 +17,8 @@ static void kernagic_rythm_init (void)
 
 static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
 {
-  float period = kerner_settings.alpha_target;
-  float offset = kerner_settings.offset;
+  float period = kerner_settings.snap;
+  float gap = kerner_settings.gap;
   float rythm = 1;
   float left, right;
   float lstem;
@@ -36,11 +36,11 @@ static void kernagic_rythm_each (Glyph *g, GtkProgressBar *progress)
   if (g->rstem > 0.0)
     rstem = g->rstem;
 
-  left = period * (offset + 0.5) - lstem;
+  left = period * (gap + 0.5) - lstem;
 
   /* can we come up with something better than ink_width here?.. */
 
-  right = left + rstem + (period * offset) + period;
+  right = left + rstem + (period * gap) + period;
   right = ((int)(right/period))*period;
   right = right - (left + g->ink_width);
     

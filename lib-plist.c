@@ -65,8 +65,8 @@ int kernagic_libplist_read (const char *path)
       float a, b;
       sscanf (p, "gap=%f snap=%f", &a, &b);
 
-      kerner_settings.offset = a;
-      kerner_settings.alpha_target = b;
+      kerner_settings.gap = a;
+      kerner_settings.snap = b;
 
       fprintf (stderr, "%f %f\n", a, b);
       ret = 1;
@@ -133,8 +133,8 @@ void kernagic_libplist_rewrite (const char *path)
 
   g_string_append_printf (ts, "\n<key>%s</key>\n", KEY);
   g_string_append_printf (ts, "<string>gap=%f snap=%f^</string>\n",
-      kerner_settings.offset,
-      kerner_settings.alpha_target);
+      kerner_settings.gap,
+      kerner_settings.snap);
   g_string_append (ts, "</dict>\n</plist>\n");
 
   g_file_set_contents (path, ts->str, ts->len, NULL);
