@@ -417,6 +417,9 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   x = event->button.x;
   y = event->button.y;
 
+  pressed = event->button.button;
+  if (pressed > 1)
+    return TRUE;
 
   for (i = 0; i+1 < big && x_entries[i+1] < event->button.x; i++);
   
