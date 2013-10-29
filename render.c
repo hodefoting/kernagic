@@ -191,7 +191,7 @@ void redraw_test_text (const char *intext, int debuglevel)
   int canvas_w = canvas_width ();
   int canvas_h = canvas_height ();
 again:
-  x0 = PREVIEW_PADDING;
+  x0 = 0;
   y0 = PREVIEW_PADDING;
   x = x0;
   y = y0;
@@ -266,7 +266,6 @@ again:
                   {
                     if (prev_g)
                       x += kernagic_kern_get (prev_g, g) * scale_factor * scale;
-
                     text[text_count].unicode = g->unicode;
                     text[text_count].x = x;
                     text[text_count++].y = y;
@@ -288,7 +287,6 @@ again:
               {
                 g_string_append_unichar (word, g->unicode);
                 uword[ulen++] = g->unicode;
-
               }
             else if (str2[i] == ' ') /* we're only faking it if we have to  */
               {
@@ -326,7 +324,6 @@ again:
                         desired_pos = -1;
                         goto again;
                       }
-
                       g_entries[big] = g;
                       x_entries[big++] = x;
                       draw_glyph_debug (g, x, y, 1.0, scale, debuglevel);
@@ -393,8 +390,11 @@ again:
               }
               else
               {
-                g_entries[big] = kernagic_find_glyph_unicode ('i');
-                x_entries[big++] = x + waterfall_offset;
+                if (w == waterfall - 1)
+                {
+                  g_entries[big] = kernagic_find_glyph_unicode ('i');
+                  x_entries[big++] = x;
+                }
               }
             }
           }

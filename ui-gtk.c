@@ -407,6 +407,29 @@ preview_release_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   return TRUE;
 }
 
+static void adjusted (int glyph_no)
+{
+  int i;
+  float x = 0;
+  float prev_pos = (float)(x_entries[glyph_no]);
+  float new_pos;
+  x = - waterfall_offset * scale_factor + canvas_width ()/2;
+
+  for (i = 0; i < glyph_no; i ++)
+    {
+      x += kernagic_get_advance (g_entries[i]) * scale_factor;
+      /*
+      if (i > 0)
+        x += kernagic_kern_get (
+            g_entries[i-1],
+            g_entries[i]) * scale_factor;
+            */
+    }
+  new_pos = x;
+
+  waterfall_offset -= (new_pos - prev_pos);
+}
+
 static gboolean
 preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -441,16 +464,6 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   /* for lowest y coords- do word picking from background ipsum,
    * for detailed adjustments
    */
- if(0) {
-    const char *word;
-    word = detect_word (event->button.x, event->button.y);
-    if (word)
-    {
-      gtk_entry_set_text (GTK_ENTRY (test_text), word);
-      trigger ();
-      return TRUE;
-    }
-  }
 
   if (y < 0)
   {
@@ -479,11 +492,14 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
   {
     g->rstem = x - g->left_bearing;
     g->lstem = x - g->left_bearing;
+
+    adjusted (i);
   }
   else if (g && y > 2.0)
   {
     g->rstem = 0;
     g->lstem = 0;
+    adjusted (i);
   }
   else if (g)
   {
@@ -495,6 +511,7 @@ preview_press_cb (GtkWidget *widget, GdkEvent *event, gpointer data)
     {
       g->rstem = x - g->left_bearing;
     }
+    adjusted (i);
   }
   else
   {
