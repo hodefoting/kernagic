@@ -418,7 +418,7 @@ static void adjusted (int glyph_no)
   for (i = 0; i < glyph_no; i ++)
     {
       x += kernagic_get_advance (g_entries[i]) * scale_factor;
-      /*
+      /* XXX: currently broken if doing kerning as well as metrics
       if (i > 0)
         x += kernagic_kern_get (
             g_entries[i-1],
