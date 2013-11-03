@@ -45,6 +45,28 @@ The gap method allows specifying the gap to use between stems in neighbouring gl
 
 Currently this only produces metrics, not kerning.
 
+Installation
+=====================
+
+From Source
+---------------
+
+### Windows
+
+It is possible to compile Kernagic for Windows. TODO: Complete this
+
+### Mac OS X
+
+Install XCode. Either with the App Store, or by registering as an Apple Developer and installing the appropriate XCode version from the [Developer website](https://developer.apple.com/downloads/index.action) (Select 'Developer Tools' and type 'Xcode' in the search box.)
+
+Install Homebrew in the normal way. 
+
+From the terminal run: `brew install kernagic --HEAD;`
+
+You can now run Kernagic by typing'kernagic' in the Terminal.
+
+In case you want to actively participate in Kernagic's development, please register at <http://www.github.com>.
+
 Usage
 =====================
 
