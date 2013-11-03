@@ -36,6 +36,44 @@ extern gboolean kernagic_strip_bearing; /* XXX: global and passed out of bounds.
 static int pinlib = 0;
 static int pinself = 0;
 
+static void 
+parse_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
+{
+  Glyph *component_glyph = kernagic_find_glyph (base);
+  if (component_glyph)
+  {
+    int x, y;
+    y = component_glyph->ink_min_y;
+    x = component_glyph->ink_min_x + component_glyph->left_original;
+
+    x -= xoffset;
+    y -= yoffset;
+    if (x > glyph->ink_max_x)
+      glyph->ink_max_x = x;
+    if (y > glyph->ink_max_y)
+      glyph->ink_max_y = y;
+    if (x < glyph->ink_min_x)
+      glyph->ink_min_x = x;
+    if (y < glyph->ink_min_y)
+      glyph->ink_min_y = y;
+
+    y = component_glyph->ink_max_y;
+    x = component_glyph->ink_max_x + component_glyph->left_original;
+    x -= xoffset;
+    y -= yoffset;
+    if (x > glyph->ink_max_x)
+      glyph->ink_max_x = x;
+    if (y > glyph->ink_max_y)
+      glyph->ink_max_y = y;
+    if (x < glyph->ink_min_x)
+      glyph->ink_min_x = x;
+    if (y < glyph->ink_min_y)
+      glyph->ink_min_y = y;
+  }
+  else
+    fprintf (stderr, "Problems importing '%s' maybe the component %s is using components\n", glyph->name, base);
+}
+
 static void
 parse_start_element (GMarkupParseContext *context,
                      const gchar         *element_name,
@@ -66,7 +104,7 @@ parse_start_element (GMarkupParseContext *context,
            a_v = attribute_values; *a_n; a_n++, a_v++)
         {
           if (!strcmp (*a_n, "width"))
-            {};//glyph->advance = atoi (*a_v);
+            glyph->right_original = atoi (*a_v);
         }
     }
   else if (!strcmp (element_name, "unicode"))
@@ -101,6 +139,21 @@ parse_start_element (GMarkupParseContext *context,
       if (y < glyph->ink_min_y) glyph->ink_min_y = y;
       if (x > glyph->ink_max_x) glyph->ink_max_x = x;
       if (y > glyph->ink_max_y) glyph->ink_max_y = y;
+    }
+  else if (!strcmp (element_name, "component"))
+    {
+      const char *base = "";
+      float xoffset = 0;
+      float yoffset = 0;
+      const char **a_n, **a_v;
+      for (a_n = attribute_names,
+           a_v = attribute_values; *a_n; a_n++, a_v++)
+        {
+          if (!strcmp (*a_n, "base")) base = *a_v;
+          else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+          else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+        }
+      parse_component (glyph, base, xoffset, yoffset);
     }
   else if (!strcmp (element_name, "lib"))
     {
@@ -149,6 +202,25 @@ parse_end_element (GMarkupParseContext *context,
     pinself = 0;
 }
 
+void render_glyph (Glyph *glyph);
+
+static void 
+render_component (Glyph *glyph, const char *base, float xoffset, float yoffset)
+{
+  Glyph *cglyph = NULL;
+  cairo_t *cr = glyph->cr;
+  cglyph = kernagic_find_glyph (base);
+  //fprintf (stderr, "Component %s  %f,%f %p\n", base, xoffset, yoffset, cglyph);
+  cairo_save (cr);
+
+  xoffset -= cglyph->offset_x;
+
+  cairo_translate (cr, xoffset, yoffset);
+
+  cglyph->cr = cr;
+  render_glyph (cglyph);
+  cairo_restore (cr);
+}
 
 static void
 glif_start_element (GMarkupParseContext *context,
@@ -188,6 +260,7 @@ glif_start_element (GMarkupParseContext *context,
           cx[cc] = x;
           cy[cc] = y;
           cc++;
+          /* too many points; wrong type of curve */
           assert (cc <= 2);
         }
       else
@@ -228,6 +301,21 @@ glif_start_element (GMarkupParseContext *context,
       first = 1;
       sc = 0;
       cc = 0;
+    }
+  else if (!strcmp (element_name, "component"))
+    {
+      const char *base = "";
+      float xoffset = 0;
+      float yoffset = 0;
+      const char **a_n, **a_v;
+      for (a_n = attribute_names,
+           a_v = attribute_values; *a_n; a_n++, a_v++)
+        {
+          if (!strcmp (*a_n, "base")) base = *a_v;
+          else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+          else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+        }
+      render_component (glyph, base, xoffset, yoffset);
     }
 }
 
@@ -293,7 +381,13 @@ void render_glyph (Glyph *glyph)
 void
 load_ufo_glyph (Glyph *glyph)
 {
-  GMarkupParseContext *ctx = g_markup_parse_context_new (&glif_parse, 0, glyph, NULL);
+  GMarkupParseContext *ctx;
+
+  if (glyph->loaded)
+    return;
+  glyph->loaded = 1;
+  
+  ctx = g_markup_parse_context_new (&glif_parse, 0, glyph, NULL);
   g_markup_parse_context_parse (ctx, glyph->xml, strlen (glyph->xml), NULL);
   g_markup_parse_context_free (ctx);
 
@@ -303,10 +397,12 @@ load_ufo_glyph (Glyph *glyph)
   if (kernagic_strip_bearing)
     {
       glyph->offset_x = -glyph->ink_min_x;
+      glyph->left_original = glyph->ink_min_x;
+      glyph->right_original -= glyph->ink_max_x;
 
       glyph->ink_min_x   += glyph->offset_x;
       glyph->ink_max_x   += glyph->offset_x;
-      //glyph->advance += glyph->offset_x;
+
       glyph->left_bearing = 0;
       glyph->right_bearing = 0;
     }
@@ -323,7 +419,7 @@ void gen_debug (Glyph *glyph)
     int t;
     float x_height = kernagic_x_height ();
 
-    for (t = 1; t < 4; t ++)
+    for (t = 1; t < 3; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
       long sum = 0;
@@ -339,13 +435,13 @@ void gen_debug (Glyph *glyph)
         }
       {
         int foo = sum / c;
-        foo /= 32;
-        foo *= 32;
+       // foo /= 32;
+       // foo *= 32;
         raster [glyph->r_width * (glyph->r_height-t) + x] = foo;
       }
     }
 
-    /* detect candidates; with confidence */
+    /* detect candidate stems/rythm points*/
     long sum = 0;
     long sum2 = 0;
 
@@ -392,33 +488,11 @@ void gen_debug (Glyph *glyph)
     glyph->stems[glyph->stem_count] = x / scale_factor;
     glyph->stem_weight[glyph->stem_count++] = 1;
 
-    for (t = 8; t < 256; t ++)
-    {
-      x = glyph->stems[0] * scale_factor;
-      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
-      x = glyph->stems[1] * scale_factor;
-      raster [glyph->r_width * (glyph->r_height-t) + x] = 32;
-    }
-
-#if 0
-
-    for (t = 16; t < 32; t ++)
+    for (t = 1; t < 3; t ++)
     for (x = 0; x < glyph->r_width; x++)
     {
-      long sum = 0;
-      int y;
-      long c = 0;
-
-      for (y = x_height * 1.8 * scale_factor ;
-          y <  x_height * 2.0 * scale_factor;
-          y++)
-        {
-          sum += raster[glyph->r_width * y + x] * 16;
-          c+= 16;
-        }
-      raster [glyph->r_width * (glyph->r_height-t) + x] = sum / c;
+      raster [glyph->r_width * (glyph->r_height-t) + x] = 0;
     }
-#endif
 }
 
 void
@@ -490,28 +564,55 @@ rewrite_start_element (GMarkupParseContext *context,
       inlib ++;
     }
 
-  for (a_n = attribute_names,
-       a_v = attribute_values; *a_n; a_n++, a_v++)
-     {
-       if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
-         {
-           char str[512];
-           int value = atoi (*a_v);
-           value = value + glyph->offset_x + glyph->left_bearing;
-           sprintf (str, "%d", value);
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
-         }
-       else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
-         {
-           char str[512];
-           sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
-         }
-       else
-         {
-           g_string_append_printf (ts, " %s=\"%s\"", *a_n, *a_v);
-         }
-     }
+  if (!strcmp (element_name, "component"))
+  {
+    const char *base = "";
+    float xoffset = 0;
+    float yoffset = 0;
+    const char **a_n, **a_v;
+    for (a_n = attribute_names,
+         a_v = attribute_values; *a_n; a_n++, a_v++)
+      {
+        if (!strcmp (*a_n, "base")) base = *a_v;
+        else if (!strcmp (*a_n, "xOffset")) xoffset = atof (*a_v);
+        else if (!strcmp (*a_n, "yOffset")) yoffset = atof (*a_v);
+      }
+
+      xoffset = xoffset + glyph->offset_x + glyph->left_bearing;
+
+      Glyph *component_glyph = kernagic_find_glyph (base);
+      if (component_glyph)
+      {
+        xoffset -= (component_glyph->offset_x + component_glyph->left_bearing);
+      }
+
+      g_string_append_printf (ts, " base=\"%s\" xOffset=\"%f\" yOffset=\"%f\" ", base, xoffset, yoffset);
+  }
+  else
+  {
+    for (a_n = attribute_names,
+         a_v = attribute_values; *a_n; a_n++, a_v++)
+       {
+         if (!strcmp (element_name, "point") && !strcmp (*a_n, "x"))
+           {
+             char str[512];
+             int value = atoi (*a_v);
+             value = value + glyph->offset_x + glyph->left_bearing;
+             sprintf (str, "%d", value);
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
+           }
+         else if (!strcmp (element_name, "advance") && !strcmp (*a_n, "width"))
+           {
+             char str[512];
+             sprintf (str, "%d", (int)(kernagic_get_advance (glyph)));
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
+           }
+         else
+           {
+             g_string_append_printf (ts, " %s=\"%s\"", *a_n, *a_v);
+           }
+       }
+  }
   g_string_append_printf (ts, ">");
 }
 
@@ -540,7 +641,6 @@ rewrite_end_element (GMarkupParseContext *context,
             glyph->lstem, glyph->rstem);
       }
   }
-
 }
 
 static void

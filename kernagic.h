@@ -31,9 +31,15 @@ void   rewrite_ufo_glyph           (Glyph *glyph);
 #define KERNAGIC_DEFAULT_STRIP_LEFT_BEARING  1
 extern gboolean kernagic_strip_left_bearing;
 
-
 gboolean kernagic_deal_with_glyphs (gunichar left, gunichar right);
 gboolean kernagic_deal_with_glyph (gunichar unicode);
+
+/* ipsum generator is a single c function, relies on state from srandom ()  */
+char *ipsumat_generate (const char *dict_path,
+                        const char *charset,
+                        const char *desired_glyphs,
+                        int         max_wordlen,
+                        int         max_words);
 
 GList *kernagic_glyphs (void);
 
@@ -47,5 +53,69 @@ struct _KernagicMethod {
   void (*each) (Glyph *glyph, GtkProgressBar *progress);
   void (*done) (void);
 };
+
+typedef struct _Word Word;
+struct _Word
+{
+  gchar *utf8;
+  int len;
+  int x;
+  int y;
+  int width;
+  int height;
+};
+const char *detect_word (int x, int y);
+float n_distance (void);
+
+extern int debug_start_y;
+
+
+typedef struct _KernerSettings KernerSettings;
+
+#define KERNER_DEFAULT_MODE              3
+#define KERNER_DEFAULT_MIN               15
+#define KERNER_DEFAULT_MAX               50
+#define KERNER_DEFAULT_DIVISOR           24
+#define KERNER_DEFAULT_SNAP              50
+#define KERNER_DEFAULT_GAP               0.25
+#define KERNER_DEFAULT_BIG_GLYPH_SCALING 1
+#define KERNER_DEFAULT_TRACKING          100
+
+struct _KernerSettings
+{
+  KernagicMethod *method;
+  float minimum_distance;
+  float maximum_distance;
+  float divisor;
+  float snap;
+  float gap;
+  float big_glyph_scaling;
+  float tracking;
+};
+extern KernerSettings kerner_settings;
+
+float kerner_kern (KernerSettings *settings, Glyph *left, Glyph *right);
+void init_kerner (void);
+void kerner_debug_ui (void);
+
+void kernagic_set_cadence (const char *cadence_path);
+
+void redraw_test_text (const char *intext, int debuglevel);
+int canvas_width ();
+int canvas_height ();
+extern float debug_scale;
+extern float waterfall_offset;
+extern char *loaded_ufo_path;
+
+void kernagic_libplist_rewrite (const char *path);
+int kernagic_libplist_read (const char *path);
+
+#define WATERFALL_START   0.02
+#define WATERFALL_SCALING 1.33
+#define WATERFALL_SPACING 0.7
+#define WATERFALL_LEVELS   10
+#define PREVIEW_PADDING 5
+
+#define IPSUM0 "ooonnnono frtjckxiv Page Down - " 
 
 #endif

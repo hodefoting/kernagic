@@ -1,49 +1,68 @@
 Kernagic
 ========
 
-Kernagic is a tool for spacing and kerning fonts. It provides a selection of methods that can be previewed and tuned interactively. 
+Kernagic is a semi-automatic tool for spacing fonts. It provides ways to
+interactively preview global and local changes to the glyphs in a UFO font -
+these changes can act as a starting point for further manual fine tuning.
 
-To fit into a diverse set of workflows, Kernagic uses UFO fonts for input. UFO can act as a superset of other formats, and tools like [Fontforge](http://github.com/fontforge/fontforge/) can be used for converting to and from it.
+To fit into a diverse set of workflows, Kernagic uses UFO fonts for input.
+UFO can act as a superset of other formats, and tools like
+[Fontforge](http://github.com/fontforge/fontforge/) can be used for
+converting to and from it.
 
-Some methods relies on automatically detected stems, if the stem detection works poorly with your font, or you want to override spacing decisions, you can insert your own stems by clicking in the preview; stem overrides are saved in the UFO's private `lib.plist`.
+The snap gap method relies on automatically detected rythm points, if the
+rythm point detection works poorly with your font, or you want to override
+spacing decisions, you can insert your own rythm points by clicking within
+the x-height of the glyph to change in the preview; rythm point overrides are
+saved in the individual glyph files.  Clicking below the x-height of a glyph
+removes custom overrides; clicking above it inserts a single rythm point to
+be used for both left and right sides of the glyphs.
 
-If metrics are determined, they can be saved back into the UFO (shifting the x co-ordinates of all points in all glyphs to change the left bearings, and setting a new advance width to set the right bearings.)
+If metrics are determined, they can be saved back into the UFO (shifting the x
+co-ordinates of all points in all glyphs to change the left bearings, and
+setting a new advance width to set the right bearings.)
 
-For help about the commandline interface, `kernagic --help` provides further documentation.
+For help about the commandline interface, `kernagic --help` provides further
+documentation.
 
 Spacing Methods
-===================
+===============
 
-These are the various spacing methods implemented in Kernagic to date. The application is intended to be modular, so any programmer familiar with C and GTK+ can explore their own methods:
+These are the various spacing methods implemented in Kernagic to date. The
+application is intended to be modular, so any programmer familiar with C and
+a minimum of GTK+ can explore their own methods, the internals of kernagic
+can express kerning but the currently implemented methods only produces
+metrics.
 
-Inkbounds
---------------
+Original
+--------
 
-A simple fallback spacing method.
+Show the original font, (included to be able to quickly switch between the
+original font and the resulting spacing, pressing F1, F2, F3, .. switches
+between the different methods.)
 
-This calculates an even 'grey value' between each letter pair. 
+An additional option is available here to proportionally scale the existing
+bearings.
 
-Currently this only produces kerning, not metrics.
+Snap gap
+--------
 
-Renaissance Cadence Table
--------------------------
+This methods permits specifying a desired gap between left and right rythm
+points of glyphs. The bearings indicated by the gap is also snapped to grid in
+such a manner that the advance of the glyphs is a multiple of the snap value.
 
-A predefined spacing table method. 
+Classic proportions
+-------------------
 
-This table encodes knowledge of glyph morphologies, found in Frank Blokland's excellent [Letter Model](http://lettermodel.org). 
+Provide a fitting that assumes your typeface is a traditional renaissance
+design, with classic glyph proportions.
 
-It assumes your typeface is a traditional renaissance design, with classic glyph proportions, and automatically prepares a fitting.
-
-Currently this only produces metrics, not kerning.
-
-Gap Cadence Discovery
--------------------------
-
-`left bearing = gap * (offset + 0.5) - left stem width`
-
-The gap method allows specifying the gap to use between stems in neighbouring glyphs. (The resulting advance is snapped to a multiple of the gap.)
-
-Currently this only produces metrics, not kerning.
+This method encodes knowledge of glyph morphologies, found in Frank
+Blokland's excellent [Letter Model](http://lettermodel.org). The bearings to
+use for each glyph; and how it relates to the shape of the glyph is encoded
+in a table. An internal table is provided that is used by default; this table
+is also provided with kernagic as a text file, using a text-editor the glyph
+morphology knowledge can be adapted and extended.
 
 Installation
 =====================
@@ -57,16 +76,17 @@ It is possible to compile Kernagic for Windows. TODO: Complete this
 
 ### Mac OS X
 
-Install XCode. Either with the App Store, or by registering as an Apple Developer and installing the appropriate XCode version from the [Developer website](https://developer.apple.com/downloads/index.action) (Select 'Developer Tools' and type 'Xcode' in the search box.)
+1. Install XCode. Either with the App Store, or by registering as an Apple 
+Developer and installing the appropriate XCode version from the 
+[Developer website](https://developer.apple.com/downloads/index.action) 
+(Select 'Developer Tools' and type 'Xcode' in the search box.)
 
-Install Homebrew in the normal way. 
+2. Install [Homebrew](http://brew.sh)
 
-From the terminal run: `brew install kernagic --HEAD;`
+3. Run Terminal and then type `brew install kernagic --HEAD;` and hit enter
 
-You can now run Kernagic by typing'kernagic' in the Terminal.
-
-In case you want to actively participate in Kernagic's development, please register at <http://www.github.com>.
-
+4. Run Terminal and then type `kernagic` and hit enter
+ 
 Usage
 =====================
 
@@ -74,7 +94,16 @@ A video on how to use the program is at: TODO
 
 Running `kernagic --ipsumat` is a way to run the ipsum generator stand-alone as a commandline utility. Run `kernagic --ipsumat --help` for more information.
 
-Debugging
------------
+
+Suggested workflow for snap gap method
+----------------------------------------
+
+1) set the snap to 0
+2) adjust the gap until the type is as loose/tight as you want it
+3) adjust snap, so that it is at a high value; where the type hasn't fallen totally apart
+4) manually adjust remaining glyphs which still need tuning.
+
+Found a crash?
+---------------
 
 A shell script, `kernagic-debug-osx.sh`, is included that allows you to produce backtraces conveniently on Mac OS X.
