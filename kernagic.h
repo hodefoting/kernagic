@@ -76,8 +76,8 @@ typedef struct _KernerSettings KernerSettings;
 #define KERNER_DEFAULT_MIN               15
 #define KERNER_DEFAULT_MAX               50
 #define KERNER_DEFAULT_DIVISOR           24
-#define KERNER_DEFAULT_SNAP              50
-#define KERNER_DEFAULT_GAP               0.25
+#define KERNER_DEFAULT_SNAP              0
+#define KERNER_DEFAULT_GAP               0.3
 #define KERNER_DEFAULT_BIG_GLYPH_SCALING 1
 #define KERNER_DEFAULT_TRACKING          100
 

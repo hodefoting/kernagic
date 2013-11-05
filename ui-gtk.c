@@ -202,6 +202,8 @@ static gboolean delayed_reload_trigger (gpointer foo)
         kerner_settings.snap);
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_gap),
         kerner_settings.gap);
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_big_glyph_scaling),
+        kerner_settings.big_glyph_scaling);
   }
   else
   {
