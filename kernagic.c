@@ -461,10 +461,9 @@ void help (void)
 "Options:\n"
 "   -m <method>   specify method, specify an invalid one for list of valid ones.\n"
 "       -g gap\n"
-"       -d divisor\n"
-"       -c cadence\n"
+"       -s snap\n"
 "\n"
-"   -s <string>      sample string for PNG and UI\n"
+"   -S <string>      sample string for PNG and UI\n"
 "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
 "   -p <output.png>  write the test string to a png, using the given parameters.\n"
 "\n");
@@ -509,7 +508,7 @@ void parse_args (int argc, char **argv)
           EXPECT_ARG;
           kerner_settings.tracking = atof (argv[++no]);
         }
-      else if (!strcmp (argv[no], "-c"))
+      else if (!strcmp (argv[no], "-s"))
         {
           EXPECT_ARG;
           kerner_settings.snap = atof (argv[++no]);
@@ -542,7 +541,7 @@ void parse_args (int argc, char **argv)
               exit (-1);
             }
         }
-      else if (!strcmp (argv[no], "-s"))
+      else if (!strcmp (argv[no], "-S"))
       {
         EXPECT_ARG;
         kernagic_sample_text = argv[++no];
