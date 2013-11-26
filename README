@@ -5,24 +5,34 @@ Kernagic is a semi-automatic tool for spacing fonts. It provides ways to
 interactively preview global and local changes to the glyphs in a UFO font -
 these changes can act as a starting point for further manual fine tuning.
 
+The development began in Madrid at the Libre Graphics Meeting 2013, when
+Øyvind 'Pippin' Kolås (github.com/hodefoting pippin@gimp.org pippin.gimp.org)
+decided to hack around the automatic font spacing challenge. There, Dave
+Crossland introduced him to Frank Blokland's PhD research, published
+on the [Letter Model](http://lettermodel.org) website. The initial 'averaging'
+approach that Pippin explored (described in the 
+[Interactivos 13 Book](https://gitorious.org/libregraphicsmag/interactivosbook))
+was later discarded, in favour of an approach of stem rhythm placement that
+deviates from Frank Blokland's theories.
+
 To fit into a diverse set of workflows, Kernagic uses UFO fonts for input.
 UFO can act as a superset of other formats, and tools like
 [Fontforge](http://github.com/fontforge/fontforge/) can be used for
 converting to and from it.
 
-The snap gap method relies on automatically detected rythm points, if the
-rythm point detection works poorly with your font, or you want to override
-spacing decisions, you can insert your own rythm points by clicking within
-the x-height of the glyph to change in the preview; rythm point overrides are
+The snap gap method relies on automatically detected rhythm points, if the
+rhythm point detection works poorly with your font, or you want to override
+spacing decisions, you can insert your own rhythm points by clicking within
+the x-height of the glyph to change in the preview; rhythm point overrides are
 saved in the individual glyph files.  Clicking below the x-height of a glyph
-removes custom overrides; clicking above it inserts a single rythm point to
+removes custom overrides; clicking above it inserts a single rhythm point to
 be used for both left and right sides of the glyphs.
 
 If metrics are determined, they can be saved back into the UFO (shifting the x
 co-ordinates of all points in all glyphs to change the left bearings, and
 setting a new advance width to set the right bearings.)
 
-For help about the commandline interface, `kernagic --help` provides further
+For help about the command line interface, `kernagic --help` provides further
 documentation.
 
 Spacing Methods
@@ -47,7 +57,7 @@ bearings.
 Snap gap
 --------
 
-This methods permits specifying a desired gap between left and right rythm
+This methods permits specifying a desired gap between left and right rhythm
 points of glyphs. The bearings indicated by the gap is also snapped to grid in
 such a manner that the advance of the glyphs is a multiple of the snap value.
 
@@ -92,7 +102,7 @@ Usage
 
 A video on how to use the program is at: TODO
 
-Running `kernagic --ipsumat` is a way to run the ipsum generator stand-alone as a commandline utility. Run `kernagic --ipsumat --help` for more information.
+Running `kernagic --ipsumat` is a way to run the ipsum generator stand-alone as a command line utility. Run `kernagic --ipsumat --help` for more information.
 
 
 Suggested workflow for snap gap method
