@@ -332,7 +332,11 @@ glif_end_element (GMarkupParseContext *context,
   {
     if (sc)
       {
-        assert (cc == 2);
+        if (cc != 2)
+        {
+          fprintf (stderr, "it seems like font contained non cubic outlines, kernagic only deals with cubic bezier\n");
+          assert (cc == 2);
+        }
         cairo_curve_to (cr, cx[0], cy[0],
                             cx[1], cy[1],
                             scx, scy);

@@ -62,13 +62,14 @@ int kernagic_libplist_read (const char *path)
       p++;
       while (*p != '>') p++;
       p++;
-      float a, b;
-      sscanf (p, "gap=%f snap=%f", &a, &b);
+      float a, b, c;
+      sscanf (p, "gap=%f snap=%f bigscale=%f", &a, &b, &c);
 
       kerner_settings.gap = a;
       kerner_settings.snap = b;
+      if (c != 0)
+        kerner_settings.big_glyph_scaling = c;
 
-      fprintf (stderr, "%f %f\n", a, b);
       ret = 1;
     }
   g_free (input);
@@ -132,9 +133,10 @@ void kernagic_libplist_rewrite (const char *path)
   g_string_append (ts, input);
 
   g_string_append_printf (ts, "\n<key>%s</key>\n", KEY);
-  g_string_append_printf (ts, "<string>gap=%f snap=%f^</string>\n",
+  g_string_append_printf (ts, "<string>gap=%f snap=%f bigscale=%f^</string>\n",
       kerner_settings.gap,
-      kerner_settings.snap);
+      kerner_settings.snap,
+      kerner_settings.big_glyph_scaling);
   g_string_append (ts, "</dict>\n</plist>\n");
 
   g_file_set_contents (path, ts->str, ts->len, NULL);
