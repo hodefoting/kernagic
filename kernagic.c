@@ -63,7 +63,6 @@ float  scale_factor = 0.18;
 static gunichar *glyph_string = NULL;
 
 extern KernagicMethod *kernagic_cadence,
-   //                   *kernagic_rythm,
                       *kernagic_gap,
                       *kernagic_gray,
                       *kernagic_original,
@@ -462,6 +461,7 @@ void help (void)
 "   -m <method>   specify method, specify an invalid one for list of valid ones.\n"
 "       -g gap\n"
 "       -s snap\n"
+"       -bs big scale\n"
 "\n"
 "   -S <string>      sample string for PNG and UI\n"
 "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
@@ -502,6 +502,11 @@ void parse_args (int argc, char **argv)
         {
           EXPECT_ARG;
           kerner_settings.gap = atof (argv[++no]);
+        }
+      else if (!strcmp (argv[no], "-bs"))
+        {
+          EXPECT_ARG;
+          kerner_settings.big_glyph_scaling = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-t"))
         {
