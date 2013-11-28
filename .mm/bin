@@ -12,12 +12,12 @@ BIN_CFLAGS += $(shell test "$(BIN_PKGMODULES)" 2>/dev/null && pkg-config $(BIN_P
 BIN_LD_FLAGS += $(shell test "$(BIN_PKGMODULES)" 2>/dev/null && pkg-config $(BIN_PKGMODULES) --libs)
 
 $(BINARY): $(BIN_CFILES) $(LIBNAME_A)
-	@echo "CCLD" $@; $(CC) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS)  \
-		$(BIN_CFILES) $(LIBNAME_A) -o $@
+	@echo "CCLD" $@; $(CC) $(BIN_CFILES) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS)  \
+		$(LIBNAME_A) -o $@
 
 $(BINARY).efence: $(BIN_CFILES) $(LIBNAME_A) 
-	@echo "CCLD" $@; $(CC) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS) \
-		$(BIN_CFILES) $(LIBNAME_A) -lefence -o $@
+	@echo "CCLD" $@; $(CC) $(BIN_CFILES) $(SYSROOT) -I .. $(BIN_CFLAGS) $(BIN_LD_FLAGS) \
+		$(LIBNAME_A) -lefence -o $@
 
 all: $(BIN_TARGETS)
 CLEAN_FILES += $(BIN_TARGETS) $(BINARY).efence
