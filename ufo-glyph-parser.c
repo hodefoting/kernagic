@@ -590,6 +590,8 @@ rewrite_start_element (GMarkupParseContext *context,
         xoffset -= (component_glyph->offset_x + component_glyph->left_bearing);
       }
 
+      xoffset += kernagic_x_shift;
+
       g_string_append_printf (ts, " base=\"%s\" xOffset=\"%f\" yOffset=\"%f\" ", base, xoffset, yoffset);
   }
   else
@@ -602,6 +604,8 @@ rewrite_start_element (GMarkupParseContext *context,
              char str[512];
              int value = atoi (*a_v);
              value = value + glyph->offset_x + glyph->left_bearing;
+
+             value += kernagic_x_shift;
              sprintf (str, "%d", value);
              g_string_append_printf (ts, " %s=\"%s\"", *a_n, str);
            }

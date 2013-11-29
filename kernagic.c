@@ -466,6 +466,7 @@ void help (void)
 "       -bs big scale\n"
 "\n"
 "   -center-glyphs utf8stringofglyphs   overrides stems with single ink centered stem for specified glyphs.\n"
+"   -x_shift fontdim_val\n"
 "\n"
 "   -S <string>      sample string for PNG and UI\n"
 "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
@@ -476,6 +477,8 @@ void help (void)
 
 const char *ufo_path = NULL;
 int ipsumat (int argc, char **argv);
+
+float kernagic_x_shift = 0.0;
 
 void parse_args (int argc, char **argv)
 {
@@ -521,6 +524,11 @@ void parse_args (int argc, char **argv)
         {
           EXPECT_ARG;
           kerner_settings.snap = atof (argv[++no]);
+        }
+      else if (!strcmp (argv[no], "--x_shift"))
+        {
+          EXPECT_ARG;
+          kernagic_x_shift = atof (argv[++no]);
         }
       else if (!strcmp (argv[no], "-m"))
         {
