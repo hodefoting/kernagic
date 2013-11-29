@@ -634,7 +634,6 @@ int main (int argc, char **argv)
 
   if (interactive)
     return ui_gtk (argc, argv);
-  //g_type_init ();
   remove_monitors ();
 
   if (!ufo_path)
