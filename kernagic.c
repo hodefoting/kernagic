@@ -465,6 +465,8 @@ void help (void)
 "       -s snap\n"
 "       -bs big scale\n"
 "\n"
+"   -center-glyphs utf8stringofglyphs   overrides stems with single ink centered stem for specified glyphs.\n"
+"\n"
 "   -S <string>      sample string for PNG and UI\n"
 "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
 "   -p <output.png>  write the test string to a png, using the given parameters.\n"
@@ -625,6 +627,7 @@ int main (int argc, char **argv)
 {
   if (!strcmp (basename(argv[0]), "ipsumat"))
     return ipsumat (argc, argv);
+  g_type_init ();
 
   if (!kernagic_preview)
     kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);

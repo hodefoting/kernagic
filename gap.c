@@ -14,6 +14,17 @@ static void kernagic_gap_init (void)
   if (!g)
     return;
   n_width = (right_most_center (g) - left_most_center(g)) * scale_factor;
+
+  if (kernagic_center_glyphs)
+  {
+    for (char *ascii = kernagic_center_glyphs; *ascii; ascii++)
+    {
+      Glyph *g = kernagic_find_glyph_unicode (*ascii);
+      g->lstem = g->ink_width / 2;
+      g->rstem = g->ink_width / 2;
+    }
+  }
+
 }
 
 float n_distance (void)
