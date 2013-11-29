@@ -43,6 +43,8 @@ int canvas_height ()
   return PREVIEW_HEIGHT;
 }
 
+char * kernagic_center_glyphs = NULL;
+
 KernerSettings kerner_settings = {
   0,
   KERNER_DEFAULT_MIN,
@@ -551,6 +553,11 @@ void parse_args (int argc, char **argv)
         EXPECT_ARG;
         kernagic_sample_text = argv[++no];
       }
+      else if (!strcmp (argv[no], "--center-glyphs"))
+      {
+        EXPECT_ARG;
+        kernagic_center_glyphs = argv[++no];
+      }
       else if (!strcmp (argv[no], "-o"))
       {
         EXPECT_ARG;
@@ -627,7 +634,7 @@ int main (int argc, char **argv)
 
   if (interactive)
     return ui_gtk (argc, argv);
-  g_type_init ();
+  //g_type_init ();
   remove_monitors ();
 
   if (!ufo_path)

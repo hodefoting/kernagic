@@ -110,6 +110,8 @@ extern char *loaded_ufo_path;
 void kernagic_libplist_rewrite (const char *path);
 int kernagic_libplist_read (const char *path);
 
+extern char * kernagic_center_glyphs;
+
 #define WATERFALL_START   0.02
 #define WATERFALL_SCALING 1.33
 #define WATERFALL_SPACING 0.7
