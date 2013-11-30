@@ -524,6 +524,8 @@ void parse_args (int argc, char **argv)
         {
           EXPECT_ARG;
           kerner_settings.snap = atof (argv[++no]);
+          if (kerner_settings.snap < 0.5)
+            kerner_settings.snap = 1;
         }
       else if (!strcmp (argv[no], "--x_shift"))
         {
