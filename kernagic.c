@@ -55,8 +55,6 @@ void add_override (int unicode, float left, float right)
   kernagic_override_right[kernagic_n_overrides++] = right;
 }
 
-char * kernagic_center_glyphs = NULL;
-
 KernerSettings kerner_settings = {
   0,
   KERNER_DEFAULT_MIN,
@@ -590,7 +588,14 @@ void parse_args (int argc, char **argv)
       else if (!strcmp (argv[no], "--center-glyphs"))
       {
         EXPECT_ARG;
-        kernagic_center_glyphs = argv[++no];
+        {
+          int i;
+          for (i = 0; argv[no+1][i]; i++)
+            {
+              add_override (argv[no+1][i], 0.5, 0.5);
+            }
+        }
+        ++no;
       }
       else if (!strcmp (argv[no], "-o"))
       {
