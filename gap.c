@@ -8,6 +8,11 @@ float left_most_center (Glyph *g);
 float right_most_center (Glyph *g);
 static float n_width = 0;
 
+extern int kernagic_n_overrides;
+extern int kernagic_override_unicode[256];
+extern float kernagic_override_left[256];
+extern float kernagic_override_right[256];
+
 static void kernagic_gap_init (void)
 {
   Glyph *g = kernagic_find_glyph_unicode ('n');
@@ -22,6 +27,15 @@ static void kernagic_gap_init (void)
       Glyph *g = kernagic_find_glyph_unicode (*ascii);
       g->lstem = g->ink_width / 2;
       g->rstem = g->ink_width / 2;
+    }
+  }
+  if (kernagic_n_overrides > 0)
+  {
+    for (int i = 0; i < kernagic_n_overrides; i++)
+    {
+      Glyph *g = kernagic_find_glyph_unicode (kernagic_override_unicode[i]);
+      g->lstem = g->ink_width * kernagic_override_left[i];
+      g->rstem = g->ink_width * kernagic_override_right[i];
     }
   }
 

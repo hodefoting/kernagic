@@ -43,6 +43,18 @@ int canvas_height ()
   return PREVIEW_HEIGHT;
 }
 
+int kernagic_n_overrides = 0;
+int kernagic_override_unicode[256];
+float kernagic_override_left[256];
+float kernagic_override_right[256];
+
+void add_override (int unicode, float left, float right)
+{
+  kernagic_override_unicode[kernagic_n_overrides] = unicode;
+  kernagic_override_left[kernagic_n_overrides] = left;
+  kernagic_override_right[kernagic_n_overrides++] = right;
+}
+
 char * kernagic_center_glyphs = NULL;
 
 KernerSettings kerner_settings = {
@@ -465,8 +477,11 @@ void help (void)
 "       -s snap\n"
 "       -bs big scale\n"
 "\n"
-"   -center-glyphs utf8stringofglyphs   overrides stems with single ink centered stem for specified glyphs.\n"
-"   -x_shift fontdim_val\n"
+"   --override glyph left right   overrides left and right stems,\n"
+"                         the stems are set with horizontal ink bounds\n"
+"                         as the unit, e.g. 0.5 is the middle of inkbounds\n"
+"   --center-glyphs utf8stringofglyphs   overrides stems with single ink centered stem for specified glyphs.\n"
+"   --x_shift fontdim_val\n"
 "\n"
 "   -S <string>      sample string for PNG and UI\n"
 "   -o <output.ufo>  instead of running UI create a copy of the input font, this make kernagic run non-interactive with the given parameters.\n"
@@ -531,6 +546,13 @@ void parse_args (int argc, char **argv)
         {
           EXPECT_ARG;
           kernagic_x_shift = atof (argv[++no]);
+        }
+      else if (!strcmp (argv[no], "--override"))
+        {
+          EXPECT_ARG; /* XXX: x3 */
+          /* XXX: parse utf8 in arg 0*/
+          add_override (argv[no+1][0], atof(argv[no+2]), atof(argv[no+3]));
+          no+=3;
         }
       else if (!strcmp (argv[no], "-m"))
         {
