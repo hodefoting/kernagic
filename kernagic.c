@@ -548,8 +548,14 @@ void parse_args (int argc, char **argv)
       else if (!strcmp (argv[no], "--override"))
         {
           EXPECT_ARG; /* XXX: x3 */
-          /* XXX: parse utf8 in arg 0*/
-          add_override (argv[no+1][0], atof(argv[no+2]), atof(argv[no+3]));
+          {
+          gunichar *ucs = g_utf8_to_ucs4_fast (argv[no+1], -1, NULL);
+            if (ucs)
+            {
+              add_override (ucs[0], atof(argv[no+2]), atof(argv[no+3]));
+              g_free (ucs);
+            }
+          }
           no+=3;
         }
       else if (!strcmp (argv[no], "-m"))
@@ -589,11 +595,16 @@ void parse_args (int argc, char **argv)
       {
         EXPECT_ARG;
         {
+          gunichar *ucs = g_utf8_to_ucs4_fast (argv[no+1], -1, NULL);
           int i;
-          for (i = 0; argv[no+1][i]; i++)
-            {
-              add_override (argv[no+1][i], 0.5, 0.5);
-            }
+          if (ucs)
+          {
+            for (i = 0; ucs[i]; i++)
+              {
+                add_override (ucs[i], 0.5, 0.5);
+              }
+            g_free (ucs);
+          }
         }
         ++no;
       }
