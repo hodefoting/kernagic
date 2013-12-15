@@ -1,3 +1,20 @@
+                                                                   /*
+Kernagic a libre spacing tool for Unified Font Objects.
+Copyright (C) 2013 Øyvind Kolås
+
+Kernagicis free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Kernagic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Kernagic.  If not, see <http://www.gnu.org/licenses/>.  */
+
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <stdint.h>
@@ -955,7 +972,7 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
   {
-    GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.01, 1.0, 0);
+    GtkObject *adj = gtk_adjustment_new (0.1, 0.0, 1.0, 0.001, 1.0, 0);
     spin_gap = gimp_spin_scale_new (GTK_ADJUSTMENT (adj), "Gap", 2);
     gtk_container_add (GTK_CONTAINER (vbox_options_rythm), spin_gap);
   }
