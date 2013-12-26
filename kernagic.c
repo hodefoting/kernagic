@@ -164,6 +164,8 @@ recompute_right_bearings ()
 void remove_monitors (void);
 void add_monitors (const char *font_path);
 
+static FILE *kernagic_spacing_file = NULL;
+
 void kernagic_save_kerning_info (void)
 {
   GString *str = g_string_new (
@@ -223,7 +225,17 @@ void kernagic_save_kerning_info (void)
     {
       Glyph *glyph = l->data;
       rewrite_ufo_glyph (glyph);
+
+      if (kernagic_spacing_file)
+      if (glyph->unicode)
+        fprintf (kernagic_spacing_file, "%i %f %d\n", 
+                 glyph->unicode,
+                 glyph->offset_x + glyph->left_bearing + kernagic_x_shift,
+                 (int)(kernagic_get_advance (glyph)));
     }
+  if (kernagic_spacing_file)
+    fclose (kernagic_spacing_file);
+  kernagic_spacing_file = NULL;
 
   sprintf (path, "%s/lib.plist", loaded_ufo_path);
   kernagic_libplist_rewrite (path);
@@ -388,6 +400,7 @@ void kernagic_kern_clear_all (void)
       g_hash_table_remove_all (glyph->kerning);
     }
 }
+
 
 Glyph *kernagic_find_glyph (const char *name)
 {
@@ -607,6 +620,11 @@ void parse_args (int argc, char **argv)
           }
         }
         ++no;
+      }
+      else if (!strcmp (argv[no], "-x"))
+      {
+        EXPECT_ARG;
+        kernagic_spacing_file = fopen (argv[++no], "w");
       }
       else if (!strcmp (argv[no], "-o"))
       {

@@ -689,6 +689,7 @@ rewrite_ufo_glyph (Glyph *glyph)
   ts = g_string_new ("");
   GMarkupParseContext *ctx = g_markup_parse_context_new (&glif_rewrite, 0, glyph, NULL);
 
+
   /* ensure that a lib section exist and that it contains a skeleton kernagic
    * section.
    */

@@ -42,8 +42,11 @@ static void kernagic_gap_init (void)
     for (int i = 0; i < kernagic_n_overrides; i++)
     {
       Glyph *g = kernagic_find_glyph_unicode (kernagic_override_unicode[i]);
-      g->lstem = g->ink_width * kernagic_override_left[i];
-      g->rstem = g->ink_width * kernagic_override_right[i];
+      if (g)
+      {
+        g->lstem = g->ink_width * kernagic_override_left[i];
+        g->rstem = g->ink_width * kernagic_override_right[i];
+      }
     }
   }
 
