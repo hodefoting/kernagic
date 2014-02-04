@@ -770,8 +770,10 @@ void kernagic_compute (GtkProgressBar *progress)
   /* space space to be width of i, if both glyphs exist */
   {
     Glyph *space = kernagic_find_glyph_unicode (' ');
+    Glyph *nbspace = kernagic_find_glyph_unicode (0x00A0);
     Glyph *i = kernagic_find_glyph_unicode ('i');
 
+    /* XXX: if i is not found.. just do 0.23% of x height? */
     if (i && space)
       {
         float width = i->left_bearing + i->ink_width + i->right_bearing;
@@ -779,6 +781,13 @@ void kernagic_compute (GtkProgressBar *progress)
         space->right_bearing = 0;
         space->left_bearing = width;
         space->ink_width = 0;
+    
+        if (nbspace)
+          {
+            nbspace->right_bearing = 0;
+            nbspace->left_bearing = width;
+            nbspace->ink_width = 0;
+          }
       }
   }
 }
