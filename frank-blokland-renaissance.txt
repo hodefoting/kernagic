@@ -3,7 +3,7 @@
   # is specified and the number of 1/24ths of the spacing between the stems
   # of the n glyph is added to the sides-creating sidebearings.
 
-n_basis 22
+n_basis 24
 
 A extreme 1 extreme 1
 B stem 8 extreme 3
