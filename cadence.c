@@ -21,6 +21,8 @@ typedef struct Cadence
 
 #define MAX_GLYPHS 4096
 
+float n_basis = 24;
+
 /* cadence unit table; from Frank Bloklands image at lettermodel.org august
  * 2013, manually transcribed to code constants by Øyvind Kolås */
 Cadence cadence[MAX_GLYPHS]={
@@ -85,9 +87,9 @@ Cadence cadence[MAX_GLYPHS]={
 int n_cadence = 56;
 
 static void cadence_add (const char *utf8,
-                         int left_stem,
+                         int   left_stem,
                          float left,
-                         int right_stem,
+                         int   right_stem,
                          float right)
 {
   cadence[n_cadence].utf8 = g_strdup (utf8);
@@ -118,8 +120,11 @@ enum {
   S_IN_RIGHT_MODE,
   S_E_RIGHT_VAL,
   S_IN_RIGHT_VAL,
+  S_IN_BASIS,
   S_DONE
 };
+
+static void cadence_init (void);
 
 void kernagic_set_cadence (const char *cadence_path)
 {
@@ -153,6 +158,14 @@ void kernagic_set_cadence (const char *cadence_path)
               { 
                 right = atof (tmp->str);
               }
+              else if (state == S_IN_BASIS)
+              {
+                n_basis = g_strtod (tmp->str, NULL);
+                state = S_E_CHAR;
+                g_string_assign (tmp, "");
+                cadence_init ();
+                break;
+              }
 
               if (state >= S_E_RIGHT_VAL)
                 cadence_add (utf8, left_mode, left, right_mode, right);
@@ -178,6 +191,10 @@ void kernagic_set_cadence (const char *cadence_path)
                       utf8 = g_strdup (tmp->str);
                       state = S_E_LEFT_MODE;
                       g_string_assign (tmp, "");
+                      if (!strcmp (utf8, "n_basis"))
+                      {
+                        state = S_IN_BASIS;
+                      }
                       break;
                     }
                   case S_IN_LEFT_MODE:
@@ -311,7 +328,7 @@ static void cadence_init (void)
   Glyph *g = kernagic_find_glyph_unicode ('n');
   if (!g)
     return;
-  n_width = (right_most_center (g) - left_most_center(g)) / 24.0;
+  n_width = (right_most_center (g) - left_most_center(g)) / n_basis;
 }
 
 static void cadence_each (Glyph *g, GtkProgressBar *progress)
