@@ -147,9 +147,16 @@ static void trigger_divisor (void)
   frozen--;
 }
 
+void add_monitors (const char *font_path);
+
 static void trigger_cadence_path (void)
 {
-  kernagic_set_cadence (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path)));
+  const char *path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path));
+  if (path)
+  {
+    kernagic_set_cadence (path);
+    add_monitors (path);
+  }
   trigger ();
 }
 
@@ -226,6 +233,12 @@ static gboolean delayed_reload_trigger (gpointer foo)
   {
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR+1);
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
+  }
+
+  {
+    const char *path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path));
+    if (path)
+      kernagic_set_cadence (path);
   }
 
   return FALSE;
