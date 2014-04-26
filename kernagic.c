@@ -162,7 +162,7 @@ recompute_right_bearings ()
 }
 
 void remove_monitors (void);
-void add_monitors (const char *font_path);
+void add_monitors (const char *path);
 
 static FILE *kernagic_spacing_file = NULL;
 
@@ -240,6 +240,7 @@ void kernagic_save_kerning_info (void)
   sprintf (path, "%s/lib.plist", loaded_ufo_path);
   kernagic_libplist_rewrite (path);
 
+  remove_monitors ();
   add_monitors (loaded_ufo_path);
 }
 
@@ -258,13 +259,12 @@ void remove_monitors (void)
 
 void trigger_reload (void);
 
-void add_monitors (const char *font_path)
+void add_monitors (const char *path)
 {
-  remove_monitors ();
   {
     GFileMonitor *monitor;
     monitor = g_file_monitor (
-        g_file_new_for_commandline_arg (font_path),
+        g_file_new_for_commandline_arg (path),
         G_FILE_MONITOR_NONE,
         NULL, NULL);
     if (monitor)
@@ -273,9 +273,11 @@ void add_monitors (const char *font_path)
                           G_CALLBACK (trigger_reload), NULL);
         monitors = g_list_append (monitors, monitor);
       }
+
+    /* we try to make monitors for the glyphs dir as well */
     {
     GString *str = g_string_new ("");
-    g_string_append_printf (str, "%s/glyphs", font_path);
+    g_string_append_printf (str, "%s/glyphs", path);
     monitor = g_file_monitor (
         g_file_new_for_commandline_arg (str->str),
         G_FILE_MONITOR_NONE,
@@ -305,6 +307,7 @@ void kernagic_load_ufo (const char *font_path, gboolean strip_left_bearing)
   if (loaded_ufo_path [strlen(loaded_ufo_path)] == '/')
     loaded_ufo_path [strlen(loaded_ufo_path)] = '\0';
 
+  remove_monitors ();
   add_monitors (loaded_ufo_path);
 
   GList *l;
