@@ -83,7 +83,7 @@ static void kernagic_gap_each (Glyph *g, GtkProgressBar *progress)
   lstem = g->stems[0];
   rstem = g->stems[g->stem_count-1];
 
-  if (!islower (g->unicode))
+  if (!g_unichar_islower (g->unicode) )
     {
       if (g->ink_height >= kernagic_x_height () * 1.1)
         gap *= kerner_settings.big_glyph_scaling;
