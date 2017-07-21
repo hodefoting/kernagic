@@ -87,7 +87,6 @@ static void init_methods (void)
   int i = 0;
   methods[i++] = kernagic_original;
   methods[i++] = kernagic_gap;
-  methods[i++] = kernagic_cadence;
   methods[i++] = kernagic_bounds;
   methods[i] = NULL;
 };

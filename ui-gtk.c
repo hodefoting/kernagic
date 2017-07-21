@@ -62,9 +62,6 @@ static GtkWidget *spin_big_glyph_scaling;
 GtkWidget *spin_ipsum_no;
 
 
-static GtkWidget *vbox_options_cadence;
-static GtkWidget *cadence_path;
-
 static GtkWidget *vbox_options_original;
 static GtkWidget *vbox_options_gray;
 static GtkWidget *vbox_options_rythm;
@@ -149,17 +146,6 @@ static void trigger_divisor (void)
 
 void add_monitors (const char *font_path);
 
-static void trigger_cadence_path (void)
-{
-  const char *path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path));
-  if (path)
-  {
-    kernagic_set_cadence (path);
-    add_monitors (path);
-  }
-  trigger ();
-}
-
 static void trigger_cadence (void)
 {
   float cadence = gtk_spin_button_get_value (GTK_SPIN_BUTTON (spin_snap));
@@ -235,15 +221,6 @@ static gboolean delayed_reload_trigger (gpointer foo)
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (spin_divisor),   KERNER_DEFAULT_DIVISOR);
   }
 
-  {
-    const char *path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (cadence_path));
-    if (path)
-    {
-      kernagic_set_cadence (path);
-      add_monitors (path);
-    }
-  }
-
   return FALSE;
 }
 
@@ -252,15 +229,12 @@ static void trigger_prop_show (void)
   KernagicMethod *method =
       kernagic_method_no (gtk_combo_box_get_active (GTK_COMBO_BOX (spin_method)));
 
-  gtk_widget_hide (vbox_options_cadence);
   gtk_widget_hide (vbox_options_gray);
   gtk_widget_hide (vbox_options_original);
   gtk_widget_hide (vbox_options_rythm);
 
   if (!strcmp (method->name, "original"))
     gtk_widget_show (vbox_options_original);
-  else if (!strcmp (method->name, "cadence"))
-    gtk_widget_show (vbox_options_cadence);
   else if (!strcmp (method->name, "gray"))
     gtk_widget_show (vbox_options_gray);
   else if (!strcmp (method->name, "rythm")||
@@ -926,29 +900,9 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
                                     1, "Snap gap (F2)");
     gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    2, "Table based (F3)");
-    gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT (spin_method),
-                                    3, "Left and right bearings 0 (F4)");
+                                    3, "Left and right bearings 0 (F3)");
     gtk_widget_set_tooltip_text (spin_method, "F1, F2, F3…");
     gtk_box_pack_start (GTK_BOX (vbox1), spin_method, FALSE, FALSE, 2);
-  }
-
-  vbox_options_cadence = gtk_vbox_new (FALSE, 4);
-  gtk_box_pack_start (GTK_BOX (vbox1), vbox_options_cadence, FALSE, FALSE, 2);
-
-  {
-    GtkWidget *label = gtk_label_new ("Spacing table file");
-    cadence_path = gtk_file_chooser_button_new ("cadence file", GTK_FILE_CHOOSER_ACTION_OPEN);
-    if (ufo_path)
-    {
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (font_path), ufo_path);
-    }
-      gtk_size_group_add_widget (labels, label);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-
-    gtk_size_group_add_widget (sliders, cadence_path);
-    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), label, FALSE, FALSE, 2);
-    gtk_box_pack_start (GTK_BOX (vbox_options_cadence), cadence_path, FALSE, FALSE, 2);
   }
 
   vbox_options_original = gtk_vbox_new (FALSE, 4);
@@ -1052,8 +1006,6 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   /************/
 
   /* when these change, we need to reinitialize from scratch */
-  g_signal_connect (cadence_path,       "file-set",      G_CALLBACK (trigger_cadence_path), NULL);
-  g_signal_connect (font_path,          "file-set",      G_CALLBACK (trigger_reload), NULL);
   g_signal_connect (ipsum_path,         "file-set",      G_CALLBACK (ipsum_reload), NULL);
   /* and when these change, we should be able to do an incremental update */
   g_signal_connect (toggle_measurement_lines_check, "toggled",   G_CALLBACK (trigger), NULL);
