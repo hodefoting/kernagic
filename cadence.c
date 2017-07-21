@@ -1,5 +1,3 @@
-/* implementation of frank bloklands reinaissance spacing scheme */
-
 #include <string.h>
 #include <stdlib.h>
 #include "kernagic.h"
