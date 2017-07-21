@@ -696,7 +696,6 @@ int main (int argc, char **argv)
 {
   if (!strcmp (basename(argv[0]), "ipsumat"))
     return ipsumat (argc, argv);
-  g_type_init ();
 
   if (!kernagic_preview)
     kernagic_preview = g_malloc0 (PREVIEW_WIDTH * PREVIEW_HEIGHT);
