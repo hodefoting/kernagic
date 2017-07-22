@@ -5,15 +5,15 @@ Kernagic is a semi-automatic tool for spacing fonts. It provides ways to
 interactively preview global and local changes to the glyphs in a UFO font -
 these changes can act as a starting point for further manual fine tuning.
 
-The development began in Madrid at the Libre Graphics Meeting 2013, when
-Øyvind 'Pippin' Kolås (github.com/hodefoting pippin@gimp.org pippin.gimp.org)
-decided to hack around the automatic font spacing challenge. There, Dave
-Crossland introduced him to Frank Blokland's PhD research, published
-on the [Letter Model](http://lettermodel.org) website. The initial 'averaging'
-approach that Pippin explored (described in the 
-[Interactivos 13 Book](https://gitorious.org/libregraphicsmag/interactivosbook))
-was later discarded, in favour of an approach of stem rhythm placement that
-deviates from Frank Blokland's theories.
+The development began in Madrid at the Libre Graphics Meeting 2013, when Øyvind
+'Pippin' Kolås (github.com/hodefoting pippin@gimp.org pippin.gimp.org) decided
+to hack around the automatic font spacing challenge. There, Dave Crossland
+introduced him to Frank Blokland's PhD research, published on the [Letter
+Model](http://lettermodel.org) website. The initial 'averaging' approach that
+Pippin explored (described in the [Interactivos 13
+Book](https://gitorious.org/libregraphicsmag/interactivosbook)) was later
+discarded, in favour of an approach of stem rhythm placement that deviates from
+Frank Blokland's theories.
 
 To fit into a diverse set of workflows, Kernagic uses UFO fonts for input.
 UFO can act as a superset of other formats, and tools like
@@ -38,11 +38,8 @@ documentation.
 Spacing Methods
 ===============
 
-These are the various spacing methods implemented in Kernagic to date. The
-application is intended to be modular, so any programmer familiar with C and
-a minimum of GTK+ can explore their own methods, the internals of kernagic
-can express kerning but the currently implemented methods only produces
-metrics.
+For visualizing the effect of applied spacing, kernagic allow switch the
+rendering from showing original/none/applied metrics.
 
 Original
 --------
@@ -60,19 +57,6 @@ Snap gap
 This methods permits specifying a desired gap between left and right rhythm
 points of glyphs. The bearings indicated by the gap is also snapped to grid in
 such a manner that the advance of the glyphs is a multiple of the snap value.
-
-Classic proportions
--------------------
-
-Provide a fitting that assumes your typeface is a traditional renaissance
-design, with classic glyph proportions.
-
-This method encodes knowledge of glyph morphologies, found in Frank
-Blokland's excellent [Letter Model](http://lettermodel.org). The bearings to
-use for each glyph; and how it relates to the shape of the glyph is encoded
-in a table. An internal table is provided that is used by default; this table
-is also provided with kernagic as a text file, using a text-editor the glyph
-morphology knowledge can be adapted and extended.
 
 Installation
 =====================
@@ -96,7 +80,7 @@ Developer and installing the appropriate XCode version from the
 3. Run Terminal and then type `brew install kernagic --HEAD;` and hit enter
 
 4. Run Terminal and then type `kernagic` and hit enter
- 
+
 Usage
 =====================
 
@@ -117,4 +101,5 @@ Suggested workflow for snap gap method
 Found a crash?
 ---------------
 
-A shell script, `kernagic-debug-osx.sh`, is included that allows you to produce backtraces conveniently on Mac OS X.
+A shell script, `kernagic-debug-osx.sh`, is included that allows you to produce
+backtraces conveniently on Mac OS X.
