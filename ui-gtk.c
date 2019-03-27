@@ -48,7 +48,7 @@ extern float      scale_factor;
 extern char      *kernagic_sample_text;
 extern uint8_t   *kernagic_preview;
 static GtkWidget *preview;
-static GtkWidget *index = NULL;
+static GtkWidget *GWindex = NULL;
 static GtkWidget *test_text;
 static GtkWidget *ipsum_glyphs;
 static GtkWidget *spin_method;
@@ -113,8 +113,8 @@ static gboolean delayed_trigger (gpointer foo)
 
   gtk_widget_queue_draw (preview);
 
-  if (index)
-    gtk_widget_queue_draw (index);
+  if (GWindex)
+    gtk_widget_queue_draw (GWindex);
 
   delayed_updater = 0;
   return FALSE;
@@ -977,21 +977,21 @@ g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (kernagic_key
   }
 
 #if 1
-  index = gtk_drawing_area_new ();
-  gtk_widget_set_size_request (index, INDEX_WIDTH, INDEX_HEIGHT/2);
-  gtk_box_pack_end (GTK_BOX (vbox1), index, FALSE, FALSE, 2);
+  GWindex = gtk_drawing_area_new ();
+  gtk_widget_set_size_request (GWindex, INDEX_WIDTH, INDEX_HEIGHT/2);
+  gtk_box_pack_end (GTK_BOX (vbox1), GWindex, FALSE, FALSE, 2);
 
-  //g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
-  g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
+  //g_signal_connect (GWindex, "draw", G_CALLBACK (index_draw_cb), NULL);
+  g_signal_connect (GWindex, "expose-event", G_CALLBACK (index_draw_cb), NULL);
 
 #ifdef GTK2
-  g_signal_connect (index, "expose-event", G_CALLBACK (index_draw_cb), NULL);
+  g_signal_connect (GWindex, "expose-event", G_CALLBACK (index_draw_cb), NULL);
 #else
-  g_signal_connect (index, "draw", G_CALLBACK (index_draw_cb), NULL);
+  g_signal_connect (GWindex, "draw", G_CALLBACK (index_draw_cb), NULL);
 #endif
 
-  g_signal_connect (index, "button-press-event", G_CALLBACK (index_press_cb), NULL);
-  gtk_widget_add_events (index, GDK_BUTTON_PRESS_MASK);
+  g_signal_connect (GWindex, "button-press-event", G_CALLBACK (index_press_cb), NULL);
+  gtk_widget_add_events (GWindex, GDK_BUTTON_PRESS_MASK);
 #endif
 
 #if 0
